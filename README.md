@@ -104,13 +104,11 @@ placed over the model each frame. Without JavaScript they jump to the list entry
   `npm run record:ask` when their READMEs settle.
 - **The timeline is a placeholder** until `~/Personal/site-data/timeline.json` arrives. Builder,
   reviewer and round counts on every desk say so, and the model's caption says so in amber.
-- **The CV** (`src/content/cv.md`, rendered at `/cv.html`) keeps only confirmed claims. Everything the
-  draft marks _to confirm_ is out: the redacted-term 250 client (and the stat that repeats it), “shared with the
-  CEO”, “took the firm from project-based consulting to a platform product”, “CEO-approved May 2026”,
-  the gated Claude Code programme, the list of first tools, the July 2025 AI policy, membership dates,
-  and the word _live_ on two products. The employer and its product are not named, per the brief's
-  rule against mentioning the company; the phone number is left off a public page. It is written in
-  the third person so each sentence stands alone as a quotation.
+- **The CV** (`src/content/cv.md`, rendered at `/cv.html`) follows the draft, with the items it marked
+  _to confirm_ included on Harry's decision of 3 November and made generic: the redacted-term 250 client is
+  “a large listed company”, and nothing names a client, the employer or its product. It is written in
+  the third person so each sentence stands alone as a quotation, and the phone number is left off a
+  public page.
 
 ## Checks
 

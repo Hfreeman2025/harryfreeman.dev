@@ -248,7 +248,7 @@ async function run(name) {
     await page.goto(`${BASE}/cv.html`, { waitUntil: 'load' });
     const text = await page.locator('main').textContent();
     expect(text.includes('Head of AI') && text.includes('EU AI Act'), 'CV content missing');
-    for (const bad of ['redacted-term 250', 'CEO-approved', 'Simply']) expect(!text.includes(bad), `found ${bad}`);
+    for (const bad of ['redacted-term', 'redacted-term', 'Simply']) expect(!text.includes(bad), `found ${bad}`);
     expect(problems.length === 0, problems.join(' | '));
   });
 

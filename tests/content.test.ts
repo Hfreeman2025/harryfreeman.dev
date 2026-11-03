@@ -30,19 +30,22 @@ describe('content', () => {
     expect(text).not.toMatch(/redacted-term|redacted-term|redacted-term|redacted-term/);
   });
 
-  it('keeps the CV’s unconfirmed claims out', () => {
+  it('carries the CV’s once-unconfirmed claims, made generic, with nothing that identifies a client', () => {
     const cv = readFileSync(new URL('../src/content/cv.md', import.meta.url), 'utf8');
-    for (const unconfirmed of [
-      'redacted-term 250',
-      'shared with the CEO',
-      'CEO-approved',
+    for (const generic of [
+      'a large listed company',
+      'A capacity forecast is shared with the CEO',
+      'from project-based consulting to a platform product',
+      'approved by the CEO in May 2026',
       'gated Claude Code programme',
-      'first AI policy',
-      'Teams assistant',
-      '2022 – present',
+      'and a Teams assistant',
+      'first AI policy in July 2025',
+      'IEMA since 2022',
+      'RICS since 2019',
     ]) {
-      expect(cv).not.toContain(unconfirmed);
+      expect(cv).toContain(generic);
     }
+    for (const identifying of ['redacted-term', 'redacted-term', 'Simply', 'redacted-term']) expect(cv).not.toContain(identifying);
   });
 
   it('validates the config and rejects a dead URL', () => {
