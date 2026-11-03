@@ -971,3 +971,17 @@ html[data-photo="og"] .titleblock__links {
     object-fit: contain;
   }
 }
+
+.replay__evidence {
+  grid-column: 1;
+  font-size: 14px;
+  color: var(--ink-3);
+}
+.replay__evidence:empty {
+  display: none;
+}
+.work__inferred {
+  margin-top: 4px;
+  font-size: 14px;
+  color: var(--ink-3);
+}

@@ -54,7 +54,7 @@ function renderPiece(piece: Piece, config: SiteConfig, timeline: Timeline): stri
   const record = recordLine(timeline, piece);
   const placeholder = timeline.placeholder
     ? '<p class="work__placeholder">Builder, reviewer and rounds come from the placeholder timeline, not the real record.</p>'
-    : '';
+    : '<p class="work__inferred">Builder, reviewer and rounds are reconstructed from file times and the builders’ reports; the times are inferred.</p>';
   const citation = piece.citation ? ` <a class="cite" href="${esc(piece.citation.href)}">${esc(piece.citation.label)}</a>.` : '';
   const run = piece.run ? `<p class="work__run">Run it: <code>${esc(piece.run)}</code></p>` : '';
   return `<li class="work" id="work-${piece.id}" data-piece="${piece.id}">

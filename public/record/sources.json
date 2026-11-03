@@ -1,82 +1,82 @@
 {
-  "builtAt": "2026-11-02T16:57:00.156Z",
+  "builtAt": "2026-11-03T16:01:32.123Z",
   "sources": [
     {
       "section": "Harry Freeman’s CV",
       "piece": null,
       "path": "src/content/cv.md",
-      "sha256": "5fd2a3953d46b7b7658bc85fd3a8afbbf0c2a22a6547a199a6341514deea5362",
-      "bytes": 6928
+      "sha256": "e82016b80e4049c481c8174cd704038cd212d86912e2c03c36fd62704c15d087",
+      "bytes": 7616
     },
     {
       "section": "GPT in a tab",
       "piece": "gpt-in-a-tab",
       "path": "~/Personal/lab/gpt-in-a-tab/README.md",
-      "sha256": "7ccb9a0b81e70bd46eaffd6dd961aeecc59c1ff02e57f3d38ccd2a4a8515148e",
-      "bytes": 16184
+      "sha256": "8df6ed0ab1502d07d255e8daca6ae941ecf06ab5937a55459a9ebc060d400a0b",
+      "bytes": 16737
     },
     {
       "section": "Real or Hallucinated?",
       "piece": "real-or-hallucinated",
       "path": "~/Personal/lab/real-or-hallucinated/README.md",
-      "sha256": "75aa1a90ed7578ca4c5dbec3ed5438ad0cbe648ad46af73f112b605b59c1388e",
-      "bytes": 14298
+      "sha256": "15dc2a958e4ec44c412072fcaf67be3e32ef5634034647478c5465a24c993d89",
+      "bytes": 17439
     },
     {
       "section": "Agent Race",
       "piece": "agent-race",
       "path": "~/Personal/lab/agent-race/README.md",
-      "sha256": "78f8cd8bbda2b6e6bddcac528206824778ad4e9b55c14c18344856952b842490",
-      "bytes": 23133
+      "sha256": "4e1763ee431a350a8e45dfe7eaadcedcb6812e93ccc88c4f1650f8abc7a6144f",
+      "bytes": 23206
     },
     {
       "section": "Grid Weather",
       "piece": "grid-weather",
       "path": "~/Personal/lab/grid-weather/README.md",
-      "sha256": "180e6cad7c0a874761adb552d061039d02b8175d23b0aa7c809b64767c13bb08",
-      "bytes": 11043
+      "sha256": "1d1246af8a567c089786db59b51997cae6146b7000b68609645fd8130b265611",
+      "bytes": 11547
     },
     {
       "section": "gridtop",
       "piece": "gridtop",
       "path": "~/Personal/lab/gridtop/README.md",
-      "sha256": "3c5f75e5b6cf4a8a828022692ea17bbd05cfa10222fc97ae9d664c71166ee22e",
-      "bytes": 19940
+      "sha256": "e20d50f46f69f7f40de0d35a916583cd459996f20e8639a1df0840a960f11c8a",
+      "bytes": 21770
     },
     {
       "section": "Listen to the Grid",
       "piece": "listen-to-the-grid",
       "path": "~/Personal/lab/listen-to-the-grid/README.md",
-      "sha256": "b53c27365004e166cc3adc28bae5a0667a0be747fd52c3e34de76a8f543d915c",
-      "bytes": 13341
+      "sha256": "139e5b7948bfc95de8239eec39091cd87a83ae349f8e8f6aa0cdaabbe7360b92",
+      "bytes": 14013
     },
     {
       "section": "Sourced",
       "piece": "sourced",
       "path": "~/Personal/lab/sourced/README.md",
-      "sha256": "17b06400975ee1e86e13e944da130542f501ffb2d74c6c088ed58d2fc3ffaf34",
-      "bytes": 26708
+      "sha256": "8af038519ab67ec8ae32d60b23e221eb7c631dab225bbf3cf50c31c2dbe9030b",
+      "bytes": 27262
     },
     {
       "section": "ask-the-record",
       "piece": "ask-the-record",
       "path": "~/Personal/oss/ask-the-record/README.md",
-      "sha256": "6e60456626796388a8dd943291af797c7d9e5236135bed4d94bc1cf3fc24c7c4",
-      "bytes": 32656
+      "sha256": "42fbe3c680b951132b20385d3d9dae920c02e557a317fac2b0c675ae8b091ce1",
+      "bytes": 34555
     },
     {
       "section": "dreaming",
       "piece": "dreaming",
       "path": "~/Personal/oss/dreaming/README.md",
-      "sha256": "3589c42e8c4b671d38ceadfed716a14c09bbff6f496789e67e0b41a8f855e095",
-      "bytes": 34501
+      "sha256": "d87c8918e06d6d06939ea6019ed620141401abc2c83e6ad8c96191f6ba6c4135",
+      "bytes": 56787
     },
     {
       "section": "receipts",
       "piece": "receipts",
       "path": "~/Personal/oss/receipts/README.md",
-      "sha256": "4e0da6077a6d283dadce56fc9432b21b2fb5f5415b4e210817f529295ae5063f",
-      "bytes": 30030
+      "sha256": "86f7651af02ac31e4bc8a6902e26112511a19d2b2cd4f34164b021cfe4d322c8",
+      "bytes": 30553
     }
   ]
 }

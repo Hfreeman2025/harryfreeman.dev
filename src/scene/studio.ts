@@ -303,6 +303,7 @@ export async function mountStudio({ stage, labels, timeline, startAt = 0, paused
   const poolLevel = new Map<PieceId, number>(PIECE_IDS.map((p) => [p, 0]));
   const timeEl = document.getElementById('replay-time');
   const eventEl = document.getElementById('replay-event');
+  const evidenceEl = document.getElementById('replay-evidence');
   let lastCaption = '';
 
   function update(dt: number, t: number): void {
@@ -447,13 +448,15 @@ export async function mountStudio({ stage, labels, timeline, startAt = 0, paused
       if (latest) {
         const phase = replay.phase(latest.piece, latest.scene + 0.001);
         const round = 'round' in phase ? phase.round : 0;
-        event = `${pieceById(latest.piece).title} ${describe(latest.kind, round, latest.brief)}${latest.note ? `: ${latest.note}` : ''}`;
+        event = `${pieceById(latest.piece).title} ${describe(latest.kind, round, latest.brief)}`;
       }
-      const caption = `${time}|${event}`;
+      const evidence = latest?.note ?? '';
+      const caption = `${time}|${event}|${evidence}`;
       if (caption !== lastCaption) {
         lastCaption = caption;
         timeEl.textContent = time;
         eventEl.textContent = event;
+        if (evidenceEl) evidenceEl.textContent = evidence;
       }
     }
   }

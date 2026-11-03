@@ -81,6 +81,7 @@ describe('render', () => {
   it('does not label a real timeline as a placeholder', () => {
     const list = renderList(config, { ...timeline, placeholder: false });
     expect(list).not.toContain('placeholder timeline');
+    expect(list).toContain('the times are inferred');
   });
 });
 
