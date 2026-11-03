@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>The studio, in plan</title>
+  <rect width="64" height="64" fill="#15120e"/>
+  <rect x="6" y="10" width="52" height="44" fill="#cfb68b"/>
+  <rect x="6" y="10" width="52" height="4" fill="#ece6da"/>
+  <g fill="#ece6da">
+    <rect x="9" y="19" width="7" height="5"/><rect x="19" y="19" width="7" height="5"/><rect x="29" y="19" width="7" height="5"/><rect x="39" y="19" width="7" height="5"/><rect x="49" y="19" width="7" height="5"/>
+    <rect x="9" y="31" width="7" height="5"/><rect x="19" y="31" width="7" height="5"/><rect x="29" y="31" width="7" height="5"/><rect x="39" y="31" width="7" height="5"/><rect x="49" y="31" width="7" height="5"/>
+  </g>
+  <rect x="25" y="44" width="14" height="5" fill="#f2b544"/>
+</svg>

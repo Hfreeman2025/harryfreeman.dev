@@ -1,0 +1,52 @@
+{
+  "gridtop": {
+    "url": "http://127.0.0.1:4400/terminal.html?piece=gridtop&loop&bare",
+    "recordedAt": "2026-11-02T16:16:59.541Z",
+    "seconds": 8
+  },
+  "gpt-in-a-tab": {
+    "url": "http://127.0.0.1:4180/",
+    "recordedAt": "2026-11-02T16:17:23.632Z",
+    "seconds": 8
+  },
+  "real-or-hallucinated": {
+    "url": "http://127.0.0.1:4174/",
+    "recordedAt": "2026-11-02T16:17:39.061Z",
+    "seconds": 8
+  },
+  "agent-race": {
+    "url": "http://127.0.0.1:4317/?view=replay",
+    "recordedAt": "2026-11-02T16:17:52.103Z",
+    "seconds": 8
+  },
+  "grid-weather": {
+    "url": "http://127.0.0.1:4173/",
+    "recordedAt": "2026-11-02T16:18:08.825Z",
+    "seconds": 8
+  },
+  "listen-to-the-grid": {
+    "url": "http://127.0.0.1:4179/",
+    "recordedAt": "2026-11-02T16:20:04.248Z",
+    "seconds": 8
+  },
+  "sourced": {
+    "url": "http://127.0.0.1:4177/",
+    "recordedAt": "2026-11-02T16:18:40.672Z",
+    "seconds": 8
+  },
+  "ask-the-record": {
+    "url": "http://127.0.0.1:4310/demo/",
+    "recordedAt": "2026-11-02T16:18:55.078Z",
+    "seconds": 8
+  },
+  "dreaming": {
+    "url": "http://127.0.0.1:4400/terminal.html?piece=dreaming&loop&bare",
+    "recordedAt": "2026-11-02T16:19:16.315Z",
+    "seconds": 8
+  },
+  "receipts": {
+    "url": "http://127.0.0.1:4318/attestation.html",
+    "recordedAt": "2026-11-02T16:19:29.509Z",
+    "seconds": 8
+  }
+}

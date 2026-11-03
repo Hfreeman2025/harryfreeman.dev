@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en-GB" data-mode="list">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Harry Freeman, Head of AI</title>
+  <meta name="description" content="Harry Freeman runs AI strategy, products and governance at a UK sustainability consultancy. A scale model of the studio where coding agents built ten pieces to his briefs, with a reviewer checking every one.">
+  <meta name="theme-color" content="#15120e">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/favicon.png" type="image/png" sizes="64x64">
+  <meta property="og:title" content="Harry Freeman, Head of AI">
+  <meta property="og:description" content="A scale model of the studio where coding agents built ten pieces to Harry's briefs, each checked by a reviewer.">
+  <meta property="og:image" content="/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <script>
+    // Decide before first paint: the studio for a large screen that welcomes motion, the list for everyone else.
+    (() => {
+      var d = document.documentElement;
+      var q = (m) => window.matchMedia(m).matches;
+      var asked = /[?&]list(=|&|$)/.test(location.search);
+      // ?photo renders the bare model, for the still photograph and the social image.
+      var photo = /[?&]photo(=|&|$)/.exec(location.search);
+      if (photo) { d.dataset.photo = /[?&]photo=og/.test(location.search) ? 'og' : 'true'; d.dataset.mode = 'scene'; return; }
+      var save = navigator.connection?.saveData;
+      var scene = !asked && !save && 'WebGL2RenderingContext' in window &&
+        q('(min-width: 900px)') && q('(min-height: 560px)') && !q('(prefers-reduced-motion: reduce)');
+      d.dataset.mode = scene ? 'scene' : 'list';
+    })();
+  </script>
+  <link rel="stylesheet" href="/src/styles/site.css">
+</head>
+<body>
+
+  <main>
+    <div class="sheet">
+    <header class="titleblock">
+      <h1 class="titleblock__name">Harry Freeman</h1>
+      <p class="titleblock__role">Head of AI</p>
+      <p class="titleblock__line">I run AI strategy, products and governance at a UK sustainability consultancy; coding agents built these ten pieces to my briefs, and a reviewer sent the work back until it met them.</p>
+      <nav class="titleblock__links" aria-label="Contact and contents">
+        <a href="%CV%">CV</a>
+        <a href="mailto:%EMAIL%">Email</a>
+        <a href="%LINKEDIN%">LinkedIn</a>
+        <a class="titleblock__skip" href="#work">Skip to the list</a>
+      </nav>
+    </header>
+    <section class="studio" id="studio" aria-label="The studio: a scale model of where the pieces were built">
+      <picture class="studio__still">
+        <source type="image/webp" srcset="/still/studio-960.webp 960w, /still/studio-1600.webp 1600w, /still/studio-2400.webp 2400w" sizes="100vw">
+        <img src="/still/studio-1600.jpg" width="1600" height="1000" alt="A white card scale model of a studio under a lamp: ten desks in two rows, each with a figure at a glowing screen, a review table at the front and three briefs pinned to the back wall." fetchpriority="high" decoding="async">
+      </picture>
+      <div class="studio__stage" aria-hidden="true"></div>
+      <nav class="studio__labels" aria-label="Desks in the studio">
+        <!--studio:labels-->
+      </nav>
+      <div class="replay" id="replay" data-origin="%TIMELINE_ORIGIN%">
+        <p class="replay__hint">Choose a desk to see its work up close; Tab and Enter work too.</p>
+        <p class="replay__now"><span class="replay__time" id="replay-time">Replay paused</span><span class="replay__event" id="replay-event"></span></p>
+        <p class="replay__note replay__note--placeholder">Placeholder timeline: invented to lay out the replay, not the real build record.</p>
+        <p class="replay__note replay__note--real">The build as it happened, compressed: a night becomes a few seconds.</p>
+        <button type="button" class="replay__toggle" id="replay-toggle" aria-pressed="false">Pause</button>
+      </div>
+      <p class="studio__status" id="studio-status" role="status"></p>
+    </section>
+
+    <section class="ask" id="ask" aria-labelledby="ask-title">
+      <h2 class="ask__title" id="ask-title">Ask the studio</h2>
+      <p class="ask__about">Every answer is a quotation from Harry’s CV or a project’s README, found in your browser by <a href="#work-ask-the-record">ask-the-record</a>. It never writes an answer; when nothing supports one, it says so.</p>
+      <ask-the-record id="ask-box" data-src="/record/studio.json" label="Your question" placeholder="About Harry or any piece" model-host="/models/" runtime="/vendor/transformers/runtime.js">
+        <form class="ask__standin">
+          <label for="ask-standin">Your question</label>
+          <input id="ask-standin" type="search" autocomplete="off" placeholder="About Harry or any piece">
+        </form>
+        <p slot="suggestions" class="ask__try">Try
+          <button type="button" data-question="What did Harry do about the EU AI Act?">What did Harry do about the EU AI Act?</button>
+          <button type="button" data-question="How does gridtop choose when to run?">How does gridtop choose when to run?</button>
+          <button type="button" data-question="What happens if you change one byte?">What happens if you change one byte?</button>
+        </p>
+      </ask-the-record>
+      <noscript><p class="ask__none">Asking needs JavaScript. Everything it can quote is in the <a href="%CV%">CV</a> and the list below.</p></noscript>
+    </section>
+    </div>
+
+    <section class="work-list" id="work" aria-labelledby="work-title">
+      <h2 id="work-title">The ten pieces</h2>
+      <p class="work-list__lede">Seven playful pieces and three open-source tools, one per desk. None is hosted yet: web pieces run on local ports, terminal pieces show their recorded sessions.</p>
+      <ol class="works">
+        <!--studio:list-->
+      </ol>
+    </section>
+
+    <section class="brief" id="brief" aria-labelledby="brief-title">
+      <h2 id="brief-title">The brief</h2>
+      <p class="brief__lede">Three documents set the bar for every desk. Each piece was built against all three, in order; the reviewer checked work against them and sent it back when it fell short.</p>
+      <div class="brief__docs">
+        <div class="brief__doc">
+          <h3><span class="doc">BRIEF.md</span> The rules</h3>
+          <ul>
+            <li>A clean room: personal work, no employer code, names or data, and no private data of any kind.</li>
+            <li>Local only. No accounts, logins, commits or publishing.</li>
+            <li>Honest data: label times and sources, show an explicit offline state, never present stale or sample data as live.</li>
+            <li>It must not look AI-generated. Deliberate type and colour, keyboard use, reduced motion, good contrast, phones.</li>
+            <li>Right-sized engineering: strict types, runtime validation of every response, real tests for the tricky core, licence-checked dependencies.</li>
+          </ul>
+        </div>
+        <div class="brief__doc">
+          <h3><span class="doc">V2.md</span> Better, more polished, more innovative</h3>
+          <ul>
+            <li>An identity derived from a medium, written down in six lines, with no shared template.</li>
+            <li>Engine first: the working thing on the first screen, on a laptop and a phone.</li>
+            <li>One signature idea per piece, built properly.</li>
+            <li>Every state designed, zero console errors, tested in Chromium, WebKit and Firefox, performance measured.</li>
+            <li>Two hostile self-critique passes before reporting.</li>
+          </ul>
+        </div>
+        <div class="brief__doc">
+          <h3><span class="doc">V3.md</span> Visionary, not just good</h3>
+          <ul>
+            <li>A real technical core, implemented properly and cited, explained in plain words.</li>
+            <li>A wow inside ten seconds, with any recorded run labelled as recorded.</li>
+            <li>Honest by construction: inferred things labelled inferred, real accuracy reported even when it is unflattering.</li>
+            <li>Downloads stated, cached, cancellable and survivable; fallbacks designed, never a crash.</li>
+            <li>Machine rules: silent browser automation, shared model weights, one test browser at a time.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="colophon" id="colophon" aria-labelledby="colophon-title">
+      <h2 id="colophon-title">How this page works</h2>
+      <p>The studio is a 1:50 model built in Three.js from a plan of boxes. The lamp’s light and shadows on the floor were baked ahead of time by ray tracing that same plan; only the figures and screens are lit live. The figures replay the build timeline: who built what, each hand-off to the reviewer, each piece sent back. Each screen plays a silent loop recorded from the real piece in a headless browser.</p>
+      <p>Ask the studio runs ask-the-record entirely in your browser. Keyword search and the three suggested questions need no download; your own question loads the meaning model on first use, about 50 MB (a 23 MB embedding model and 27 MB of WebAssembly runtime), served from this site and cached by your browser. Your question never leaves the page.</p>
+      <p>Phones, reduced motion and screen readers get this page as a list with a still photograph of the model. <a href="?list">See the list version</a>.</p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Harry Freeman, 2026. Code under the MIT licence. No cookies, analytics or requests to other sites.</p>
+  </footer>
+
+  <div class="card" id="card" role="dialog" aria-modal="true" aria-labelledby="card-title" hidden>
+    <div class="card__frame">
+      <div class="card__screen"><video class="card__video" muted loop playsinline preload="none" aria-hidden="true"></video></div>
+      <div class="card__body" id="card-body"></div>
+      <button type="button" class="card__back" id="card-back">Back to the studio</button>
+    </div>
+  </div>
+
+  <!--studio:timeline-->
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

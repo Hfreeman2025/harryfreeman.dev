@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Recorded terminal session</title>
+  <meta name="theme-color" content="#15120e">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/src/styles/terminal.css">
+</head>
+<body>
+  <nav class="cv-bar" aria-label="Site"><a href="/">The studio</a></nav>
+  <main class="term">
+    <h1 class="term__title" id="term-title">Recorded terminal session</h1>
+    <p class="term__about" id="term-about"></p>
+    <div class="term__screen" id="term-screen" role="img" aria-label="A replay of the recorded terminal session"></div>
+    <p class="term__controls"><button type="button" id="term-replay">Play again</button> <span id="term-state"></span></p>
+    <p class="term__run" id="term-run"></p>
+  </main>
+  <script type="module" src="/src/terminal.ts"></script>
+</body>
+</html>

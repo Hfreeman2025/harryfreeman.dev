@@ -1,0 +1,47 @@
+{
+  "name": "harry-freeman-studio",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Harry Freeman's personal site: a scale model of the studio where his portfolio was built.",
+  "license": "MIT",
+  "author": "Harry Freeman",
+  "type": "module",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 4400 --strictPort",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host 127.0.0.1 --port 4400 --strictPort",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "test": "vitest run",
+    "test:e2e": "node scripts/e2e.mjs",
+    "bake": "tsx scripts/bake-lightmap.ts",
+    "record:loops": "node scripts/record-loops.mjs",
+    "record:ask": "tsx scripts/build-record.ts",
+    "shots": "node scripts/shots.mjs",
+    "perf": "node scripts/perf.mjs",
+    "licences": "node scripts/licences.mjs",
+    "gate": "npm run typecheck && npm run lint && npm test && npm run build && npm run licences",
+    "stills": "node scripts/stills.mjs",
+    "placeholder": "node scripts/make-placeholder.mjs"
+  },
+  "dependencies": {
+    "@fontsource-variable/jost": "^5.3.0",
+    "@xterm/xterm": "^6.0.0",
+    "three": "^0.187.0",
+    "valibot": "^1.5.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.6.4",
+    "@types/node": "^26.6.6",
+    "@types/three": "^0.187.0",
+    "marked": "^18.1.2",
+    "playwright": "^1.63.0",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vite": "^7.3.7",
+    "vitest": "^4.1.12"
+  }
+}

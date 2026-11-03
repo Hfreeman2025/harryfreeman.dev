@@ -1,0 +1,18 @@
+{
+  "$comment": "Where each piece opens. Local ports for now: nothing is hosted. Terminal pieces open their recorded session on this site.",
+  "pieces": {
+    "gpt-in-a-tab": "http://127.0.0.1:4180/",
+    "real-or-hallucinated": "http://127.0.0.1:4174/",
+    "agent-race": "http://127.0.0.1:4317/",
+    "grid-weather": "http://127.0.0.1:4173/",
+    "gridtop": "/terminal.html?piece=gridtop",
+    "listen-to-the-grid": "http://127.0.0.1:4179/",
+    "sourced": "http://127.0.0.1:4177/",
+    "ask-the-record": "http://127.0.0.1:4310/demo/",
+    "dreaming": "/terminal.html?piece=dreaming",
+    "receipts": "http://127.0.0.1:4318/attestation.html"
+  },
+  "cv": "/cv.html",
+  "email": "harryfreeman2000@icloud.com",
+  "linkedin": "https://www.linkedin.com/in/harry-freeman-950295180"
+}

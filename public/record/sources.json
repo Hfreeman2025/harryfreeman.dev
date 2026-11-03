@@ -1,0 +1,82 @@
+{
+  "builtAt": "2026-11-02T16:57:00.156Z",
+  "sources": [
+    {
+      "section": "Harry Freeman’s CV",
+      "piece": null,
+      "path": "src/content/cv.md",
+      "sha256": "5fd2a3953d46b7b7658bc85fd3a8afbbf0c2a22a6547a199a6341514deea5362",
+      "bytes": 6928
+    },
+    {
+      "section": "GPT in a tab",
+      "piece": "gpt-in-a-tab",
+      "path": "~/Personal/lab/gpt-in-a-tab/README.md",
+      "sha256": "7ccb9a0b81e70bd46eaffd6dd961aeecc59c1ff02e57f3d38ccd2a4a8515148e",
+      "bytes": 16184
+    },
+    {
+      "section": "Real or Hallucinated?",
+      "piece": "real-or-hallucinated",
+      "path": "~/Personal/lab/real-or-hallucinated/README.md",
+      "sha256": "75aa1a90ed7578ca4c5dbec3ed5438ad0cbe648ad46af73f112b605b59c1388e",
+      "bytes": 14298
+    },
+    {
+      "section": "Agent Race",
+      "piece": "agent-race",
+      "path": "~/Personal/lab/agent-race/README.md",
+      "sha256": "78f8cd8bbda2b6e6bddcac528206824778ad4e9b55c14c18344856952b842490",
+      "bytes": 23133
+    },
+    {
+      "section": "Grid Weather",
+      "piece": "grid-weather",
+      "path": "~/Personal/lab/grid-weather/README.md",
+      "sha256": "180e6cad7c0a874761adb552d061039d02b8175d23b0aa7c809b64767c13bb08",
+      "bytes": 11043
+    },
+    {
+      "section": "gridtop",
+      "piece": "gridtop",
+      "path": "~/Personal/lab/gridtop/README.md",
+      "sha256": "3c5f75e5b6cf4a8a828022692ea17bbd05cfa10222fc97ae9d664c71166ee22e",
+      "bytes": 19940
+    },
+    {
+      "section": "Listen to the Grid",
+      "piece": "listen-to-the-grid",
+      "path": "~/Personal/lab/listen-to-the-grid/README.md",
+      "sha256": "b53c27365004e166cc3adc28bae5a0667a0be747fd52c3e34de76a8f543d915c",
+      "bytes": 13341
+    },
+    {
+      "section": "Sourced",
+      "piece": "sourced",
+      "path": "~/Personal/lab/sourced/README.md",
+      "sha256": "17b06400975ee1e86e13e944da130542f501ffb2d74c6c088ed58d2fc3ffaf34",
+      "bytes": 26708
+    },
+    {
+      "section": "ask-the-record",
+      "piece": "ask-the-record",
+      "path": "~/Personal/oss/ask-the-record/README.md",
+      "sha256": "6e60456626796388a8dd943291af797c7d9e5236135bed4d94bc1cf3fc24c7c4",
+      "bytes": 32656
+    },
+    {
+      "section": "dreaming",
+      "piece": "dreaming",
+      "path": "~/Personal/oss/dreaming/README.md",
+      "sha256": "3589c42e8c4b671d38ceadfed716a14c09bbff6f496789e67e0b41a8f855e095",
+      "bytes": 34501
+    },
+    {
+      "section": "receipts",
+      "piece": "receipts",
+      "path": "~/Personal/oss/receipts/README.md",
+      "sha256": "4e0da6077a6d283dadce56fc9432b21b2fb5f5415b4e210817f529295ae5063f",
+      "bytes": 30030
+    }
+  ]
+}

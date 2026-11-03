@@ -1,0 +1,100 @@
+@import "./site.css";
+
+.cv-bar {
+  display: flex;
+  gap: 22px;
+  margin: var(--gutter);
+  font-size: 16px;
+}
+.cv-bar a:first-child {
+  margin-right: auto;
+}
+.cv {
+  max-width: 760px;
+  margin: 0 var(--gutter) 96px;
+  padding: 32px 36px 40px;
+  border: 1px solid var(--rule-strong);
+}
+@media (min-width: 840px) {
+  .cv {
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+.cv h1 {
+  font-size: 40px;
+  font-weight: 500;
+}
+.cv h1 + p {
+  color: var(--ink-2);
+  margin-top: 6px;
+  font-size: 18px;
+}
+.cv h2 {
+  font-size: 24px;
+  margin: 40px 0 12px;
+  padding-top: 14px;
+  border-top: 1px solid var(--rule-strong);
+}
+.cv h3 {
+  font-size: 19px;
+  margin: 26px 0 6px;
+}
+.cv p {
+  margin: 10px 0 0;
+  color: var(--ink-2);
+  max-width: 68ch;
+}
+.cv h3 + p {
+  color: var(--ink-3);
+  margin-top: 2px;
+}
+.cv ul {
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.cv li {
+  position: relative;
+  padding-left: 18px;
+  margin-bottom: 8px;
+  color: var(--ink-2);
+}
+.cv li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.72em;
+  width: 9px;
+  height: 1px;
+  background: var(--ink-3);
+}
+@media (max-width: 520px) {
+  .cv {
+    padding: 20px 18px 28px;
+  }
+  .cv h1 {
+    font-size: 32px;
+  }
+}
+@media print {
+  :root {
+    --ink: #111;
+    --ink-2: #222;
+    --ink-3: #555;
+    --rule: #ccc;
+    --rule-strong: #999;
+  }
+  html {
+    background: #fff;
+  }
+  .cv-bar {
+    display: none;
+  }
+  .cv {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    max-width: none;
+  }
+}
