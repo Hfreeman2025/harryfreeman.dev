@@ -4,8 +4,10 @@ import { dirname, extname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { marked } from 'marked';
 import { defineConfig, type Plugin } from 'vite';
+import { BRIEFS_HTML } from './src/content/briefs';
 import { parseConfig } from './src/content/config';
 import { renderLabels, renderList, renderTimelineJson } from './src/content/render';
+import { renderCabinet, renderDirectory, renderPlan } from './src/office/render';
 import placeholder from './src/timeline/placeholder.json' with { type: 'json' };
 import { parseTimeline, type Timeline } from './src/timeline/schema';
 
@@ -109,13 +111,17 @@ function studio(): Plugin {
           const body = marked.parse(readFileSync(join(root, 'src/content/cv.md'), 'utf8'), { async: false });
           return html.replace('<!--cv:body-->', body).replaceAll('%EMAIL%', config.email).replaceAll('%LINKEDIN%', config.linkedin);
         }
-        if (!ctx.filename.endsWith('index.html')) return html;
+        if (!ctx.filename.endsWith('index.html') && !ctx.filename.endsWith('office.html')) return html;
         const source = loadTimeline(strict);
         const status = source.problem
           ? `<p class="timeline-problem" role="alert">The real timeline could not be read (${source.problem.replace(/[<>&]/g, '')}). Playing the placeholder instead.</p>`
           : '';
         return html
           .replace('<!--studio:labels-->', renderLabels())
+          .replace('<!--studio:briefs-->', BRIEFS_HTML)
+          .replace('<!--office:directory-->', renderDirectory())
+          .replace('<!--office:cabinet-->', renderCabinet())
+          .replace('<!--office:plan-->', renderPlan())
           .replace('<!--studio:list-->', renderList(config, source.timeline))
           .replace('<!--studio:timeline-->', renderTimelineJson(source.timeline) + status)
           .replaceAll('%CV%', config.cv)
@@ -151,6 +157,7 @@ export default defineConfig({
         index: join(root, 'index.html'),
         cv: join(root, 'cv.html'),
         terminal: join(root, 'terminal.html'),
+        office: join(root, 'office.html'),
       },
     },
   },

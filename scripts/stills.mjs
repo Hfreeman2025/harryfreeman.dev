@@ -14,7 +14,7 @@ const still = join(site, 'public', 'still');
 const tmp = join(site, '.tmp');
 mkdirSync(still, { recursive: true });
 // A moment in the replay when every screen is on and work is moving to and from the reviewer.
-const MOMENT = 32.5;
+const MOMENT = 15;
 
 const browser = await chromium.launch({
   headless: true,

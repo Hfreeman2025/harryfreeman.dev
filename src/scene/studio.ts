@@ -22,7 +22,8 @@ import {
   VideoTexture,
   WebGLRenderer,
 } from 'three';
-import { PIECE_IDS, PIECES, type PieceId, pieceById } from '../content/pieces';
+import { PIECE_IDS, PIECES, type PieceId } from '../content/pieces';
+import { captionAt } from '../timeline/caption';
 import { type Phase, Replay } from '../timeline/replay';
 import type { Timeline } from '../timeline/schema';
 import { along, approachAngle, Figure, makeRoute, type Route } from './figures';
@@ -85,32 +86,6 @@ async function loadTexture(url: string): Promise<Texture | null> {
     return await new TextureLoader().loadAsync(url);
   } catch {
     return null;
-  }
-}
-
-const dateFormat = new Intl.DateTimeFormat('en-GB', {
-  weekday: 'short',
-  day: 'numeric',
-  month: 'short',
-  hour: '2-digit',
-  minute: '2-digit',
-  timeZone: 'Europe/London',
-});
-
-function describe(kind: string, round: number, brief: string | undefined): string {
-  switch (kind) {
-    case 'briefed':
-      return brief ? `briefed with ${brief}` : 'briefed';
-    case 'started':
-      return 'starts building';
-    case 'submitted':
-      return `hands in for review, round ${round}`;
-    case 'returned':
-      return 'sent back by the reviewer';
-    case 'accepted':
-      return 'accepted';
-    default:
-      return kind;
   }
 }
 
@@ -440,17 +415,8 @@ export async function mountStudio({ stage, labels, timeline, startAt = 0, paused
     }
 
     // Caption: the real time being replayed, and the latest hand-off.
-    const real = replay.realAt(s);
-    const latest = replay.latest(s);
     if (timeEl && eventEl) {
-      const time = real === null ? 'No events' : dateFormat.format(real);
-      let event = '';
-      if (latest) {
-        const phase = replay.phase(latest.piece, latest.scene + 0.001);
-        const round = 'round' in phase ? phase.round : 0;
-        event = `${pieceById(latest.piece).title} ${describe(latest.kind, round, latest.brief)}`;
-      }
-      const evidence = latest?.note ?? '';
+      const { time, event, evidence } = captionAt(replay, s);
       const caption = `${time}|${event}|${evidence}`;
       if (caption !== lastCaption) {
         lastCaption = caption;

@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Harry Freeman, Head of AI</title>
+  <meta name="description" content="Harry Freeman runs AI strategy, products and governance at a UK sustainability consultancy. Ten tools, filed in a cabinet: pull a drawer, pull a folder, open the tool.">
+  <meta name="theme-color" content="#f0efea">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="/fonts/plex/ibm-plex-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/plex/ibm-plex-sans-condensed-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <script>
+    // Motion only for those who welcome it; everything works either way.
+    document.documentElement.dataset.motion = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'reduce' : 'full';
+  </script>
+  <link rel="stylesheet" href="/src/styles/office.css">
+</head>
+<body>
+  <main>
+    <div class="lobby">
+      <section class="board" id="directory" aria-labelledby="board-name">
+        <div class="board__face">
+          <h1 class="board__name" id="board-name">Harry Freeman</h1>
+          <p class="board__role">Head of AI</p>
+          <p class="board__line">I run AI strategy, products and governance at a UK sustainability consultancy; coding agents built these ten tools to my briefs, and a reviewer sent the work back until it met them.</p>
+          <h2 class="board__heading">Directory</h2>
+          <!--office:directory-->
+          <ul class="board__more">
+            <li class="board__row"><a href="#ask">Ask a question</a><span class="board__leader" aria-hidden="true"></span><span class="board__where">Reception</span></li>
+            <li class="board__row"><a href="#floor">Who built what</a><span class="board__leader" aria-hidden="true"></span><span class="board__where">Studio floor</span></li>
+            <li class="board__row"><a href="#brief">The briefs</a><span class="board__leader" aria-hidden="true"></span><span class="board__where">Studio floor</span></li>
+            <li class="board__row"><a href="%CV%">CV</a><span class="board__leader" aria-hidden="true"></span><a href="mailto:%EMAIL%">Email</a><span class="board__sep" aria-hidden="true"> · </span><a href="%LINKEDIN%">LinkedIn</a></li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="archive" id="archive" aria-labelledby="archive-title">
+        <h2 class="sign" id="archive-title">Archive</h2>
+        <p class="archive__how">Ten tools, filed by theme. Pull a drawer, then a folder: each holds a recorded loop of the tool and a way to open it live.</p>
+        <div class="cabinet-stage">
+          <!--office:cabinet-->
+        </div>
+      </section>
+
+      <section class="ask" id="ask" aria-labelledby="ask-title">
+        <h2 class="sign" id="ask-title">Reception</h2>
+        <p class="ask__about">Ask about Harry or any tool. Every answer is a quotation from his CV or a tool’s README, found in your browser by <a href="#work-ask-the-record">ask-the-record</a>; when nothing supports an answer, it says so.</p>
+        <ask-the-record id="ask-box" data-src="/record/studio.json" label="Your question" placeholder="About Harry or any tool" model-host="/models/" runtime="/vendor/transformers/runtime.js">
+          <form class="ask__standin">
+            <label for="ask-standin">Your question</label>
+            <input id="ask-standin" type="search" autocomplete="off" placeholder="About Harry or any tool">
+          </form>
+          <p slot="suggestions" class="ask__try">Try
+            <button type="button" data-question="What did Harry do about the EU AI Act?">What did Harry do about the EU AI Act?</button>
+            <button type="button" data-question="How does gridtop choose when to run?">How does gridtop choose when to run?</button>
+            <button type="button" data-question="What happens if you change one byte?">What happens if you change one byte?</button>
+          </p>
+        </ask-the-record>
+        <noscript><p class="ask__none">Asking needs JavaScript. Everything it can quote is in the <a href="%CV%">CV</a> and the folders below.</p></noscript>
+      </section>
+    </div>
+
+    <section class="floor" id="floor" aria-labelledby="floor-title">
+      <h2 class="sign" id="floor-title">Studio floor</h2>
+      <p class="floor__about">Where the tools were built. Each desk has the props of its tool; the dots are the builders, replaying the build: work carried to the review table, sent back in red, accepted in green.</p>
+      <div class="floor__plan">
+        <!--office:plan-->
+      </div>
+      <div class="replay" id="replay" data-origin="%TIMELINE_ORIGIN%">
+        <p class="replay__now"><span class="replay__time" id="replay-time">Replay paused</span> <span class="replay__event" id="replay-event"></span></p>
+        <p class="replay__evidence" id="replay-evidence"></p>
+        <p class="replay__note replay__note--placeholder">Placeholder timeline: invented to lay out the replay, not the real build record.</p>
+        <p class="replay__note replay__note--real">Reconstructed from file times and the builders’ reports, so every time is inferred; a night becomes a few seconds.</p>
+        <button type="button" class="replay__toggle" id="replay-toggle" aria-pressed="false">Pause</button>
+      </div>
+    </section>
+
+    <section class="files" id="files" aria-labelledby="files-title">
+      <h2 class="sign" id="files-title">Every folder, in full</h2>
+      <p class="files__about">The cabinet’s contents as a plain list. None of the tools is hosted yet: web tools open on local ports, terminal tools show their recorded sessions.</p>
+      <ol class="works">
+        <!--studio:list-->
+      </ol>
+    </section>
+
+    <section class="brief" id="brief" aria-labelledby="brief-title">
+      <h2 class="sign" id="brief-title">The briefs</h2>
+      <p class="brief__lede">Three documents set the bar for every tool. Each was built against all three, in order; the reviewer checked work against them and sent it back when it fell short.</p>
+      <!--studio:briefs-->
+    </section>
+
+    <section class="colophon" id="colophon" aria-labelledby="colophon-title">
+      <h2 class="colophon__title" id="colophon-title">How this page works</h2>
+      <p>The cabinet is HTML and CSS in three dimensions: every drawer is a button and every folder a link, so the directory, the keyboard and a screen reader reach the same ten tools. The loops in the folders were recorded from the real tools in a silent headless browser and are labelled recorded; <strong>Open</strong> launches the tool live. The floor plan is drawn from the same plan as the studio model, and the dots replay the build timeline.</p>
+      <p>Reception runs ask-the-record entirely in your browser. Keyword search and the suggested questions need no download; your own question loads the meaning model on first use, about 50 MB, served from this site and cached. Your question never leaves the page.</p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Harry Freeman, 2026. Code under the MIT licence. Set in IBM Plex, under the SIL Open Font Licence. No cookies, analytics or requests to other sites.</p>
+  </footer>
+
+  <div class="folder-card" id="card" role="dialog" aria-modal="true" aria-labelledby="card-title" hidden>
+    <div class="folder-card__open">
+      <div class="folder-card__leaf folder-card__leaf--loop">
+        <video class="folder-card__video" muted loop playsinline preload="none" aria-hidden="true"></video>
+        <p class="folder-card__recorded" id="card-recorded"></p>
+      </div>
+      <div class="folder-card__leaf folder-card__leaf--text" id="card-body"></div>
+      <button type="button" class="folder-card__back" id="card-back">Put it back</button>
+    </div>
+  </div>
+
+  <!--studio:timeline-->
+  <script type="module" src="/src/office/main.ts"></script>
+</body>
+</html>
