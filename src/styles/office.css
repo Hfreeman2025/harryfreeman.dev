@@ -1130,8 +1130,10 @@ html[data-motion="reduce"] .drawer:not([data-open="true"]) .folder {
 }
 
 @media (max-width: 760px) {
+  /* A phone pulls drawers out less far, and leaves just enough room below for the bottom one. */
   .cabinet-stage {
-    padding-bottom: calc(var(--cw) * 0.14);
+    --pull: calc(var(--cw) * 0.36);
+    padding-bottom: calc(var(--cw) * 0.22);
   }
 }
 
@@ -1153,4 +1155,21 @@ html[data-motion="reduce"] .drawer:not([data-open="true"]) .folder {
 }
 .folder-card__actions .work__elsewhere {
   margin: 0;
+}
+
+/* Only the drawer fronts and the folder tabs take the pointer; the boxes around them never do. */
+.drawer {
+  pointer-events: none;
+}
+.drawer__front {
+  pointer-events: auto;
+}
+
+/* The question box keeps the height it will have once ask-the-record loads, so loading it moves
+   nothing on the page; the suggestions sit above it for the same reason. */
+ask-the-record {
+  min-height: 118px;
+}
+.ask__try {
+  margin: 0 0 12px;
 }

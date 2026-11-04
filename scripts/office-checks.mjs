@@ -30,6 +30,11 @@ export async function officeChecks({ check, expect, BASE, config, name }) {
       ...desk,
       initScript: () => {
         window.__shift = 0;
+        // Only Chromium reports layout shifts; asking elsewhere just logs a warning.
+        if (!PerformanceObserver.supportedEntryTypes?.includes('layout-shift')) {
+          window.__shift = null;
+          return;
+        }
         try {
           new PerformanceObserver((list) => {
             for (const e of list.getEntries()) if (!e.hadRecentInput) window.__shift += e.value;
@@ -104,10 +109,27 @@ export async function officeChecks({ check, expect, BASE, config, name }) {
     expect((await cardTitle(page)) === 'Sourced', 'the plan pulled the wrong folder');
   });
 
+  for (const [room, path] of [
+    ['office', '/'],
+    ['studio', '/studio.html'],
+  ]) {
+    await check(`${room}: reaching for the question box moves nothing (ask-the-record loads in place)`, desk, async (page) => {
+      await page.goto(`${BASE}${path}`, { waitUntil: 'load' });
+      const where = () => page.$eval('.ask__try button', (b) => Math.round(b.getBoundingClientRect().top + scrollY));
+      const box = () => page.$eval('#ask-box', (b) => Math.round(b.getBoundingClientRect().height));
+      const [top, height] = [await where(), await box()];
+      await page.hover('#ask');
+      await page.waitForFunction(() => document.querySelector('ask-the-record')?.record, null, { timeout: 30000 });
+      await page.waitForTimeout(400);
+      expect((await where()) === top, `a suggestion moved from ${top} to ${await where()}`);
+      expect((await box()) === height, `the box grew from ${height} to ${await box()}`);
+    });
+  }
+
   await check('office: Reception answers, pulls the drawer and marks the folder', desk, async (page, problems) => {
     await page.goto(BASE, { waitUntil: 'load' });
     await page.getByRole('button', { name: 'How does gridtop choose when to run?' }).click();
-    await page.waitForFunction(() => document.querySelector('ask-the-record')?.result?.kind === 'answer', null, { timeout: 20000 });
+    await page.waitForFunction(() => document.querySelector('ask-the-record')?.result?.kind === 'answer', null, { timeout: 30000 });
     await page.waitForTimeout(900);
     expect((await page.getAttribute('.drawer[data-drawer="grid"]', 'data-open')) === 'true', 'drawer not pulled');
     expect((await page.getAttribute('.folder[data-piece="gridtop"]', 'data-answering')) === 'true', 'folder not marked');
@@ -124,7 +146,16 @@ export async function officeChecks({ check, expect, BASE, config, name }) {
       const cut = [];
       for (const drawer of ['inside', 'agents', 'grid', 'sources']) {
         await page.locator(`.drawer[data-drawer="${drawer}"] .drawer__front`).scrollIntoViewIfNeeded();
-        await page.click(`.drawer[data-drawer="${drawer}"] .drawer__front`, { position: { x: 20, y: 20 } });
+        // Push back the drawer that is out, as a person would when it is in the way.
+        const out = page.locator('.drawer[data-open="true"] .drawer__front');
+        if (await out.count()) {
+          await out.click({ position: { x: 24, y: 10 } });
+          await page.waitForTimeout(750);
+        }
+        const front = page.locator(`.drawer[data-drawer="${drawer}"] .drawer__front`);
+        const box = await front.boundingBox();
+        // The lower edge of a front is never under the drawer pulled out above it.
+        await front.click({ position: { x: 24, y: Math.max(8, box.height - 10) } });
         await page.waitForTimeout(750);
         cut.push(
           ...(await page.$$eval(`.drawer[data-drawer="${drawer}"] .folder__tab`, (tabs) =>

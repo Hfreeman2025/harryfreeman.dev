@@ -71,16 +71,16 @@
     <section class="ask" id="ask" aria-labelledby="ask-title">
       <h2 class="ask__title" id="ask-title">Ask the studio</h2>
       <p class="ask__about">Every answer is a quotation from Harry’s CV or a project’s README, found in your browser by <a href="#work-ask-the-record">ask-the-record</a>. It never writes an answer; when nothing supports one, it says so.</p>
+      <p class="ask__try">Try
+          <button type="button" data-question="What did Harry do about the EU AI Act?">What did Harry do about the EU AI Act?</button>
+          <button type="button" data-question="How does gridtop choose when to run?">How does gridtop choose when to run?</button>
+          <button type="button" data-question="What happens if you change one byte?">What happens if you change one byte?</button>
+        </p>
       <ask-the-record id="ask-box" data-src="/record/studio.json" label="Your question" placeholder="About Harry or any piece" model-host="/models/" runtime="/vendor/transformers/runtime.js">
         <form class="ask__standin">
           <label for="ask-standin">Your question</label>
           <input id="ask-standin" type="search" autocomplete="off" placeholder="About Harry or any piece">
         </form>
-        <p slot="suggestions" class="ask__try">Try
-          <button type="button" data-question="What did Harry do about the EU AI Act?">What did Harry do about the EU AI Act?</button>
-          <button type="button" data-question="How does gridtop choose when to run?">How does gridtop choose when to run?</button>
-          <button type="button" data-question="What happens if you change one byte?">What happens if you change one byte?</button>
-        </p>
       </ask-the-record>
       <noscript><p class="ask__none">Asking needs JavaScript. Everything it can quote is in the <a href="%CV%">CV</a> and the list below.</p></noscript>
     </section>

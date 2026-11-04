@@ -1023,3 +1023,12 @@ html[data-photo] .titleblock__back {
   margin-top: 8px;
   font-size: 15px;
 }
+
+/* The question box keeps the height it will have once ask-the-record loads, so loading it moves
+   nothing on the page; the suggestions sit above it for the same reason. */
+ask-the-record {
+  min-height: 112px;
+}
+.ask__try {
+  margin: 0 0 12px;
+}

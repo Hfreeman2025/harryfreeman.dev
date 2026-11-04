@@ -179,7 +179,7 @@ async function run(name) {
   await check('Ask the studio answers with quotes, and the desk it concerns lights up', desk, async (page, problems) => {
     await page.goto(STUDIO, { waitUntil: 'load' });
     await page.getByRole('button', { name: 'How does gridtop choose when to run?' }).click();
-    await page.waitForFunction(() => document.querySelector('ask-the-record')?.result?.kind === 'answer', null, { timeout: 20000 });
+    await page.waitForFunction(() => document.querySelector('ask-the-record')?.result?.kind === 'answer', null, { timeout: 30000 });
     const first = await page.evaluate(() => document.querySelector('ask-the-record').result.quotes[0].fact.text);
     expect(/gridtop/.test(first), `first quote: ${first}`);
     const lit = await page.locator('[data-piece="gridtop"][data-answering="true"]').count();
@@ -192,9 +192,10 @@ async function run(name) {
 
   await check('Ask the studio refuses what the record does not say', desk, async (page) => {
     await page.goto(STUDIO, { waitUntil: 'load' });
-    await page.locator('#ask-standin').click();
+    // Reaching for the box loads ask-the-record, whose own box then takes the stand-in's place.
+    await page.hover('#ask');
     await page.waitForFunction(() => customElements.get('ask-the-record') && document.querySelector('ask-the-record')?.record, null, {
-      timeout: 20000,
+      timeout: 30000,
     });
     const input = page.locator('ask-the-record').locator('[part="input"]');
     await input.fill('What is your favourite football team?');

@@ -52,6 +52,8 @@ const cardRecorded = document.getElementById('card-recorded');
 let openPiece: PieceId | null = null;
 let returnFocus: HTMLElement | null = null;
 let busy = false;
+/** The folder still opening, so a close asked for meanwhile waits for it rather than being lost. */
+let opening: Promise<void> | null = null;
 
 const Report = v.record(v.string(), v.looseObject({ recordedAt: v.optional(v.string()), url: v.optional(v.string()) }));
 let report: v.InferOutput<typeof Report> = {};
@@ -123,9 +125,18 @@ function onto(rect: DOMRect | null): string {
   return `translate(${rect.left - full.left}px, ${rect.top - full.top}px) scale(${scale}, ${rect.height / full.height})`;
 }
 
-async function openFolder(piece: PieceId, from: HTMLElement | null): Promise<void> {
-  if (busy || !card || !cardOpen) return;
+function openFolder(piece: PieceId, from: HTMLElement | null): Promise<void> {
+  if (busy || !card || !cardOpen) return opening ?? Promise.resolve();
   busy = true;
+  opening = pull(piece, from).finally(() => {
+    opening = null;
+    busy = false;
+  });
+  return opening;
+}
+
+async function pull(piece: PieceId, from: HTMLElement | null): Promise<void> {
+  if (!card || !cardOpen) return;
   openPiece = piece;
   returnFocus = from;
   await openDrawer(drawerOf(piece).id);
@@ -142,10 +153,10 @@ async function openFolder(piece: PieceId, from: HTMLElement | null): Promise<voi
   card.dataset.open = 'true';
   await wait(500);
   document.getElementById('card-title')?.focus();
-  busy = false;
 }
 
 async function closeFolder(): Promise<void> {
+  if (opening) await opening;
   if (busy || !card || !cardOpen || !openPiece) return;
   busy = true;
   const folder = folderFor(openPiece);

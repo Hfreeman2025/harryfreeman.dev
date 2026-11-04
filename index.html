@@ -14,8 +14,6 @@
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="preload" href="/fonts/plex/ibm-plex-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/fonts/plex/ibm-plex-sans-condensed-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
   <script>
     // Motion only for those who welcome it; everything works either way.
     document.documentElement.dataset.motion = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'reduce' : 'full';
@@ -53,16 +51,16 @@
       <section class="ask" id="ask" aria-labelledby="ask-title">
         <h2 class="sign" id="ask-title">Reception</h2>
         <p class="ask__about">Ask about Harry or any tool. Every answer is a quotation from his CV or a tool’s README, found in your browser by <a href="#work-ask-the-record">ask-the-record</a>; when nothing supports an answer, it says so.</p>
+        <p class="ask__try">Try
+            <button type="button" data-question="What did Harry do about the EU AI Act?">What did Harry do about the EU AI Act?</button>
+            <button type="button" data-question="How does gridtop choose when to run?">How does gridtop choose when to run?</button>
+            <button type="button" data-question="What happens if you change one byte?">What happens if you change one byte?</button>
+          </p>
         <ask-the-record id="ask-box" data-src="/record/studio.json" label="Your question" placeholder="About Harry or any tool" model-host="/models/" runtime="/vendor/transformers/runtime.js">
           <form class="ask__standin">
             <label for="ask-standin">Your question</label>
             <input id="ask-standin" type="search" autocomplete="off" placeholder="About Harry or any tool">
           </form>
-          <p slot="suggestions" class="ask__try">Try
-            <button type="button" data-question="What did Harry do about the EU AI Act?">What did Harry do about the EU AI Act?</button>
-            <button type="button" data-question="How does gridtop choose when to run?">How does gridtop choose when to run?</button>
-            <button type="button" data-question="What happens if you change one byte?">What happens if you change one byte?</button>
-          </p>
         </ask-the-record>
         <noscript><p class="ask__none">Asking needs JavaScript. Everything it can quote is in the <a href="%CV%">CV</a> and the folders below.</p></noscript>
       </section>

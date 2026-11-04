@@ -50,7 +50,7 @@ export function renderCabinet(): string {
 // Drawn in metres from the same plan as the light bake. The lobby below the studio is drawing only.
 
 const LOBBY = { z0: ROOM.z1, z1: 7.6 } as const;
-const VIEW = { x0: -7.6, z0: -5.0, x1: 7.6, z1: 8.2 } as const;
+const VIEW = { x0: -7.6, z0: -5.5, x1: 7.6, z1: 8.2 } as const;
 
 const r = (n: number) => Math.round(n * 1000) / 1000;
 
