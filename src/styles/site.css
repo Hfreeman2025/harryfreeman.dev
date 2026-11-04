@@ -1,11 +1,4 @@
-@font-face {
-  font-family: Jost;
-  src: url("/fonts/jost-latin-wght-normal.woff2") format("woff2");
-  font-weight: 300 700;
-  font-style: normal;
-  font-display: swap;
-}
-
+@import "./plex.css";
 :root {
   --room: #15120e;
   --room-2: #1d1914;
@@ -20,8 +13,10 @@
   --vermilion: #ef6a4c;
   --mat: #1e4536;
   --gutter: clamp(16px, 2.6vw, 40px);
-  --sans: Jost, "Futura PT", Futura, "Century Gothic", "Avenir Next", "Trebuchet MS", sans-serif;
-  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --sans: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --cond: "IBM Plex Sans Condensed", "Arial Narrow", "IBM Plex Sans", sans-serif;
+  --sign: #1d5a44;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
   color-scheme: dark;
 }
 
@@ -984,4 +979,47 @@ html[data-photo="og"] .titleblock__links {
   margin-top: 4px;
   font-size: 14px;
   color: var(--ink-3);
+}
+
+/* One building with the office: the same type, the same green wayfinding signs. */
+h1,
+h2,
+h3,
+.titleblock__name,
+.titleblock__role,
+.desk-label,
+.work__title,
+.replay__toggle,
+.open {
+  font-family: var(--cond);
+}
+.replay__time {
+  font-family: var(--mono);
+  font-size: 14px;
+}
+.sign {
+  display: inline-block;
+  padding: 6px 14px 7px;
+  background: var(--sign);
+  color: #fff;
+  font: 600 18px / 1.15 var(--cond);
+  border-radius: 3px;
+  text-decoration: none;
+}
+.sign--link:hover {
+  background: #164a38;
+}
+.sign--link:focus-visible {
+  outline-color: var(--amber);
+}
+.titleblock__back {
+  grid-column: 1 / -1;
+  padding: 16px 22px 4px;
+}
+html[data-photo] .titleblock__back {
+  display: none;
+}
+.work__elsewhere {
+  margin-top: 8px;
+  font-size: 15px;
 }

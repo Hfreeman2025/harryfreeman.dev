@@ -34,7 +34,7 @@ async function shoot(url, width, height, path, scale = 1) {
 }
 
 const big = join(tmp, 'still-2400.png');
-await shoot(`${base}/?photo&t=${MOMENT}`, 1600, 1000, big, 1.5);
+await shoot(`${base}/studio.html?photo&t=${MOMENT}`, 1600, 1000, big, 1.5);
 for (const w of [2400, 1600, 960]) {
   execFileSync('/opt/homebrew/bin/cwebp', ['-quiet', '-q', '80', '-resize', String(w), '0', big, '-o', join(still, `studio-${w}.webp`)]);
 }
@@ -51,7 +51,18 @@ execFileSync('/opt/homebrew/bin/ffmpeg', [
   join(still, 'studio-1600.jpg'),
 ]);
 
-await shoot(`${base}/?photo=og&t=${MOMENT}`, 1200, 630, join(site, 'public', 'og.png'));
+// The social image is the way in: the lobby, with the directory board and the cabinet.
+{
+  const context = await browser.newContext({ viewport: { width: 1200, height: 630 }, deviceScaleFactor: 1 });
+  await context.addInitScript(silenceLiveAudio);
+  const page = await context.newPage();
+  await page.goto(`${base}/`, { waitUntil: 'load' });
+  await page.click('.drawer[data-drawer="agents"] .drawer__front');
+  await page.waitForTimeout(1200);
+  await page.screenshot({ path: join(site, 'public', 'og.png') });
+  await context.close();
+}
+await shoot(`${base}/studio.html?photo=og&t=${MOMENT}`, 1200, 630, join(site, 'public', 'og-studio.png'));
 
 const context = await browser.newContext({ viewport: { width: 64, height: 64 } });
 const page = await context.newPage();

@@ -103,6 +103,7 @@ export async function mountStudio({ stage, labels, timeline, startAt = 0, paused
   stage.append(renderer.domElement);
   renderer.domElement.setAttribute('aria-hidden', 'true');
 
+  await document.fonts.load('600 22px "IBM Plex Sans Condensed"').catch(() => undefined);
   const [floor, ground, poster] = await Promise.all([
     loadTexture('/bake/floor.webp'),
     loadTexture('/bake/ground.webp'),

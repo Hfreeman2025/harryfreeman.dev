@@ -1,5 +1,5 @@
 // Every installed package must be MIT, Apache-2.0, BSD or ISC (or a combination of those). The one
-// exception is the self-hosted typeface, Jost, under the SIL Open Font Licence: a font, not code.
+// exception is the self-hosted typeface, IBM Plex, under the SIL Open Font Licence: fonts, not code.
 import { readFileSync } from 'node:fs';
 
 const ALLOWED = /^(MIT|ISC|Apache-2\.0|BSD-2-Clause|BSD-3-Clause|0BSD|BlueOak-1\.0\.0)$/;

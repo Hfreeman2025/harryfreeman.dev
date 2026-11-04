@@ -94,6 +94,15 @@ function fill(piece: PieceId): void {
       title.id = 'card-title';
       title.setAttribute('tabindex', '-1');
     }
+    // The left leaf, under the loop: how to open it and who made it. The right leaf: what it is.
+    const actions = document.getElementById('card-actions');
+    if (actions) {
+      actions.replaceChildren();
+      for (const selector of ['.work__open', '.work__run', '.work__record', '.work__placeholder', '.work__inferred']) {
+        const part = clone.querySelector(selector);
+        if (part) actions.append(part);
+      }
+    }
     const wrapper = document.createElement('div');
     wrapper.className = 'work';
     wrapper.append(clone);
@@ -186,6 +195,17 @@ document.addEventListener('click', (event) => {
   event.preventDefault();
   void openFolder(piece, link);
 });
+
+// Arriving from the studio floor: /#folder-<id> pulls that folder.
+function followHash(): void {
+  const piece = /^#folder-(.+)$/.exec(location.hash)?.[1] ?? '';
+  if (isPieceId(piece)) {
+    document.getElementById('archive')?.scrollIntoView({ block: 'start' });
+    void openFolder(piece, folderFor(piece));
+  }
+}
+window.addEventListener('hashchange', followHash);
+followHash();
 
 // ---------- Reception ----------
 function markAnswering(pieces: readonly PieceId[]): void {

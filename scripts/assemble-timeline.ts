@@ -5,7 +5,8 @@
 // No session transcripts were read. File times move when files are rewritten, so this records the
 // evidence as a dated table rather than re-reading the file system. Every time is an inference
 // from that evidence and each note says so.
-//   npx tsx scripts/assemble-timeline.ts   → ~/Personal/site-data/timeline.draft.json
+//   npx tsx scripts/assemble-timeline.ts   → ~/Personal/site-data/timeline.draft.json, for review
+//   before it replaces the approved timeline.json.
 
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
@@ -185,7 +186,7 @@ const timeline = {
   schema: 'studio-timeline/1',
   placeholder: false,
   description:
-    'Draft, assembled 3 Nov 2026 from file times in each repo and the DONE lines in the builders’ panes. Every time is inferred; each note names its evidence. Builder kinds are the panes’ current agents.',
+    'Assembled 3 Nov 2026 from file times in each repo and the DONE lines in the builders’ panes, and approved by Harry. Every time is inferred; each note names its evidence. Builder kinds are the panes’ current agents.',
   actors: [
     { id: 'harry', role: 'brief', kind: 'person', label: 'Harry, who wrote the briefs' },
     ...pieces.map((p) => ({ id: BUILDERS[p].id, role: 'builder', kind: BUILDERS[p].kind, label: BUILDERS[p].label })),

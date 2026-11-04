@@ -1,4 +1,4 @@
-// Browser checks for the studio, in Chromium, WebKit and Firefox, one browser at a time, one page
+// Browser checks for the office (the way in) and the studio, in Chromium, WebKit and Firefox, one browser at a time, one page
 // at a time. Every browser is silent (silent.mjs). Needs the site on STUDIO_URL (default :4400).
 //   node scripts/e2e.mjs [chromium|webkit|firefox ...]
 // Writes shots/e2e-<browser>.json and prints a summary. Exit code 1 if any check fails.
@@ -7,10 +7,12 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium, firefox, webkit } from 'playwright';
+import { officeChecks } from './office-checks.mjs';
 import { silenceLiveAudio } from './silent.mjs';
 
 const site = join(dirname(fileURLToPath(import.meta.url)), '..');
 const BASE = process.env.STUDIO_URL ?? 'http://127.0.0.1:4400';
+const STUDIO = `${BASE}/studio.html`;
 const config = JSON.parse(readFileSync(join(site, 'site.config.json'), 'utf8'));
 const shots = join(site, 'shots', 'e2e');
 mkdirSync(shots, { recursive: true });
@@ -66,9 +68,11 @@ async function run(name) {
   };
   const desk = { viewport: { width: 1440, height: 900 } };
 
-  await check('the HTML carries name, role, line, CV and every desk link before any script', {}, async () => {
-    const html = await (await fetch(`${BASE}/`)).text();
-    for (const text of ['Harry Freeman', 'Head of AI', 'coding agents built these ten pieces', 'href="/cv.html"', 'Skip to the list'])
+  await officeChecks({ check, expect, BASE, config, shots, name });
+
+  await check('studio: the HTML carries the way back, the CV and every desk link before any script', {}, async () => {
+    const html = await (await fetch(STUDIO)).text();
+    for (const text of ['Harry Freeman', 'Head of AI', 'The studio floor', 'href="/#archive"', 'href="/cv.html"', 'Skip to the list'])
       expect(html.includes(text), `missing ${text}`);
     for (const id of Object.keys(config.pieces)) {
       expect(html.includes(`href="#work-${id}"`), `no desk link for ${id}`);
@@ -79,7 +83,7 @@ async function run(name) {
   let sceneOk = false;
   await check('the studio comes alive on a laptop screen, with a clean console', desk, async (page, problems) => {
     const t0 = Date.now();
-    await page.goto(BASE, { waitUntil: 'commit' });
+    await page.goto(STUDIO, { waitUntil: 'commit' });
     await page.waitForSelector('.titleblock__name', { timeout: 5000 });
     const firstText = Date.now() - t0;
     const mode = await page.evaluate(() => document.documentElement.dataset.mode);
@@ -111,7 +115,7 @@ async function run(name) {
 
   if (sceneOk) {
     await check('Tab to a desk, Enter: the camera glides in and the card opens; Escape returns focus', desk, async (page, problems) => {
-      await page.goto(BASE, { waitUntil: 'load' });
+      await page.goto(STUDIO, { waitUntil: 'load' });
       await page.waitForFunction(() => document.documentElement.dataset.stage === 'live');
       const label = page.locator('.desk-label[data-piece="agent-race"]');
       await label.focus();
@@ -134,8 +138,17 @@ async function run(name) {
       expect(problems.length === 0, problems.join(' | '));
     });
 
+    await check('studio: arriving at /studio.html#desk-receipts sits at that desk', desk, async (page) => {
+      await page.goto(`${STUDIO}#desk-receipts`, { waitUntil: 'load' });
+      await page.waitForFunction(() => !document.getElementById('card').hidden, null, { timeout: 10000 });
+      await page.waitForTimeout(900);
+      const title = await page.locator('#card-title').textContent();
+      expect(title?.trim() === 'receipts', `opened ${title}`);
+      expect((await page.locator('#card .work__elsewhere a').getAttribute('href')) === '/#folder-receipts', 'no way back to its folder');
+    });
+
     await check('clicking a desk in the model opens it', desk, async (page) => {
-      await page.goto(BASE, { waitUntil: 'load' });
+      await page.goto(STUDIO, { waitUntil: 'load' });
       await page.waitForFunction(() => document.documentElement.dataset.stage === 'live');
       await page.waitForTimeout(500);
       const box = await page.locator('.desk-label[data-piece="sourced"]').boundingBox();
@@ -148,7 +161,7 @@ async function run(name) {
     });
 
     await check('the replay pauses and plays', desk, async (page) => {
-      await page.goto(BASE, { waitUntil: 'load' });
+      await page.goto(STUDIO, { waitUntil: 'load' });
       await page.waitForFunction(() => document.documentElement.dataset.stage === 'live');
       await page.click('#replay-toggle');
       const a = await page.locator('#replay-time').textContent();
@@ -164,7 +177,7 @@ async function run(name) {
   }
 
   await check('Ask the studio answers with quotes, and the desk it concerns lights up', desk, async (page, problems) => {
-    await page.goto(BASE, { waitUntil: 'load' });
+    await page.goto(STUDIO, { waitUntil: 'load' });
     await page.getByRole('button', { name: 'How does gridtop choose when to run?' }).click();
     await page.waitForFunction(() => document.querySelector('ask-the-record')?.result?.kind === 'answer', null, { timeout: 20000 });
     const first = await page.evaluate(() => document.querySelector('ask-the-record').result.quotes[0].fact.text);
@@ -178,7 +191,7 @@ async function run(name) {
   });
 
   await check('Ask the studio refuses what the record does not say', desk, async (page) => {
-    await page.goto(BASE, { waitUntil: 'load' });
+    await page.goto(STUDIO, { waitUntil: 'load' });
     await page.locator('#ask-standin').click();
     await page.waitForFunction(() => customElements.get('ask-the-record') && document.querySelector('ask-the-record')?.record, null, {
       timeout: 20000,
@@ -192,7 +205,7 @@ async function run(name) {
   });
 
   await check('Skip to the list reaches the list', desk, async (page) => {
-    await page.goto(BASE, { waitUntil: 'load' });
+    await page.goto(STUDIO, { waitUntil: 'load' });
     await page.click('.titleblock__skip');
     await page.waitForTimeout(1200);
     const top = await page.locator('#work').evaluate((el) => el.getBoundingClientRect().top);
@@ -200,7 +213,7 @@ async function run(name) {
   });
 
   await check('reduced motion gets the list and the still photograph', { ...desk, reducedMotion: 'reduce' }, async (page, problems) => {
-    await page.goto(BASE, { waitUntil: 'load' });
+    await page.goto(STUDIO, { waitUntil: 'load' });
     await page.waitForTimeout(800);
     expect((await page.evaluate(() => document.documentElement.dataset.mode)) === 'list', 'not list mode');
     expect((await page.locator('canvas').count()) === 0, 'a canvas was created');
@@ -214,7 +227,7 @@ async function run(name) {
     'a phone gets the list, with no sideways scroll',
     { viewport: { width: 390, height: 844 }, isMobile: name !== 'firefox', hasTouch: true },
     async (page, problems) => {
-      await page.goto(BASE, { waitUntil: 'load' });
+      await page.goto(STUDIO, { waitUntil: 'load' });
       await page.waitForTimeout(800);
       expect((await page.evaluate(() => document.documentElement.dataset.mode)) === 'list', 'not list mode');
       const [sw, w] = await page.evaluate(() => [document.documentElement.scrollWidth, window.innerWidth]);
@@ -237,7 +250,7 @@ async function run(name) {
       },
     },
     async (page) => {
-      await page.goto(BASE, { waitUntil: 'load' });
+      await page.goto(STUDIO, { waitUntil: 'load' });
       await page.waitForFunction(() => document.documentElement.dataset.mode === 'list', null, { timeout: 10000 });
       const status = await page.locator('#studio-status').textContent();
       expect(/could not start/.test(status ?? ''), `status: ${status}`);

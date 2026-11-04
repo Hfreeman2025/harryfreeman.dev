@@ -111,7 +111,7 @@ function studio(): Plugin {
           const body = marked.parse(readFileSync(join(root, 'src/content/cv.md'), 'utf8'), { async: false });
           return html.replace('<!--cv:body-->', body).replaceAll('%EMAIL%', config.email).replaceAll('%LINKEDIN%', config.linkedin);
         }
-        if (!ctx.filename.endsWith('index.html') && !ctx.filename.endsWith('office.html')) return html;
+        if (!ctx.filename.endsWith('index.html') && !ctx.filename.endsWith('studio.html')) return html;
         const source = loadTimeline(strict);
         const status = source.problem
           ? `<p class="timeline-problem" role="alert">The real timeline could not be read (${source.problem.replace(/[<>&]/g, '')}). Playing the placeholder instead.</p>`
@@ -122,7 +122,7 @@ function studio(): Plugin {
           .replace('<!--office:directory-->', renderDirectory())
           .replace('<!--office:cabinet-->', renderCabinet())
           .replace('<!--office:plan-->', renderPlan())
-          .replace('<!--studio:list-->', renderList(config, source.timeline))
+          .replace('<!--studio:list-->', renderList(config, source.timeline, ctx.filename.endsWith('studio.html') ? 'studio' : 'office'))
           .replace('<!--studio:timeline-->', renderTimelineJson(source.timeline) + status)
           .replaceAll('%CV%', config.cv)
           .replaceAll('%EMAIL%', config.email)
@@ -157,7 +157,7 @@ export default defineConfig({
         index: join(root, 'index.html'),
         cv: join(root, 'cv.html'),
         terminal: join(root, 'terminal.html'),
-        office: join(root, 'office.html'),
+        studio: join(root, 'studio.html'),
       },
     },
   },

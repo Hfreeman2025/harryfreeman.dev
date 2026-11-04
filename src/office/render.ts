@@ -26,15 +26,15 @@ export function renderCabinet(): string {
     const folders = d.pieces
       .map(
         (p, f) =>
-          `<a class="folder" href="#work-${p}" data-piece="${p}" style="--f:${f}" tabindex="-1"><span class="folder__tab">${esc(pieceById(p).title)}</span><span class="folder__edge" aria-hidden="true"></span></a>`,
+          `<a class="folder" href="#work-${p}" data-piece="${p}" data-cut="${['left', 'centre', 'right'][f] ?? 'left'}" style="--f:${f}" tabindex="-1"><span class="folder__tab">${esc(pieceById(p).title)}</span><span class="folder__edge" aria-hidden="true"></span></a>`,
       )
       .join('');
     return `<div class="drawer" id="drawer-${d.id}" data-drawer="${d.id}" style="--i:${i}">
-  <div class="drawer__tray" id="tray-${d.id}" inert>${folders}</div>
   <button type="button" class="drawer__front" aria-expanded="false" aria-controls="tray-${d.id}">
     <span class="drawer__holder"><span class="drawer__label">${esc(d.label)}</span><span class="drawer__contents">${d.pieces.map((p) => esc(pieceById(p).title)).join(', ')}</span></span>
     <span class="drawer__handle" aria-hidden="true"></span>
   </button>
+  <div class="drawer__tray" id="tray-${d.id}" inert>${folders}</div>
 </div>`;
   }).join('\n');
   return `<div class="cabinet" style="--drawers:${DRAWERS.length}">
@@ -109,7 +109,7 @@ function deskPlan(piece: PieceId): string {
   <rect class="plan-desk__screen" x="${r(d.x - 0.46)}" y="${r(d.z - 0.36)}" width="0.92" height="0.08"/>
   <circle class="plan-desk__chair" cx="${r(d.seat[0])}" cy="${r(d.seat[1])}" r="0.24"/>
   ${prop(piece, d.x - 0.38, d.z)}
-  <text class="plan-label" x="${r(d.x)}" y="${r(d.z + 1.18)}" text-anchor="middle">${esc(title)}</text>
+  <text class="plan-label" x="${r(d.x)}" y="${r(d.z - 0.55)}" text-anchor="middle">${esc(title)}</text>
 </a>`;
 }
 
@@ -132,7 +132,7 @@ export function renderPlan(): string {
   <path class="plan-door" d="M-0.8 ${ROOM.z1} A1.6 1.6 0 0 1 0.8 ${ROOM.z1}"/>
   ${sheets}
   <text class="plan-room" x="0" y="${ROOM.z0 + 0.62}" text-anchor="middle">The briefs</text>
-  <text class="plan-room plan-room--big" x="${ROOM.x0 + 0.35}" y="${ROOM.z0 - 0.3}">Studio floor</text>
+  <a class="plan-place" href="/studio.html"><text class="plan-room plan-room--big" x="${ROOM.x0 + 0.35}" y="${ROOM.z0 - 0.3}">Studio floor, in 3D</text></a>
   ${DESKS.map((d) => deskPlan(d.piece)).join('\n')}
   <rect class="plan-review" x="${r(rt.x - rt.width / 2)}" y="${r(rt.z - rt.depth / 2)}" width="${rt.width}" height="${rt.depth}"/>
   <circle class="plan-desk__chair" cx="${REVIEW.reviewer[0]}" cy="${REVIEW.reviewer[1]}" r="0.24"/>

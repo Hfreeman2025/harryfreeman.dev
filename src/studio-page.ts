@@ -61,10 +61,22 @@ async function startStudio(timeline: Timeline): Promise<void> {
     // No 3D: the page becomes the list, and says why.
     root.dataset.mode = 'list';
     say(`The 3D studio could not start here (${error instanceof Error ? error.message : String(error)}), so this is the list version.`);
+    followHash();
     return;
   }
   wireDesks(studio);
+  followHash();
 }
+
+/** Arriving from the archive: /studio.html#desk-<id> glides to that desk. */
+function followHash(): void {
+  const piece = /^#desk-(.+)$/.exec(location.hash)?.[1] ?? '';
+  if (!isPieceId(piece)) return;
+  const label = document.querySelector<HTMLElement>(`.desk-label[data-piece="${piece}"]`);
+  if (studio && label && root.dataset.mode === 'scene') void studio.open(piece, label);
+  else document.getElementById(`work-${piece}`)?.scrollIntoView({ block: 'start' });
+}
+window.addEventListener('hashchange', followHash);
 
 function wireDesks(s: Studio): void {
   for (const label of document.querySelectorAll<HTMLAnchorElement>('.desk-label')) {
@@ -93,3 +105,4 @@ if (root.dataset.mode === 'scene' && timeline) {
 } else if (root.dataset.mode === 'scene') {
   root.dataset.mode = 'list';
 }
+if (root.dataset.mode === 'list') followHash();

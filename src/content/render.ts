@@ -49,7 +49,16 @@ export function renderLabels(): string {
   return desks + furniture;
 }
 
-function renderPiece(piece: Piece, config: SiteConfig, timeline: Timeline): string {
+/** Which room a list is in: the office links each tool to its desk, the studio to its folder. */
+export type Room = 'office' | 'studio';
+
+function crossLink(piece: Piece, room: Room): string {
+  return room === 'office'
+    ? `<p class="work__elsewhere"><a href="/studio.html#desk-${piece.id}">See its desk on the studio floor</a></p>`
+    : `<p class="work__elsewhere"><a href="/#folder-${piece.id}">Find its folder in the archive</a></p>`;
+}
+
+function renderPiece(piece: Piece, config: SiteConfig, timeline: Timeline, room: Room): string {
   const url = config.pieces[piece.id];
   const record = recordLine(timeline, piece);
   const placeholder = timeline.placeholder
@@ -75,12 +84,13 @@ function renderPiece(piece: Piece, config: SiteConfig, timeline: Timeline): stri
     </div>
     ${run}
     <p class="work__open"><a class="open" href="${esc(url)}">Open ${esc(piece.title)}</a><span class="work__where">${esc(openLabel(piece, url))}</span></p>
+    ${crossLink(piece, room)}
   </div>
 </li>`;
 }
 
-export function renderList(config: SiteConfig, timeline: Timeline): string {
-  return PIECES.map((p) => renderPiece(p, config, timeline)).join('\n');
+export function renderList(config: SiteConfig, timeline: Timeline, room: Room): string {
+  return PIECES.map((p) => renderPiece(p, config, timeline, room)).join('\n');
 }
 
 /** The timeline goes into the page as inert JSON for the replay; the page re-validates it. */

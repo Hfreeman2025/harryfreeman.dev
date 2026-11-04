@@ -94,7 +94,7 @@ function briefTexture(name: string): CanvasTexture {
     ctx.fillStyle = PALETTE.card;
     ctx.fillRect(0, 0, w, h);
     ctx.fillStyle = '#2b261f';
-    ctx.font = '600 22px Jost, Futura, sans-serif';
+    ctx.font = '600 22px "IBM Plex Sans Condensed", "Arial Narrow", sans-serif';
     ctx.fillText(name, 18, 40);
     ctx.fillStyle = '#9d958a';
     let y = 64;

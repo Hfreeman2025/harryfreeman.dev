@@ -214,7 +214,7 @@ code {
   --plinth: calc(var(--cw) * 0.05);
   display: grid;
   justify-items: center;
-  padding: calc(var(--cw) * 0.24) 0 calc(var(--cw) * 0.34);
+  padding: calc(var(--cw) * 0.22) 0 calc(var(--cw) * 0.2);
   perspective: 1000px;
   perspective-origin: 50% -30%;
 }
@@ -365,8 +365,8 @@ html[data-motion="reduce"] .drawer {
 .folder__tab {
   position: absolute;
   bottom: 100%;
-  left: calc(3% + var(--f) * 32%);
-  max-width: 44%;
+  left: 3%;
+  max-width: 64%;
   padding: 2px 9px 3px;
   background: var(--manila-hi);
   border: 1px solid var(--manila-edge);
@@ -1047,4 +1047,110 @@ ask-the-record::part(refusal) {
   .drawer__contents {
     font-size: 12.5px;
   }
+}
+
+/* Tabs cut left, centre and right; the right-hand tab is anchored to the right edge so a long name
+   never runs off the folder. */
+.folder[data-cut="centre"] .folder__tab {
+  left: 32%;
+}
+.folder[data-cut="right"] .folder__tab {
+  left: auto;
+  right: 3%;
+}
+
+/* A closed drawer's folders are out of sight: hidden once the drawer has slid home, so nothing shows
+   through the cabinet top whatever the browser's 3D sorting does. */
+.drawer:not([data-open="true"]) .folder {
+  visibility: hidden;
+  transition:
+    transform 260ms ease,
+    visibility 0s linear 620ms;
+}
+.drawer[data-open="true"] .folder {
+  visibility: visible;
+}
+html[data-motion="reduce"] .drawer:not([data-open="true"]) .folder {
+  transition: none;
+}
+
+/* The open drawer sits in front of the ones below: it casts a shadow, and they fall into it. */
+.drawer[data-open="true"] .drawer__front {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.65),
+    0 26px 30px -12px rgb(0 0 0 / 0.55),
+    0 8px 10px -6px rgb(0 0 0 / 0.35);
+}
+.drawer[data-open="true"] ~ .drawer .drawer__front {
+  filter: brightness(0.82);
+  transition: filter 400ms ease;
+}
+.drawer__front {
+  transition: filter 400ms ease;
+}
+
+/* The open folder: under the loop, the way to open it and who made it. */
+.folder-card__open {
+  align-items: start;
+}
+.folder-card__actions {
+  display: grid;
+  gap: 10px;
+  padding-top: 6px;
+  border-top: 1px solid var(--manila-edge);
+}
+.folder-card__actions .work__open {
+  margin: 4px 0 0;
+}
+.folder-card__actions .work__record {
+  margin: 0;
+  display: grid;
+  gap: 2px;
+  font-size: 15px;
+}
+.folder-card__actions .work__record div {
+  display: flex;
+  gap: 8px;
+}
+.folder-card__actions .work__record dt {
+  color: #5d4e2c;
+  min-width: 6.5em;
+}
+.folder-card__actions .work__inferred,
+.folder-card__actions .work__placeholder {
+  margin: 0;
+  color: #5d4e2c;
+}
+.folder-card__actions .work__run {
+  margin: 0;
+  color: #4d3f22;
+}
+.folder-card__actions .work__where {
+  color: #5d4e2c;
+}
+
+@media (max-width: 760px) {
+  .cabinet-stage {
+    padding-bottom: calc(var(--cw) * 0.14);
+  }
+}
+
+/* Into the studio, and between the rooms. */
+.floor__enter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 16px;
+  margin: 0 0 16px;
+}
+.floor__enter-note {
+  font-size: 15px;
+  color: var(--ink-3);
+}
+.work__elsewhere {
+  margin-top: 8px;
+  font-size: 15px;
+}
+.folder-card__actions .work__elsewhere {
+  margin: 0;
 }

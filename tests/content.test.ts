@@ -25,6 +25,7 @@ describe('content', () => {
       readFileSync(new URL('../src/content/cv.md', import.meta.url), 'utf8'),
       JSON.stringify(PIECES),
       readFileSync(new URL('../index.html', import.meta.url), 'utf8'),
+      readFileSync(new URL('../studio.html', import.meta.url), 'utf8'),
     ].join('\n');
     expect(text).not.toMatch(/Simply\s*(Sustainable|Carbon)/i);
     expect(text).not.toMatch(/redacted-term|redacted-term|redacted-term|redacted-term/);
@@ -70,7 +71,7 @@ describe('render', () => {
   });
 
   it('renders the list with open links from the config and labels the placeholder', () => {
-    const list = renderList(config, timeline);
+    const list = renderList(config, timeline, 'office');
     for (const id of PIECE_IDS) expect(list).toContain(`id="work-${id}"`);
     expect(list).toContain('href="http://127.0.0.1:4317/"');
     expect(list.match(/placeholder timeline, not the real record/g)?.length).toBe(10);
@@ -79,9 +80,14 @@ describe('render', () => {
   });
 
   it('does not label a real timeline as a placeholder', () => {
-    const list = renderList(config, { ...timeline, placeholder: false });
+    const list = renderList(config, { ...timeline, placeholder: false }, 'studio');
     expect(list).not.toContain('placeholder timeline');
     expect(list).toContain('the times are inferred');
+  });
+
+  it('links each tool between the rooms: office to desk, studio to folder', () => {
+    expect(renderList(config, timeline, 'office')).toContain('href="/studio.html#desk-gridtop"');
+    expect(renderList(config, timeline, 'studio')).toContain('href="/#folder-gridtop"');
   });
 });
 
