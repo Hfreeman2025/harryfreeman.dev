@@ -206,15 +206,15 @@ code {
   font-size: 15.5px;
 }
 .cabinet-stage {
-  --cw: min(470px, 100%);
+  --cw: min(470px, calc(100vw - 2 * var(--gutter)));
   --dh: calc(var(--cw) * 0.25);
   --gap: calc(var(--cw) * 0.035);
   --depth: calc(var(--cw) * 0.7);
-  --pull: calc(var(--cw) * 0.34);
+  --pull: calc(var(--cw) * 0.5);
   --plinth: calc(var(--cw) * 0.05);
   display: grid;
   justify-items: center;
-  padding: 26px 0 calc(var(--cw) * 0.3);
+  padding: calc(var(--cw) * 0.24) 0 calc(var(--cw) * 0.34);
   perspective: 1000px;
   perspective-origin: 50% -30%;
 }
@@ -342,6 +342,7 @@ html[data-motion="reduce"] .drawer {
   transform: rotateX(-90deg);
   transform-style: preserve-3d;
   background: linear-gradient(0deg, var(--steel-in), #5d6259);
+  pointer-events: none;
 }
 /* Hanging folders stand up in the tray, staggered back, tabs cut left, centre and right. */
 .folder {
@@ -349,7 +350,7 @@ html[data-motion="reduce"] .drawer {
   position: absolute;
   left: 4%;
   right: 4%;
-  top: calc(var(--depth) * (0.14 + var(--f) * 0.2) - var(--fh));
+  top: calc(var(--depth) * (0.1 + var(--f) * 0.15) - var(--fh));
   height: var(--fh);
   transform-origin: bottom center;
   transform: rotateX(90deg);
@@ -358,6 +359,8 @@ html[data-motion="reduce"] .drawer {
   border-top: 1px solid var(--manila-edge);
   color: #3a2f1c;
   text-decoration: none;
+  /* Folders overlap on screen; the staggered tabs, which never do, are what you pull. */
+  pointer-events: none;
 }
 .folder__tab {
   position: absolute;
@@ -373,6 +376,8 @@ html[data-motion="reduce"] .drawer {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  pointer-events: auto;
+  cursor: pointer;
 }
 .folder:hover,
 .folder:focus-visible {
@@ -489,6 +494,7 @@ ask-the-record::part(refusal) {
   border: 1px solid var(--rule);
   padding: 18px;
   overflow-x: auto;
+  max-width: 1080px;
 }
 .plan {
   display: block;
@@ -1010,7 +1016,7 @@ ask-the-record::part(refusal) {
     gap: 28px;
   }
   .cabinet-stage {
-    --cw: min(400px, 100%);
+    --cw: min(400px, calc(100vw - 2 * var(--gutter)));
   }
   .work {
     grid-template-columns: 1fr;
