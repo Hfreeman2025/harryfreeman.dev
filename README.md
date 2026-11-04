@@ -1,16 +1,17 @@
-# Harry Freeman: the studio
+# Harry Freeman: the office
 
-The front door of Harry Freeman's personal site. A 1:50 white-card model of the studio where his
-portfolio was built sits under a work lamp: ten desks, one per piece, a builder at each, a reviewer at
-the front, and the three briefs pinned to the back wall. The figures replay the build (who built what,
-each hand-off to the reviewer, each piece sent back), every screen plays a silent loop recorded from
-the real piece, and choosing a desk lowers the camera over the builder's shoulder until the screen
-becomes that piece's card. Ask the studio answers questions with quotations from Harry's CV and the ten
-READMEs, entirely in the browser, and lights the desk the answer came from. Name, role, a plain line,
-the CV and every desk are real HTML before any 3D loads; phones, reduced motion and screen readers get
-the same content as a list with a still photograph of the model.
+Harry Freeman's personal site, built as one office building. The way in is the lobby: a directory
+board listing every tool and where it is filed, Reception for questions, and at the heart a steel
+filing cabinet. Its four drawers are filed by theme; each of the ten tools is a manila folder you pull
+by its tab, and an opened folder holds a recorded loop of the tool (labelled recorded), what it is, who
+built it and who reviewed it, the brief it worked to, its checks and **Open**, which launches it live.
+The floor plan on the lobby wall replays the build: dots carry work from each desk to the review
+table, back in red when it was sent back, green when it was accepted. Through the lobby door is the
+studio floor itself, kept as a lit 3D model of the room, where every screen plays its tool and you can
+sit at any desk. Everything a recruiter needs is plain HTML before any script; phones, reduced motion
+and screen readers get the same content.
 
-![The studio at 1440×900](shots/pass-2/chromium-desktop-02-studio.png)
+![The lobby: directory board, filing cabinet with a drawer pulled out, Reception](shots/office-2/chromium-desktop-02-second-drawer.png)
 
 ## See it
 
@@ -22,164 +23,119 @@ npm run build
 npm run preview
 ```
 
-Open **http://127.0.0.1:4400**. `npm run dev` serves the same thing with live reload. The server binds
-to loopback only.
+Open **http://127.0.0.1:4400** for the lobby and **/studio.html** for the studio floor. `npm run dev`
+serves the same with live reload. The server binds to loopback only.
 
-- **Ask the studio** loads ask-the-record from its own folder, `~/Personal/oss/ask-the-record` (its
-  built element, its transformers.js runtime, ONNX Runtime's WebAssembly and the all-MiniLM-L6-v2
-  model already in its cache). Nothing is copied or downloaded, and the page makes no request to
-  another site. `STUDIO_COPY_VENDOR=1 npm run build` copies those files into `dist/` for hosting
-  later (about 50 MB).
-- **Open** on a desk goes to the piece on its own local port (`site.config.json`), so start that piece
-  from its folder first. The two terminal pieces, gridtop and dreaming, open their own recorded
-  sessions on this site.
-- `?list` shows the list version on any screen.
+- **Open** on a folder goes to the tool on its own local port (`site.config.json`), so start that tool
+  from its folder first. The two terminal tools, gridtop and dreaming, open their recorded sessions.
+- **Reception** loads ask-the-record from its own folder, `~/Personal/oss/ask-the-record`: its built
+  element, its transformers.js runtime, ONNX Runtime's WebAssembly and the all-MiniLM-L6-v2 model in
+  its cache. Nothing is copied or downloaded and no request goes to another site.
+  `STUDIO_COPY_VENDOR=1 npm run build` copies those files into `dist/` for hosting later (about 50 MB).
+- Rooms link to each other: `/#folder-<tool>` pulls that folder, `/studio.html#desk-<tool>` sits you at
+  that desk, and every folder and desk card links to the other.
 
-## How a visit goes
+## The rooms
 
-1. **First paint, under 100 ms:** the title strip (name, role, one line, CV, email, LinkedIn, _Skip to
-   the list_) and a still photograph of the model, all HTML and one image.
-2. **The studio comes alive** (about 0.1 s on loopback): the canvas fades in over the photograph and the
-   replay starts. Figures type at their desks, carry sheets to the review table, wait their turn, carry
-   sent-back work home with a red-pencil corner, and accepted work goes up on the board. The caption
-   shows the real time being replayed and the latest hand-off. **Pause** stops it.
-3. **Choose a desk** (click it, or Tab to its label and press Enter): the camera glides down over the
-   builder's shoulder, the monitor's rectangle becomes the card (a larger loop, the line, the
-   technique and its citation, who built it, who reviewed it, the review rounds, the brief it worked
-   to, its checks, and **Open**). Escape or _Back to the studio_ glides out and returns focus.
-4. **Ask the studio:** keyword search and the suggested questions answer at once; your own question
-   loads the meaning model on first use, about 50 MB (a 23 MB embedding model and 27 MB of ONNX
-   Runtime WebAssembly), served from ask-the-record's folder and then cached. Answers are quotations with their source; a desk whose README is quoted lights up and its
-   builder stands to answer. When nothing supports an answer, it says so and shows the numbers.
+**The lobby (`index.html`).** The directory board is the plain path through the site: every tool is a
+link with its drawer, and the same links reach the studio, the floor plan, the briefs and the CV. The
+cabinet is HTML and CSS in three dimensions: each drawer front is a button that slides the drawer out;
+a drawer's folders are links kept out of the tab order, and hidden, until it is open; tabs are cut
+left, centre and right so each can be pulled. A pulled folder opens over the page from where it sat.
+Reception answers with quotations; an answer pulls the drawer it came from and marks the folder and
+the desk. The floor plan is drawn in metres from the same plan as the 3D model, with a prop on each
+desk that says what its tool does (a scope trace, a corrected news page, a stopwatch, a weather chart,
+a terminal and clock, a score, a calculator and rule, a card index, a coffee and a diff, a receipt
+spike).
 
-## How it works
+**The studio floor (`studio.html`).** A 1:50 white-card model in Three.js under a work lamp. The lamp's
+light and shadows on the floor were baked ahead of time by ray tracing the plan (`npm run bake`); only
+figures, screens and box faces are lit live. Figures replay the build timeline, every screen plays its
+tool from one 375 KB video atlas, and choosing a desk glides the camera over the builder's shoulder until
+the screen becomes that tool's card. A green sign leads back to the lobby and the archive.
 
-**Medium.** An architect's presentation model under an anglepoise lamp; the page is the drawing sheet
-and its title strip. [IDENTITY.md](IDENTITY.md) has the six lines: Jost (a free Futura descendant),
-card, basswood and cutting-mat green on a dark room, lamp amber for focus, red pencil only for work
-sent back, and the rule that only the build moves.
+**Identity.** [IDENTITY.md](IDENTITY.md): one office building; IBM Plex throughout (Sans to read, Mono
+for data, Sans Condensed for signs, drawer labels and tabs); putty steel, manila, black felt and green
+wayfinding signs; the studio keeps its dark, lamp-lit room.
 
-**Three.js, vanilla.** One canvas, one scene, no component tree: React and react-three-fiber would add
-weight and a second rendering model for no gain here. The scene module and Three.js load after first
-paint as one 142 KB (gzipped) chunk.
+## The build timeline
 
-**The model is a plan.** `src/scene/layout.ts` describes every static object as axis-aligned boxes in
-metres: walls cut low at the sides as in a sectional model, desks, chairs, monitors, the review table,
-the board, the drafting table. The renderer draws them as one instanced mesh per material (five draw
-calls for 107 boxes). Figures are turned card silhouettes (a seven-sided lathe), all alike, standing
-for roles, never for people.
+`~/Personal/site-data/timeline.json`, approved by Harry, was assembled by `scripts/assemble-timeline.ts`
+from evidence only: file creation and modification times in each repository (each SPEC.md, the first
+file a builder created, the shots folder for each version, DONE and report files) and the DONE lines
+visible in the builders' herdr panes. No transcripts were read. Every time is inferred, and each
+event's note names its evidence; the site shows that note under the replay and says on every desk that
+the times are inferred. Schema and rules: [docs/TIMELINE.md](docs/TIMELINE.md).
 
-**Baked light.** `npm run bake` ray-traces the same plan in Node: a disc lamp sampled with 16 shadow
-rays per texel, 20 ambient-occlusion rays, a soft-edged shade, and bounce light from the white card. The
-floor (1024×711) and the workbench with its cutting mat (768×595) are written as WebP, 16 KB and 3 KB,
-and drawn unlit. Only the figures, screens and box faces are lit live, by a spotlight and hemisphere
-light matched to the bake's units, so live and baked surfaces agree.
+## Content
 
-**Screens.** `npm run record:loops` drives each real piece on its own port in a silent headless
-Chromium (the V3 `silent.mjs` pattern: no audio device is ever opened), records eight seconds of it
-doing its signature thing (GPT in a tab training, the lie detector clustering answers, the race
-replay, the wind field, the score being engraved, a number being dragged in Sourced, the tamper demo
-in receipts, the two terminal recordings), and encodes them with ffmpeg: one 1920×480 atlas (375 KB
-WebM, 289 KB MP4) feeds all ten monitors from a single video decode, and each piece gets a 960×600 loop
-for its card and a still for the list.
-
-**The replay.** `src/timeline/replay.ts` compresses real time (minutes become fractions of a second, a
-night under three seconds), keeps order, and guarantees each hand-off enough time to be seen. The
-schema, its validation rules and the placeholder are in [docs/TIMELINE.md](docs/TIMELINE.md).
-
-**Ask the studio.** `npm run record:ask` builds one record from `src/content/cv.md` and the ten
-READMEs with ask-the-record's own build and embedding code, run from its folder (1,998 facts, 1.59 MB,
-900 KB gzipped, loaded only when someone reaches for the box). The three suggested questions are
-embedded at build time, so their answers need no model. Each quote's top-level section names its
-source; that is how an answer finds its desk.
-
-**Links first.** The desk labels are `<a href="#work-…">` links rendered into the HTML at build time,
-placed over the model each frame. Without JavaScript they jump to the list entry; with it, they glide.
-
-## The content, and what is left out
-
-- Piece lines, techniques and checks are summarised from each README and IDENTITY.md as they stood on
-  2 November 2026. Checks are labelled _as its README reports them_: this site did not re-run them.
-  Several pieces were mid-way through V3 while this was built; the Ask record can be rebuilt with
-  `npm run record:ask` when their READMEs settle.
-- **The timeline is a placeholder** until `~/Personal/site-data/timeline.json` arrives. Builder,
-  reviewer and round counts on every desk say so, and the model's caption says so in amber.
-- **The CV** (`src/content/cv.md`, rendered at `/cv.html`) follows the draft, with the items it marked
-  _to confirm_ included on Harry's decision of 3 November and made generic: the redacted-term 250 client is
-  “a large listed company”, and nothing names a client, the employer or its product. It is written in
-  the third person so each sentence stands alone as a quotation, and the phone number is left off a
-  public page.
+- Tool lines, techniques and checks are summarised from each README and IDENTITY.md. Checks are labelled
+  _as its README reports them_: this site did not re-run them.
+- The loops were recorded on 4 November 2026 from each tool's own server in a silent headless Chromium
+  (`npm run record:loops`); the folders say so.
+- **The CV** (`src/content/cv.md`, at `/cv.html`) follows the draft, with the items it marked _to
+  confirm_ included on Harry's decision of 3 November and made generic: the redacted-term 250 client is "a
+  large listed company", and nothing names a client, the employer or its product. It is in the third
+  person so each sentence stands alone as a quotation; the phone number is left off a public page.
 
 ## Checks
 
 ```sh
 npm run gate        # typecheck, lint, unit tests, build, licences
-npm run test:e2e    # Chromium, WebKit, Firefox, one at a time (needs the preview on 4400)
-npm run perf        # paint, bytes and frame times (writes shots/performance.json)
-npm run shots -- pass-2 chromium
+npm run test:e2e    # both rooms in Chromium, WebKit and Firefox, one at a time (needs the preview on 4400)
+npm run perf        # both rooms: paint, bytes, layout shift, frame times (shots/performance.json)
+node scripts/office-shots.mjs office-2 chromium   # the lobby's states at 1440×900 and 390×844
 ```
 
-- **Unit tests (Vitest, 27):** the timeline schema (accepts the placeholder and the documented
-  example; rejects out-of-order events, impossible hand-offs, unknown actors and pieces, wrong roles,
-  stray fields, zoneless and impossible dates, long notes), the replay (gap compression, minimum
-  hand-off times, every phase from idle to done, real-time interpolation), rendering (escaping, every
-  desk a link, the placeholder labelled and a real timeline not), the config (bad URLs rejected), the
-  CV (no unconfirmed claim, no employer or client name), which desks an answer lights, where a
-  quote's source link goes, and the asciicast parser.
-- **Browser checks (13 per browser):** HTML-first content and every link before scripts; the studio
-  comes alive with a clean console; Tab and Enter open a desk with focus in the card and Escape
-  restores it; clicking a desk in the model opens it; pause and play; an answer lights the right desk;
-  a refusal lights none; _Skip to the list_; reduced motion gets the list and the still with no canvas;
-  a phone gets the list with no sideways scroll; without WebGL the page says so and becomes the list;
-  the CV holds only confirmed claims; a terminal piece plays. Results: `shots/e2e-<browser>.json`.
+- **Unit tests (Vitest, 36):** the timeline schema and its documented example, the replay, rendering
+  (every tool a link, the placeholder labelled, room-to-room links), the config, the CV (generic
+  wording present, no client or employer name), the filing (every tool in exactly one drawer), the
+  directory, the cabinet (closed drawers, inert trays, folders out of the tab order, tabs cut three
+  ways), the floor plan (every desk a link with a prop, names clear of chairs), Reception's desk
+  lighting and quote links, and the asciicast parser.
+- **Browser checks (29 per browser, all passing in Chromium, WebKit and Firefox on 4 November):** the
+  lobby's HTML before scripts; a clean console and zero layout shift; keyboard drawer, then folder, then
+  Escape with focus returned; one drawer at a time, with closed drawers hiding their folders; the
+  directory and the plan pulling the right folder; Reception answering and marking the folder and desk;
+  reaching for the question box moving nothing; every tab's whole name at both sizes; desk names clear
+  of chairs; the door to the studio and the way back; deep links both ways; reduced motion; the phone
+  (no sideways scroll, the bottom drawer clearing Reception); and the studio's own fourteen checks.
 
 ## Measured
 
-Production build, `vite preview` on loopback, Chromium (full build, GPU compositing) at 1440×900 and
-2× pixel ratio, three cold runs, on a shared machine with other builds running (`shots/performance.json`):
+Production build on loopback, Chromium with GPU compositing, 1440×900 at 2×, three cold runs, on a
+shared machine (`shots/performance.json`):
 
-|                                                  |                                                                                                   |
-| ------------------------------------------------ | ------------------------------------------------------------------------------------------------- |
-| First contentful paint                           | 52–64 ms (median 64)                                                                              |
-| Studio interactive (canvas live, replay running) | median 107 ms                                                                                     |
-| Transferred when interactive                     | 424–476 KB (HTML, CSS, scripts, font, baked light, the still)                                     |
-| Transferred after 5 s                            | about 850 KB, with the video atlas playing on all ten screens                                     |
-| JavaScript, gzipped                              | 11 KB at first paint (page, Ask wiring); 142 KB for Three.js and the scene, loaded straight after |
-| Frame time while the replay runs (5 s)           | median 16.7 ms, p99 16.8 ms, worst 16.8 ms, no frame over 20 ms                                   |
-| Frame time during the glide to a desk            | median 16.7 ms, worst 16.8 ms                                                                     |
-| Ask the studio record                            | 1.59 MB (900 KB gzipped), fetched only when someone reaches for the box                           |
-
-The browser suite's first page, in a freshly launched Chromium on the loaded machine, showed text at
-2.6 s and the studio at 2.7 s; WebKit and Firefox showed the studio at 0.23 s each.
+|                        | Lobby                         | Studio floor                                        |
+| ---------------------- | ----------------------------- | --------------------------------------------------- |
+| First contentful paint | 40 ms                         | 40 ms                                               |
+| Interactive            | at first paint                | 76 ms (canvas live)                                 |
+| Transferred            | 158 KB after 2 s              | 499 KB when interactive, 873 KB after 5 s           |
+| Layout shift           | 0                             | 0                                                   |
+| Worst frame            | 16.8 ms while a drawer slides | 16.8 ms while the replay runs and the camera glides |
 
 ## What is weak
 
-- **The replay is invented until the real timeline arrives.** It is labelled everywhere, but the
-  piece of the site that shows how Harry works is, today, a layout of made-up hand-offs.
-- **Checks and screens are a snapshot.** Several pieces were mid-way through V3 on 2 November; the
-  loops were recorded from their running servers at 16:17–16:20 and the card text from their READMEs
-  the same afternoon. `npm run record:loops`, `npm run record:ask` and `npm run stills` refresh them.
-- **The model is plain.** Identical desks, boxes and turned figures, no props, and the lamp is felt
-  rather than seen. Figures can pass through each other when two walk the same aisle at once.
-- **Meaning search is heavy** (about 50 MB on first use, mostly ONNX Runtime's WebAssembly).
-- **Hosting is not done.** The preview server serves ask-the-record's files from its folder; a static
-  host needs `STUDIO_COPY_VENDOR=1`, and every piece's **Open** link points at a local port.
-- **Browser noise outside the page's control:** headless Firefox logs “WebGPU is disabled by
-  blocklist” when ask-the-record's worker asks for a GPU (allowed, narrowly, in the test); headless
-  Chromium's software compositor logs GL “ReadPixels” stalls, which the GPU-composited build used for
-  testing does not.
-- Not tested with a real screen reader; the structure (links, headings, a labelled dialog with focus
-  management) is checked, the experience is not.
+- **WebKit draws the cabinet flat in testing.** Playwright's headless WebKit on this Mac does not draw
+  nested CSS 3D (a drawer moved towards the viewer inside a 3D container), though Chromium and Firefox
+  do; the minimal reproduction is `shots/office-2/webkit-flattens-nested-3d-chromium-firefox-webkit.png`.
+  Its hit-testing is 3D-aware, so every check passes, but in WebKit's screenshots drawers look closed.
+  Real Safari could not be checked without opening a window on the shared machine: open
+  http://127.0.0.1:4400 in Safari and pull a drawer to confirm.
+- The timeline's times are inferred from file times; three hand-ins come from pane DONE lines.
+- The screens and card text are a snapshot of tools still being polished.
+- Meaning search is heavy (about 50 MB on first use, mostly ONNX Runtime's WebAssembly).
+- Not hosted: the preview serves ask-the-record from its folder and **Open** points at local ports.
+- Not tested with a real screen reader; structure, labels and focus are checked, the experience is not.
 
 ## Credits and licences
 
-Code: MIT, Copyright (c) 2026 Harry Freeman. Runtime dependencies: Three.js (MIT), Valibot (MIT),
-xterm.js (MIT, terminal pages only). Type: Jost by the Jost Project Authors, SIL Open Font Licence 1.1,
-self-hosted (`public/fonts/OFL-Jost.txt`). Used from ask-the-record's folder, unmodified: its element
-(MIT), transformers.js (Apache-2.0), ONNX Runtime Web (MIT) and Xenova/all-MiniLM-L6-v2 (Apache-2.0).
-`npm run licences` checks all 142 installed packages are MIT, Apache-2.0, BSD or ISC (the font aside).
-Vite is pinned to 7.3.7 because Vite 8 brings in lightningcss, which is MPL-2.0.
-
-The screens show Harry's ten projects, recorded from their own servers; the two terminal recordings
-are the projects' own asciicasts, unchanged. Their data credits (NESO Carbon Intensity API, CC BY 4.0;
-Open-Meteo; Project Gutenberg) live in those projects. Nothing here is hosted, committed or published.
+Code: MIT, Copyright (c) 2026 Harry Freeman. Runtime dependencies: Three.js (MIT, studio only), Valibot
+(MIT), xterm.js (MIT, terminal pages only). Type: IBM Plex Sans, Mono and Sans Condensed by IBM, from
+@fontsource 5.3.0, SIL Open Font Licence 1.1, self-hosted (`public/fonts/plex/OFL.txt`). Used from
+ask-the-record's folder, unmodified: its element (MIT), transformers.js (Apache-2.0), ONNX Runtime Web
+(MIT) and Xenova/all-MiniLM-L6-v2 (Apache-2.0). `npm run licences` checks every installed package is
+MIT, Apache-2.0, BSD or ISC (the fonts aside). Vite is pinned to 7.3.7 because Vite 8 brings in
+lightningcss, which is MPL-2.0. The screens show Harry's ten tools; their data credits (NESO Carbon
+Intensity API, CC BY 4.0; Open-Meteo; Project Gutenberg) live in those projects. Nothing here is hosted
+or published.
