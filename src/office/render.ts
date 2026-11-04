@@ -1,10 +1,10 @@
 // Server-side HTML for the office: the lobby directory board, the filing cabinet and the floor
-// plan. Rendered into office.html at build time, so every tool is a real link before any script.
+// plan. Rendered into index.html at build time, so every tool is a real link before any script.
 
 import { DRAWERS } from '../content/drawers';
 import { type PieceId, pieceById } from '../content/pieces';
 import { esc } from '../content/render';
-import { BRIEF, DESKS, deskFor, REVIEW, ROOM } from '../scene/layout';
+import { BOARD, BRIEF, CABINET, DESKS, deskFor, RECEPTION, REVIEW, ROOM, SHELF, SIGN } from '../scene/layout';
 
 export function renderDirectory(): string {
   const groups = DRAWERS.map(
@@ -47,10 +47,9 @@ export function renderCabinet(): string {
 }
 
 // --- the floor plan -------------------------------------------------------------------------------
-// Drawn in metres from the same plan as the light bake. The lobby below the studio is drawing only.
+// Drawn in metres from the same plan as the light bake and the 3D room.
 
-const LOBBY = { z0: ROOM.z1, z1: 7.6 } as const;
-const VIEW = { x0: -7.6, z0: -5.5, x1: 7.6, z1: 8.2 } as const;
+const VIEW = { x0: -7.6, z0: -5.5, x1: 7.6, z1: 5.9 } as const;
 
 const r = (n: number) => Math.round(n * 1000) / 1000;
 
@@ -115,32 +114,35 @@ function deskPlan(piece: PieceId): string {
 
 export function renderPlan(): string {
   const t = 0.12;
-  const walls = [
-    // Studio
-    `M${ROOM.x0} ${ROOM.z0} H${ROOM.x1} V${ROOM.z1} H0.8 M-0.8 ${ROOM.z1} H${ROOM.x0} Z`,
-    // Lobby, with the street door at the bottom
-    `M${ROOM.x0} ${LOBBY.z0} V${LOBBY.z1} H-0.9 M0.9 ${LOBBY.z1} H${ROOM.x1} V${LOBBY.z0}`,
-  ];
+  const wall = `M${ROOM.x0} ${ROOM.z0} H${ROOM.x1} V${ROOM.z1} H0.8 M-0.8 ${ROOM.z1} H${ROOM.x0} Z`;
   const rt = REVIEW.table;
+  const c = CABINET;
+  const rc = RECEPTION;
   const sheets = BRIEF.sheets
     .map((s) => `<rect class="plan-brief" x="${r(s.x - 0.32)}" y="${ROOM.z0 + 0.04}" width="0.64" height="0.1"/>`)
     .join('');
+  const drawers = Array.from({ length: c.drawers - 1 }, (_, i) => r(c.x - c.width / 2 + ((i + 1) * c.width) / c.drawers))
+    .map((x) => `M${x} ${r(c.z - c.depth / 2)} V${r(c.z + c.depth / 2)}`)
+    .join(' ');
   return `<svg class="plan" viewBox="${VIEW.x0} ${VIEW.z0} ${r(VIEW.x1 - VIEW.x0)} ${r(VIEW.z1 - VIEW.z0)}" role="group" aria-labelledby="floor-title">
   <rect class="plan-floor" x="${ROOM.x0}" y="${ROOM.z0}" width="${ROOM.x1 - ROOM.x0}" height="${ROOM.z1 - ROOM.z0}"/>
-  <rect class="plan-floor plan-floor--lobby" x="${ROOM.x0}" y="${LOBBY.z0}" width="${ROOM.x1 - ROOM.x0}" height="${LOBBY.z1 - LOBBY.z0}"/>
-  ${walls.map((w) => `<path class="plan-wall" d="${w}" stroke-width="${t}"/>`).join('')}
+  <path class="plan-wall" d="${wall}" stroke-width="${t}"/>
   <path class="plan-door" d="M-0.8 ${ROOM.z1} A1.6 1.6 0 0 1 0.8 ${ROOM.z1}"/>
   ${sheets}
   <text class="plan-room" x="0" y="${ROOM.z0 + 0.62}" text-anchor="middle">The briefs</text>
-  <a class="plan-place" href="/studio.html"><text class="plan-room plan-room--big" x="${ROOM.x0 + 0.35}" y="${ROOM.z0 - 0.3}">Studio floor, in 3D</text></a>
+  <rect class="plan-board" x="${r(BOARD.x - BOARD.width / 2)}" y="${ROOM.z0 + 0.04}" width="${BOARD.width}" height="0.1"/>
+  <text class="plan-room" x="${BOARD.x}" y="${ROOM.z0 + 0.62}" text-anchor="middle">Accepted</text>
+  <rect class="plan-board" x="${r(SIGN.x - SIGN.width / 2)}" y="${ROOM.z0 + 0.04}" width="${SIGN.width}" height="0.1"/>
+  <text class="plan-room" x="${SIGN.x}" y="${ROOM.z0 + 0.62}" text-anchor="middle">Grid sign</text>
+  <rect class="plan-reception" x="${r(SHELF.x - SHELF.width / 2)}" y="${ROOM.z0 + 0.04}" width="${SHELF.width}" height="${SHELF.depth}"/>
+  <text class="plan-room" x="${SHELF.x}" y="${ROOM.z0 + 0.8}" text-anchor="middle">Radio</text>
   ${DESKS.map((d) => deskPlan(d.piece)).join('\n')}
   <rect class="plan-review" x="${r(rt.x - rt.width / 2)}" y="${r(rt.z - rt.depth / 2)}" width="${rt.width}" height="${rt.depth}"/>
   <circle class="plan-desk__chair" cx="${REVIEW.reviewer[0]}" cy="${REVIEW.reviewer[1]}" r="0.24"/>
   <text class="plan-room" x="${r(rt.x + rt.width / 2 + 0.2)}" y="${r(rt.z + 0.1)}">Review table</text>
-  <a class="plan-place" href="#archive"><rect class="plan-cabinet" x="-6.6" y="${LOBBY.z0 + 0.5}" width="1.4" height="0.62"/><path class="plan-drawers" d="M-6.25 ${LOBBY.z0 + 0.5} V${LOBBY.z0 + 1.12} M-5.9 ${LOBBY.z0 + 0.5} V${LOBBY.z0 + 1.12} M-5.55 ${LOBBY.z0 + 0.5} V${LOBBY.z0 + 1.12}"/><text class="plan-room" x="-5.9" y="${LOBBY.z0 + 1.6}" text-anchor="middle">Archive</text></a>
-  <a class="plan-place" href="#directory"><rect class="plan-board" x="-3.4" y="${LOBBY.z1 - 0.18}" width="2" height="0.1"/><text class="plan-room" x="-2.4" y="${LOBBY.z1 - 0.45}" text-anchor="middle">Directory</text></a>
-  <a class="plan-place" href="#ask"><path class="plan-reception" d="M3 ${LOBBY.z0 + 1.6} Q4.4 ${LOBBY.z0 + 0.7} 5.8 ${LOBBY.z0 + 1.6}"/><text class="plan-room" x="4.4" y="${LOBBY.z0 + 2.2}" text-anchor="middle">Reception</text></a>
-  <g class="plan-here" transform="translate(0 ${LOBBY.z1 - 0.55})"><circle r="0.2"/><text x="0.34" y="0.1">You are here</text></g>
+  <a class="plan-place" href="#archive"><rect class="plan-cabinet" x="${r(c.x - c.width / 2)}" y="${r(c.z - c.depth / 2)}" width="${c.width}" height="${c.depth}"/><path class="plan-drawers" d="${drawers}"/><text class="plan-room" x="${c.x}" y="${r(c.z + c.depth / 2 + 0.5)}" text-anchor="middle">Filing cabinet</text></a>
+  <a class="plan-place" href="#ask"><rect class="plan-reception" x="${r(rc.x - rc.width / 2)}" y="${r(rc.z - rc.depth / 2)}" width="${rc.width}" height="${rc.depth}"/><text class="plan-room" x="${rc.x}" y="${r(rc.z + rc.depth / 2 + 0.5)}" text-anchor="middle">Reception</text></a>
+  <g class="plan-here" transform="translate(0 ${r(ROOM.z1 + 0.62)})"><circle r="0.2"/><text x="0.34" y="0.1">You are here, at the door</text></g>
   <g class="plan-figures" id="plan-figures" aria-hidden="true">${DESKS.map((d) => `<circle class="plan-figure" data-piece="${d.piece}" cx="${d.seat[0]}" cy="${d.seat[1]}" r="0.17"/><rect class="plan-sheet" data-sheet="${d.piece}" x="-0.11" y="-0.14" width="0.22" height="0.28" visibility="hidden"/>`).join('')}<circle class="plan-figure plan-figure--reviewer" cx="${REVIEW.reviewer[0]}" cy="${REVIEW.reviewer[1]}" r="0.17"/></g>
 </svg>`;
 }

@@ -1,0 +1,41 @@
+Third-party code, data and type on Harry Freeman's site
+=======================================================
+
+The site's own code is under the MIT licence. It uses, unmodified:
+
+DATA
+
+  Carbon intensity of Great Britain's electricity grid
+    NESO Carbon Intensity API, https://carbonintensity.org.uk/
+    © National Energy System Operator (NESO). Licensed under Creative Commons
+    Attribution 4.0 International (CC BY 4.0),
+    https://creativecommons.org/licenses/by/4.0/
+    Used by the grid sign and the room's light (the current national
+    half-hour, /intensity, one request when the page opens and again after
+    each half-hour), and by the radio while it plays (/intensity and
+    /generation). Shown as published; nothing is cached as current.
+
+CODE, VENDORED AS BUILT
+
+  Listen to the Grid: the radio (public/vendor/radio/)
+    Harry Freeman, MIT licence (public/vendor/radio/LICENSE). Its source
+    commit and file hashes are in public/vendor/radio/SOURCE.json. Bundled
+    inside it: zod, MIT licence, © Colin McDonnell.
+
+  ask-the-record (served from its own folder at /vendor/ask-the-record/)
+    Harry Freeman, MIT licence.
+  transformers.js, Apache License 2.0, © Hugging Face.
+  ONNX Runtime Web, MIT licence, © Microsoft Corporation.
+  all-MiniLM-L6-v2 (the meaning model, ONNX export by Xenova), Apache
+    License 2.0, from sentence-transformers.
+
+CODE, BUNDLED
+
+  three.js, MIT licence, © three.js authors.
+  valibot, MIT licence, © Fabian Hiller.
+  xterm.js, MIT licence, © The xterm.js authors.
+
+TYPE
+
+  IBM Plex Sans, Sans Condensed and Mono, © IBM Corp., SIL Open Font
+  Licence 1.1 (public/fonts/plex/OFL.txt), from @fontsource 5.3.0.

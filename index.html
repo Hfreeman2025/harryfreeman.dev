@@ -4,21 +4,32 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Harry Freeman, Head of AI</title>
-  <meta name="description" content="Harry Freeman runs AI strategy, products and governance at a UK sustainability consultancy. Ten tools, filed in a cabinet: pull a drawer, pull a folder, open the tool.">
+  <meta name="description" content="Harry Freeman runs AI strategy, products and governance at a UK sustainability consultancy. Ten tools, built by coding agents to his briefs, in one studio: a filing cabinet, a desk for each tool, and a Reception that answers from the record.">
   <meta name="theme-color" content="#f0efea">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="icon" href="/favicon.png" type="image/png" sizes="64x64">
   <meta property="og:title" content="Harry Freeman, Head of AI">
-  <meta property="og:description" content="Ten tools, filed in a cabinet: pull a drawer, pull a folder, open the tool. Built by coding agents to Harry's briefs, with a reviewer checking every one.">
+  <meta property="og:description" content="Ten tools in one studio: pull a folder from the cabinet and the camera turns to the desk where it was built. Built by coding agents to Harry's briefs, with a reviewer checking every one.">
   <meta property="og:image" content="/og.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
   <script>
-    // Motion only for those who welcome it; everything works either way.
-    document.documentElement.dataset.motion = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'reduce' : 'full';
+    // Before first paint: the lit 3D room on large screens that welcome motion and have WebGL, the flat
+    // office otherwise (and without script). ?room and ?flat choose either.
+    (() => {
+      const root = document.documentElement;
+      const query = new URLSearchParams(location.search);
+      const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const large = matchMedia('(min-width: 1000px) and (min-height: 620px)').matches;
+      const webgl = typeof WebGLRenderingContext === 'function';
+      root.dataset.motion = reduce ? 'reduce' : 'full';
+      root.dataset.mode = webgl && !query.has('flat') && (query.has('room') || (large && !reduce)) ? 'room' : 'office';
+      if (query.has('photo')) root.dataset.photo = '';
+    })();
   </script>
   <link rel="stylesheet" href="/src/styles/office.css">
+  <link rel="stylesheet" href="/src/styles/room.css">
 </head>
 <body>
   <main>
@@ -32,44 +43,93 @@
           <!--office:directory-->
           <ul class="board__more">
             <li class="board__row"><a href="#ask">Ask a question</a><span class="board__leader" aria-hidden="true"></span><span class="board__where">Reception</span></li>
-            <li class="board__row"><a href="/studio.html">The studio floor, in 3D</a><span class="board__leader" aria-hidden="true"></span><span class="board__where">Through the lobby door</span></li>
-            <li class="board__row"><a href="#floor">Floor plan: who built what</a><span class="board__leader" aria-hidden="true"></span><span class="board__where">Lobby wall</span></li>
-            <li class="board__row"><a href="#brief">The briefs</a><span class="board__leader" aria-hidden="true"></span><span class="board__where">Lobby wall</span></li>
+            <li class="board__row board__row--office"><a href="#floor">Floor plan: who built what</a><span class="board__leader" aria-hidden="true"></span><span class="board__where">Studio floor</span></li>
+            <li class="board__row board__row--3d"><a href="/?room">The studio in 3D</a><span class="board__leader" aria-hidden="true"></span><span class="board__where">Large screens</span></li>
+            <li class="board__row"><a href="#brief">The briefs</a><span class="board__leader" aria-hidden="true"></span><span class="board__where">Back wall</span></li>
             <li class="board__row"><a href="%CV%">CV</a><span class="board__leader" aria-hidden="true"></span><a href="mailto:%EMAIL%">Email</a><span class="board__sep" aria-hidden="true"> · </span><a href="%LINKEDIN%">LinkedIn</a></li>
           </ul>
         </div>
       </section>
 
-      <section class="archive" id="archive" aria-labelledby="archive-title">
-        <h2 class="sign" id="archive-title">Archive</h2>
-        <p class="archive__how">Ten tools, filed by theme. Pull a drawer, then a folder: each holds a recorded loop of the tool and a way to open it live.</p>
-        <div class="cabinet-stage">
-          <!--office:cabinet-->
-        </div>
-      </section>
+      <div class="hall" id="hall">
+        <section class="room" id="room" aria-labelledby="room-title">
+          <h2 class="room__title" id="room-title">The studio, from the door</h2>
+          <img class="room__poster" src="/still/door-1600.webp" srcset="/still/door-1200.webp 1200w, /still/door-1600.webp 1600w, /still/door-2400.webp 2400w" sizes="(min-width: 1000px) calc(100vw - 390px), 100vw" alt="" width="1600" height="1333" loading="lazy" decoding="async" fetchpriority="high">
+          <div class="room__stage" aria-hidden="true"></div>
+          <div class="room__labels">
+            <!--room:labels-->
+          </div>
+          <video class="room__screen" id="room-screen" muted loop playsinline preload="none" aria-hidden="true" hidden></video>
+          <button type="button" class="room__back" id="room-back" tabindex="0">Back to the door</button>
+          <div class="room__caption"></div>
+        </section>
+        <p class="room__status" id="room-status" role="status"></p>
 
-      <section class="ask" id="ask" aria-labelledby="ask-title">
-        <h2 class="sign" id="ask-title">Reception</h2>
-        <p class="ask__about">Ask about Harry or any tool. Every answer is a quotation from his CV or a tool’s README, found in your browser by <a href="#work-ask-the-record">ask-the-record</a>; when nothing supports an answer, it says so.</p>
-        <p class="ask__try">Try
+        <aside class="grid-sign" id="grid-sign" data-target="sign" data-at="door" data-place="wall" data-state="loading" aria-labelledby="grid-sign-title" hidden>
+          <h2 class="grid-sign__title" id="grid-sign-title">The grid, now</h2>
+          <p class="grid-sign__value" id="grid-value" aria-live="polite">Reading the grid…</p>
+          <p class="grid-sign__detail" id="grid-detail"></p>
+          <p class="grid-sign__light" id="grid-light"></p>
+          <p class="grid-sign__source">Source: <a href="https://carbonintensity.org.uk/">NESO Carbon Intensity API</a>, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></p>
+        </aside>
+
+        <div class="radio" id="radio" data-target="radio" data-at="door" data-place="wall" data-state="off" hidden>
+          <button type="button" class="radio__button" id="radio-button" tabindex="0" aria-pressed="false" aria-describedby="radio-state radio-credit"><span class="radio__name">Radio</span> <span class="radio__what">Listen to the Grid</span></button>
+          <p class="radio__state" id="radio-state">off</p>
+          <p class="radio__credit" id="radio-credit">Data: Carbon Intensity API, © NESO, CC BY 4.0</p>
+        </div>
+
+        <section class="archive" id="archive" aria-labelledby="archive-title">
+          <h2 class="sign" id="archive-title">Filing cabinet</h2>
+          <p class="archive__how">Ten tools, filed by theme. Pull a drawer, then a folder: each holds a recorded loop of the tool and a way to open it live.</p>
+          <div class="cabinet-stage">
+            <!--office:cabinet-->
+          </div>
+        </section>
+
+        <section class="ask" id="ask" aria-labelledby="ask-title">
+          <h2 class="sign" id="ask-title">Reception</h2>
+          <p class="ask__about">Ask about Harry or any tool. Every answer is a quotation from his CV or a tool’s README, found in your browser by <a href="#work-ask-the-record">ask-the-record</a>; when the answer is in a README, its folder opens at the quoted line. When nothing supports an answer, it says so.</p>
+          <p class="ask__try">Try
             <button type="button" data-question="What did Harry do about the EU AI Act?">What did Harry do about the EU AI Act?</button>
             <button type="button" data-question="How does gridtop choose when to run?">How does gridtop choose when to run?</button>
             <button type="button" data-question="What happens if you change one byte?">What happens if you change one byte?</button>
           </p>
-        <ask-the-record id="ask-box" data-src="/record/studio.json" label="Your question" placeholder="About Harry or any tool" model-host="/models/" runtime="/vendor/transformers/runtime.js">
-          <form class="ask__standin">
-            <label for="ask-standin">Your question</label>
-            <input id="ask-standin" type="search" autocomplete="off" placeholder="About Harry or any tool">
-          </form>
-        </ask-the-record>
-        <noscript><p class="ask__none">Asking needs JavaScript. Everything it can quote is in the <a href="%CV%">CV</a> and the folders below.</p></noscript>
-      </section>
+          <ask-the-record id="ask-box" data-src="/record/studio.json" label="Your question" placeholder="About Harry or any tool" model-host="/models/" runtime="/vendor/transformers/runtime.js" highlight="#record-lines">
+            <form class="ask__standin">
+              <label for="ask-standin">Your question</label>
+              <input id="ask-standin" type="search" autocomplete="off" placeholder="About Harry or any tool">
+            </form>
+          </ask-the-record>
+          <noscript><p class="ask__none">Asking needs JavaScript. Everything it can quote is in the <a href="%CV%">CV</a> and the folders below.</p></noscript>
+        </section>
+
+        <div class="folder-card" id="card" role="dialog" aria-modal="true" aria-labelledby="card-title" hidden>
+          <div class="folder-card__open">
+            <div class="folder-card__leaf folder-card__leaf--loop">
+              <video class="folder-card__video" muted loop playsinline preload="none" aria-hidden="true"></video>
+              <p class="folder-card__recorded" id="card-recorded"></p>
+              <div class="folder-card__actions" id="card-actions"></div>
+            </div>
+            <div class="folder-card__leaf folder-card__leaf--text">
+              <div id="card-body"></div>
+              <details class="readme" id="card-readme">
+                <summary>Its README, line by line</summary>
+                <div class="readme__lines" id="record-lines"></div>
+              </details>
+            </div>
+            <div class="folder-card__nav">
+              <button type="button" class="folder-card__back" id="card-back">Put it back</button>
+              <button type="button" class="folder-card__back" id="card-reception" hidden>Back to Reception</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <section class="floor" id="floor" aria-labelledby="floor-title">
       <h2 class="sign" id="floor-title">Studio floor</h2>
       <p class="floor__about">Where the tools were built. Each desk has the props of its tool; the dots are the builders, replaying the build: work carried to the review table, sent back in red, accepted in green.</p>
-      <p class="floor__enter"><a class="open" href="/studio.html">Walk onto the studio floor</a><span class="floor__enter-note">The same room as a lit 3D model: each screen plays its tool, and you can sit at any desk.</span></p>
       <div class="floor__plan">
         <!--office:plan-->
       </div>
@@ -98,28 +158,17 @@
 
     <section class="colophon" id="colophon" aria-labelledby="colophon-title">
       <h2 class="colophon__title" id="colophon-title">How this page works</h2>
-      <p>The cabinet is HTML and CSS in three dimensions: every drawer is a button and every folder a link, so the directory, the keyboard and a screen reader reach the same ten tools. The loops in the folders were recorded from the real tools in a silent headless browser and are labelled recorded; <strong>Open</strong> launches the tool live. The floor plan is drawn from the same plan as the studio model, and the dots replay the build timeline.</p>
-      <p>Reception runs ask-the-record entirely in your browser. Keyword search and the suggested questions need no download; your own question loads the meaning model on first use, about 50 MB, served from this site and cached. Your question never leaves the page.</p>
+      <p>One building, drawn two ways from the same content. On a large screen that welcomes motion, it is a lit 3D studio in three.js, seen from the door: the filing cabinet’s drawers slide out, a folder you pull turns the camera to the desk where that tool was built, and its screen plays the tool. On a phone, with reduced motion, without WebGL or without script, it is a flat office: the same directory, cabinet, folders and Reception as HTML. Every object in the room is a real button or link, so the keyboard reaches all of it; Esc steps back.</p>
+      <p>The loops were recorded from the real tools in a silent headless browser and are labelled recorded; <strong>Open</strong> launches the tool live. The studio’s light follows Great Britain’s grid: one request to the NESO Carbon Intensity API for the current half-hour, shown on the sign with its time and source. When it fails, the sign says so and the light stays neutral. The radio plays Listen to the Grid, from its own embeddable build, and only once you press it.</p>
+      <p>Reception runs ask-the-record entirely in your browser. Keyword search and the suggested questions need no download; your own question loads the meaning model on first use, about 50 MB, served from this site and cached. Your question never leaves the page. Third-party code and data are listed in <a href="/NOTICES.txt">NOTICES.txt</a>.</p>
     </section>
   </main>
 
   <footer class="footer">
-    <p>Harry Freeman, 2026. Code under the MIT licence. Set in IBM Plex, under the SIL Open Font Licence. No cookies, analytics or requests to other sites.</p>
+    <p>Harry Freeman, 2026. Code under the MIT licence. Set in IBM Plex, under the SIL Open Font Licence. No cookies or analytics. One request to another site, for the grid’s current carbon intensity (NESO, CC BY 4.0); the radio makes more only while it plays.</p>
   </footer>
 
-  <div class="folder-card" id="card" role="dialog" aria-modal="true" aria-labelledby="card-title" hidden>
-    <div class="folder-card__open">
-      <div class="folder-card__leaf folder-card__leaf--loop">
-        <video class="folder-card__video" muted loop playsinline preload="none" aria-hidden="true"></video>
-        <p class="folder-card__recorded" id="card-recorded"></p>
-        <div class="folder-card__actions" id="card-actions"></div>
-      </div>
-      <div class="folder-card__leaf folder-card__leaf--text" id="card-body"></div>
-      <button type="button" class="folder-card__back" id="card-back">Put it back</button>
-    </div>
-  </div>
-
   <!--studio:timeline-->
-  <script type="module" src="/src/office/main.ts"></script>
+  <script type="module" src="/src/main.ts"></script>
 </body>
 </html>

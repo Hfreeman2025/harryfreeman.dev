@@ -1,0 +1,13 @@
+{
+  "from": "Personal/lab/listen-to-the-grid/dist-radio",
+  "commit": "cd664696636a531e3dcd4799a3bf856c49efbc79",
+  "committed": "2026-11-04T16:38:47Z",
+  "build": "npm run build:radio",
+  "files": {
+    "assets/loudness.worker-CVegmcmW.js": "d305b0d8104766b8ef016ef9de66113b683ab4166e0f5fbfa0e3b93c232defbf",
+    "LICENSE": "c841af0fbe85aa30a37aa14d3ee265aef97f6fbabfd472687532dbd54b4a1f48",
+    "listen-to-the-grid-radio.d.ts": "427a130ace8aa9545d68e8e9d324f70b3240150f8cdcd80e3fcb906487e41e52",
+    "listen-to-the-grid-radio.js": "a590adbddeea7063eea28fc50dbc83cbc1e9acf2571e5583a946d378253a9054",
+    "README.md": "44fab04e58a2a9b096eba3ad990a0be4900b9579487aefc02a112ff160f42323"
+  }
+}

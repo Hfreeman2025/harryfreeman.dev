@@ -85,6 +85,8 @@ type Vector = typeof import('../../oss/ask-the-record/src/core/vector');
 const { build } = (await import(pathToFileURL(join(atr, 'src/cli/build.ts')).href)) as Build;
 const { DEFAULT_MODEL, loadEmbedder } = (await import(pathToFileURL(join(atr, 'src/cli/embed.ts')).href)) as Embed;
 const { encodeBase64 } = (await import(pathToFileURL(join(atr, 'src/core/vector.ts')).href)) as Vector;
+type SourceView = typeof import('../../oss/ask-the-record/src/browser/source-view');
+const { renderSourceView } = (await import(pathToFileURL(join(atr, 'src/browser/source-view.ts')).href)) as SourceView;
 
 const record = await build({
   input: mdPath,
@@ -120,4 +122,23 @@ try {
 }
 
 writeFileSync(join(out, 'sources.json'), `${JSON.stringify({ builtAt: new Date().toISOString(), sources }, null, 2)}\n`);
+
+// The same markdown drawn as numbered source lines, by ask-the-record's own renderer, so every fact
+// is found on exactly its line. Split by section: the CV, then one block per tool for its folder.
+// Heading ids are prefixed so they cannot collide with the page's own.
+const view = renderSourceView(markdown);
+const lineHtml = view.html.split('\n').map((l) => l.replace(/ id="/, ' id="readme-'));
+const starts = markdown.split('\n').flatMap((l, i) => (/^## /.test(l) ? [{ title: l.slice(3).trim(), line: i + 1 }] : []));
+const sections = starts.map((h, i) => {
+  const to = (starts[i + 1]?.line ?? lineHtml.length + 1) - 1;
+  const piece = PIECES.find((p) => p.title === h.title)?.id ?? (h.title === CV_SECTION ? 'cv' : null);
+  if (!piece) throw new Error(`unknown section ${h.title}`);
+  return { key: piece, title: h.title, from: h.line, to, html: lineHtml.slice(h.line - 1, to).join('\n') };
+});
+if (sections.length !== PIECES.length + 1) throw new Error(`expected ${PIECES.length + 1} sections, found ${sections.length}`);
+writeFileSync(
+  join(out, 'lines.json'),
+  `${JSON.stringify({ about: 'The record’s markdown as numbered source lines (ask-the-record renderSourceView), by section.', lines: view.lines, sections })}\n`,
+);
+console.log(`lines: ${view.lines} in ${sections.length} sections`);
 console.log(`record: ${record.facts.length} facts from ${sources.length} sources`);

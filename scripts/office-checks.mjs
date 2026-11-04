@@ -1,5 +1,8 @@
-// The office's browser checks, run by e2e.mjs in each browser: the lobby, the cabinet, the folder,
-// Reception, the floor plan and the doors between the office and the studio.
+// The flat office's browser checks, run by e2e.mjs in each browser: the same building as HTML, for
+// phones, reduced motion and no WebGL (and ?flat on a desktop). The cabinet, the folder card,
+// Reception with its marked line, the grid sign, the radio and the floor plan.
+
+import { MOCK_VALUE } from './e2e.mjs';
 
 const desk = { viewport: { width: 1440, height: 900 } };
 const phone = (name) => ({ viewport: { width: 390, height: 844 }, ...(name === 'firefox' ? {} : { isMobile: true, hasTouch: true }) });
@@ -8,20 +11,27 @@ const cardOpen = (page) =>
     timeout: 8000,
   });
 const cardTitle = async (page) => (await page.locator('#card-title').textContent())?.trim();
+const mode = (page) => page.evaluate(() => document.documentElement.dataset.mode);
 
-export async function officeChecks({ check, expect, BASE, config, name }) {
-  const ids = Object.keys(config.pieces);
+export async function officeChecks({ check, expect, BASE, config, shot, name }) {
+  const FLAT = `${BASE}/?flat`;
 
-  await check('office: the HTML carries name, role, line, the directory and every folder before any script', {}, async () => {
-    const html = await (await fetch(`${BASE}/`)).text();
-    for (const text of ['Harry Freeman', 'Head of AI', 'coding agents built these ten tools', 'href="/cv.html"', 'href="/studio.html"'])
-      expect(html.includes(text), `missing ${text}`);
-    expect((html.match(/class="drawer__front" aria-expanded="false"/g) ?? []).length === 4, 'not four drawers');
-    for (const id of ids) {
-      expect(html.includes(`href="#work-${id}" data-piece="${id}"`), `no directory link for ${id}`);
-      expect(html.includes(`class="folder" href="#work-${id}"`), `no folder for ${id}`);
-      expect(html.includes(`href="${config.pieces[id]}"`), `no open link for ${id}`);
+  await check('office: a phone, reduced motion and ?flat all get the flat office, with no canvas', desk, async (page) => {
+    const seen = {};
+    for (const [label, url, options] of [
+      ['?flat', FLAT, {}],
+      ['reduced motion', BASE, { reducedMotion: 'reduce' }],
+    ]) {
+      await page.emulateMedia({ reducedMotion: options.reducedMotion ?? 'no-preference' });
+      await page.goto(url, { waitUntil: 'load' });
+      await page.waitForTimeout(500);
+      seen[label] = await mode(page);
+      expect(seen[label] === 'office', `${label} got ${seen[label]}`);
+      expect((await page.locator('canvas').count()) === 0, `${label} made a canvas`);
+      const poster = await page.locator('.room__poster').evaluate((img) => img.complete && img.naturalWidth > 0);
+      expect(!poster, `${label} downloaded the room's poster`);
     }
+    return seen;
   });
 
   await check(
@@ -29,41 +39,35 @@ export async function officeChecks({ check, expect, BASE, config, name }) {
     {
       ...desk,
       initScript: () => {
-        window.__shift = 0;
-        // Only Chromium reports layout shifts; asking elsewhere just logs a warning.
-        if (!PerformanceObserver.supportedEntryTypes?.includes('layout-shift')) {
-          window.__shift = null;
-          return;
-        }
-        try {
-          new PerformanceObserver((list) => {
-            for (const e of list.getEntries()) if (!e.hadRecentInput) window.__shift += e.value;
-          }).observe({ type: 'layout-shift', buffered: true });
-        } catch {
-          window.__shift = null; // This browser does not report layout shifts.
-        }
+        window.__shift = PerformanceObserver.supportedEntryTypes?.includes('layout-shift') ? 0 : null;
+        if (window.__shift === null) return;
+        new PerformanceObserver((list) => {
+          for (const e of list.getEntries()) if (!e.hadRecentInput) window.__shift += e.value;
+        }).observe({ type: 'layout-shift', buffered: true });
       },
     },
     async (page, problems) => {
-      await page.goto(BASE, { waitUntil: 'load' });
+      await page.goto(FLAT, { waitUntil: 'load' });
       await page.waitForTimeout(2500);
       const shift = await page.evaluate(() => window.__shift);
-      if (shift !== null) expect(shift < 0.01, `layout shift ${shift}`);
+      if (shift !== null) expect(shift === 0, `layout shift ${shift}`);
+      await shot(page, 'flat-top');
       expect(problems.length === 0, problems.join(' | '));
-      return { layoutShift: shift === null ? 'not reported by this browser' : Number(shift.toFixed(4)) };
+      return { layoutShift: shift === null ? 'not reported by this browser' : shift };
     },
   );
 
   await check('office: keyboard pulls a drawer, then a folder; Escape puts it back', desk, async (page, problems) => {
-    await page.goto(BASE, { waitUntil: 'load' });
+    await page.goto(FLAT, { waitUntil: 'load' });
     await page.focus('.drawer[data-drawer="grid"] .drawer__front');
     await page.keyboard.press('Enter');
     await page.waitForTimeout(800);
     expect((await page.getAttribute('.drawer[data-drawer="grid"] .drawer__front', 'aria-expanded')) === 'true', 'drawer not expanded');
-    expect(!(await page.evaluate(() => document.getElementById('tray-grid').inert)), 'tray still inert');
     await page.keyboard.press('Tab');
-    const focused = await page.evaluate(() => document.activeElement?.getAttribute('data-piece'));
-    expect(focused === 'grid-weather', `Tab went to ${focused}`);
+    expect(
+      (await page.evaluate(() => document.activeElement?.getAttribute('data-piece'))) === 'grid-weather',
+      'Tab missed the first folder',
+    );
     await page.keyboard.press('Enter');
     await cardOpen(page);
     await page.waitForTimeout(600);
@@ -71,10 +75,6 @@ export async function officeChecks({ check, expect, BASE, config, name }) {
     expect((await page.evaluate(() => document.activeElement?.id)) === 'card-title', 'focus not in the card');
     expect((await page.locator('#card .open').getAttribute('href')) === config.pieces['grid-weather'], 'open link');
     expect(/^Recorded/.test((await page.locator('#card-recorded').textContent()) ?? ''), 'no recorded label');
-    expect(
-      (await page.locator('#card .work__elsewhere a').getAttribute('href')) === '/studio.html#desk-grid-weather',
-      'no way to its desk',
-    );
     await page.keyboard.press('Escape');
     await page.waitForFunction(() => document.getElementById('card').hidden, null, { timeout: 8000 });
     expect((await page.evaluate(() => document.activeElement?.getAttribute('data-piece'))) === 'grid-weather', 'focus not returned');
@@ -82,7 +82,7 @@ export async function officeChecks({ check, expect, BASE, config, name }) {
   });
 
   await check('office: one drawer out at a time, and a closed drawer hides its folders', desk, async (page) => {
-    await page.goto(BASE, { waitUntil: 'load' });
+    await page.goto(FLAT, { waitUntil: 'load' });
     await page.click('.drawer[data-drawer="agents"] .drawer__front');
     await page.waitForTimeout(800);
     await page.click('.drawer[data-drawer="inside"] .drawer__front', { position: { x: 30, y: 30 } });
@@ -95,80 +95,82 @@ export async function officeChecks({ check, expect, BASE, config, name }) {
     expect(hidden, 'a closed drawer shows or tabs to its folders');
   });
 
-  await check('office: the directory and the floor plan both pull the right folder', desk, async (page) => {
-    await page.goto(BASE, { waitUntil: 'load' });
+  await check('office: the directory, the list and the floor plan all pull the right folder', desk, async (page) => {
+    await page.goto(FLAT, { waitUntil: 'load' });
     await page.click('.board__row a[data-piece="gridtop"]');
     await cardOpen(page);
     expect((await cardTitle(page)) === 'gridtop', 'directory pulled the wrong folder');
-    expect((await page.getAttribute('.drawer[data-drawer="grid"]', 'data-open')) === 'true', 'its drawer is not open');
     await page.keyboard.press('Escape');
     await page.waitForFunction(() => document.getElementById('card').hidden, null, { timeout: 8000 });
     await page.locator('#floor').scrollIntoViewIfNeeded();
     await page.click('.plan-desk[data-piece="sourced"] .plan-desk__top');
     await cardOpen(page);
     expect((await cardTitle(page)) === 'Sourced', 'the plan pulled the wrong folder');
+    await page.keyboard.press('Escape');
+    await page.waitForFunction(() => document.getElementById('card').hidden, null, { timeout: 8000 });
+    await page.click('#work-dreaming .work__elsewhere a');
+    await cardOpen(page);
+    expect((await cardTitle(page)) === 'dreaming', 'the list pulled the wrong folder');
   });
 
-  for (const [room, path] of [
-    ['office', '/'],
-    ['studio', '/studio.html'],
-  ]) {
-    await check(`${room}: reaching for the question box moves nothing (ask-the-record loads in place)`, desk, async (page) => {
-      await page.goto(`${BASE}${path}`, { waitUntil: 'load' });
-      const where = () => page.$eval('.ask__try button', (b) => Math.round(b.getBoundingClientRect().top + scrollY));
-      const box = () => page.$eval('#ask-box', (b) => Math.round(b.getBoundingClientRect().height));
-      const [top, height] = [await where(), await box()];
-      await page.hover('#ask');
-      await page.waitForFunction(() => document.querySelector('ask-the-record')?.record, null, { timeout: 30000 });
-      await page.waitForTimeout(400);
-      expect((await where()) === top, `a suggestion moved from ${top} to ${await where()}`);
-      expect((await box()) === height, `the box grew from ${height} to ${await box()}`);
-    });
-  }
+  await check('office: reaching for the question box moves nothing (ask-the-record loads in place)', desk, async (page) => {
+    await page.goto(FLAT, { waitUntil: 'load' });
+    const where = () => page.$eval('.ask__try button', (b) => Math.round(b.getBoundingClientRect().top + scrollY));
+    const box = () => page.$eval('#ask-box', (b) => Math.round(b.getBoundingClientRect().height));
+    const [top, height] = [await where(), await box()];
+    await page.hover('#ask');
+    await page.waitForFunction(() => document.querySelector('ask-the-record')?.record, null, { timeout: 30000 });
+    await page.waitForTimeout(400);
+    expect((await where()) === top, `a suggestion moved from ${top} to ${await where()}`);
+    expect((await box()) === height, `the box grew from ${height} to ${await box()}`);
+  });
 
-  await check('office: Reception answers, pulls the drawer and marks the folder', desk, async (page, problems) => {
-    await page.goto(BASE, { waitUntil: 'load' });
+  await check('office: Reception’s answer opens the folder at the quoted line; a refusal opens nothing', desk, async (page, problems) => {
+    await page.goto(FLAT, { waitUntil: 'load' });
     await page.getByRole('button', { name: 'How does gridtop choose when to run?' }).click();
     await page.waitForFunction(() => document.querySelector('ask-the-record')?.result?.kind === 'answer', null, { timeout: 30000 });
-    await page.waitForTimeout(900);
-    expect((await page.getAttribute('.drawer[data-drawer="grid"]', 'data-open')) === 'true', 'drawer not pulled');
-    expect((await page.getAttribute('.folder[data-piece="gridtop"]', 'data-answering')) === 'true', 'folder not marked');
-    expect((await page.getAttribute('.plan-desk[data-piece="gridtop"]', 'data-answering')) === 'true', 'desk not marked');
+    await cardOpen(page);
+    expect((await cardTitle(page)) === 'gridtop', `opened ${await cardTitle(page)}`);
+    const marked = await page.evaluate(() => {
+      const highlight = globalThis.CSS?.highlights?.get('ask-the-record');
+      if (!highlight) return { api: false };
+      const node = [...highlight][0]?.startContainer;
+      const line = (node instanceof Element ? node : node?.parentElement)?.closest('[data-record-line]');
+      return {
+        api: true,
+        inFolder: Boolean(line && document.getElementById('record-lines').contains(line)),
+        line: line?.dataset.recordLine,
+      };
+    });
+    if (marked.api) expect(marked.inFolder, 'the quoted line is not marked in the folder');
+    await page.waitForFunction(() => document.getElementById('card-readme').open, null, { timeout: 5000 }).catch(() => {});
+    expect(await page.locator('#card-readme').evaluate((d) => d.open), 'the README is not open at the line');
+    await page.waitForTimeout(500);
+    await shot(page, 'flat-answer');
+    await page.keyboard.press('Escape');
+    await page.waitForFunction(() => document.getElementById('card').hidden, null, { timeout: 8000 });
+    const input = page.locator('ask-the-record').locator('[part="input"]');
+    await input.fill('What is your favourite football team?');
+    await input.press('Enter');
+    await page.waitForFunction(() => document.querySelector('ask-the-record')?.result?.kind === 'refusal', null, { timeout: 30000 });
+    await page.waitForTimeout(1200);
+    expect(await page.locator('#card').isHidden(), 'a folder opened for a refusal');
+    expect((await page.locator('.drawer[data-open="true"]').count()) <= 1, 'drawers moved');
     expect(problems.length === 0, problems.join(' | '));
+    return { line: marked.line ?? 'no Highlight API' };
   });
 
-  for (const [size, options] of [
-    ['laptop', desk],
-    ['phone', phone(name)],
-  ]) {
-    await check(`office (${size}): every folder tab shows its whole name`, options, async (page) => {
-      await page.goto(BASE, { waitUntil: 'load' });
-      const cut = [];
-      for (const drawer of ['inside', 'agents', 'grid', 'sources']) {
-        await page.locator(`.drawer[data-drawer="${drawer}"] .drawer__front`).scrollIntoViewIfNeeded();
-        // Push back the drawer that is out, as a person would when it is in the way.
-        const out = page.locator('.drawer[data-open="true"] .drawer__front');
-        if (await out.count()) {
-          await out.click({ position: { x: 24, y: 10 } });
-          await page.waitForTimeout(750);
-        }
-        const front = page.locator(`.drawer[data-drawer="${drawer}"] .drawer__front`);
-        const box = await front.boundingBox();
-        // The lower edge of a front is never under the drawer pulled out above it.
-        await front.click({ position: { x: 24, y: Math.max(8, box.height - 10) } });
-        await page.waitForTimeout(750);
-        cut.push(
-          ...(await page.$$eval(`.drawer[data-drawer="${drawer}"] .folder__tab`, (tabs) =>
-            tabs.filter((t) => t.scrollWidth > t.clientWidth + 1).map((t) => t.textContent),
-          )),
-        );
-      }
-      expect(cut.length === 0, `cut short: ${cut.join(', ')}`);
-    });
-  }
+  await check('office: the grid sign and the radio are in the lobby too', desk, async (page) => {
+    await page.goto(FLAT, { waitUntil: 'load' });
+    await page.waitForFunction(() => document.getElementById('grid-sign')?.dataset.state === 'live', null, { timeout: 8000 });
+    expect((await page.locator('#grid-value').textContent()) === `${MOCK_VALUE} gCO₂/kWh, moderate`, 'sign value');
+    expect(await page.locator('#grid-light').isHidden(), 'the flat office talks about a light it does not have');
+    expect(await page.locator('#radio-button').isVisible(), 'no radio');
+    expect((await page.evaluate(() => window.__audio.made)) === 0, 'audio before the press');
+  });
 
   await check('office: desk names on the plan clear the chairs and the builders', desk, async (page) => {
-    await page.goto(BASE, { waitUntil: 'load' });
+    await page.goto(FLAT, { waitUntil: 'load' });
     const overlaps = await page.$$eval('.plan-desk', (desks) =>
       desks
         .filter((d) => {
@@ -181,22 +183,14 @@ export async function officeChecks({ check, expect, BASE, config, name }) {
     expect(overlaps.length === 0, `labels over chairs: ${overlaps}`);
   });
 
-  await check('office: the studio is a room off the lobby, with a way back to the archive', desk, async (page) => {
-    await page.goto(BASE, { waitUntil: 'load' });
-    await page.click('.floor__enter a');
-    await page.waitForURL('**/studio.html');
-    await page.click('.titleblock__back a');
-    await page.waitForURL((url) => url.pathname === '/' && url.hash === '#archive');
-  });
-
-  await check('office: arriving at /#folder-dreaming pulls that folder', desk, async (page) => {
-    await page.goto(`${BASE}/#folder-dreaming`, { waitUntil: 'load' });
+  await check('office: arriving at /?flat#folder-dreaming pulls that folder', desk, async (page) => {
+    await page.goto(`${FLAT}#folder-dreaming`, { waitUntil: 'load' });
     await cardOpen(page);
     expect((await cardTitle(page)) === 'dreaming', `pulled ${await cardTitle(page)}`);
   });
 
   await check(
-    'office: reduced motion opens drawers without sliding and holds the replay at the end',
+    'office: reduced motion opens drawers without sliding, holds the replay, and offers the 3D room',
     { ...desk, reducedMotion: 'reduce' },
     async (page, problems) => {
       await page.goto(BASE, { waitUntil: 'load' });
@@ -205,25 +199,89 @@ export async function officeChecks({ check, expect, BASE, config, name }) {
       const duration = await page.$eval('.drawer[data-drawer="sources"]', (d) => getComputedStyle(d).transitionDuration);
       expect(duration === '0s', `drawer transition ${duration}`);
       expect((await page.locator('#replay-toggle').textContent())?.trim() === 'Play', 'replay not held');
+      expect(await page.locator('.board__row--3d a').isVisible(), 'no way into the 3D room');
       expect(problems.length === 0, problems.join(' | '));
     },
   );
 
-  await check('office (phone): no sideways scroll, and an open bottom drawer clears Reception', phone(name), async (page, problems) => {
+  for (const [size, options] of [
+    ['laptop', desk],
+    ['phone', phone(name)],
+  ]) {
+    await check(`office (${size}): every folder tab shows its whole name`, options, async (page) => {
+      await page.goto(FLAT, { waitUntil: 'load' });
+      const cut = [];
+      for (const drawer of ['inside', 'agents', 'grid', 'sources']) {
+        await page.locator(`.drawer[data-drawer="${drawer}"] .drawer__front`).scrollIntoViewIfNeeded();
+        const out = page.locator('.drawer[data-open="true"] .drawer__front');
+        if (await out.count()) {
+          await out.click({ position: { x: 24, y: 10 } });
+          await page.waitForTimeout(750);
+        }
+        const front = page.locator(`.drawer[data-drawer="${drawer}"] .drawer__front`);
+        const box = await front.boundingBox();
+        await front.click({ position: { x: 24, y: Math.max(8, box.height - 10) } });
+        await page.waitForTimeout(750);
+        cut.push(
+          ...(await page.$$eval(`.drawer[data-drawer="${drawer}"] .folder__tab`, (tabs) =>
+            tabs.filter((t) => t.scrollWidth > t.clientWidth + 1).map((t) => t.textContent),
+          )),
+        );
+      }
+      expect(cut.length === 0, `cut short: ${cut.join(', ')}`);
+    });
+  }
+
+  await check(
+    'office (phone): the flat office, no sideways scroll, no layout shift; an open bottom drawer clears Reception',
+    {
+      ...phone(name),
+      initScript: () => {
+        window.__shift = PerformanceObserver.supportedEntryTypes?.includes('layout-shift') ? 0 : null;
+        if (window.__shift === null) return;
+        new PerformanceObserver((list) => {
+          for (const e of list.getEntries()) if (!e.hadRecentInput) window.__shift += e.value;
+        }).observe({ type: 'layout-shift', buffered: true });
+      },
+    },
+    async (page, problems) => {
+      await page.goto(BASE, { waitUntil: 'load' });
+      expect((await mode(page)) === 'office', `a phone got ${await mode(page)}`);
+      await page.waitForTimeout(1500);
+      const shift = await page.evaluate(() => window.__shift);
+      if (shift !== null) expect(shift === 0, `layout shift ${shift}`);
+      const [sw, w] = await page.evaluate(() => [document.documentElement.scrollWidth, window.innerWidth]);
+      expect(sw <= w, `scrollWidth ${sw} > ${w}`);
+      await shot(page, 'top', 'phone');
+      await page.locator('#archive').scrollIntoViewIfNeeded();
+      await page.click('.drawer[data-drawer="sources"] .drawer__front', { position: { x: 20, y: 20 } });
+      await page.waitForTimeout(800);
+      const front = await page.locator('.drawer[data-drawer="sources"] .drawer__front').boundingBox();
+      const reception = await page.locator('#ask-title').boundingBox();
+      expect(front.y + front.height < reception.y, `drawer bottom ${front.y + front.height} over Reception at ${reception.y}`);
+      await shot(page, 'drawer', 'phone');
+      await page.locator('.folder[data-piece="sourced"] .folder__tab').click();
+      await cardOpen(page);
+      expect((await cardTitle(page)) === 'Sourced', 'phone folder');
+      await page.waitForTimeout(500);
+      await shot(page, 'folder', 'phone');
+      expect(problems.length === 0, problems.join(' | '));
+      return { layoutShift: shift === null ? 'not reported by this browser' : shift };
+    },
+  );
+
+  await check('office (phone): Reception’s answer opens the folder at the quoted line', phone(name), async (page) => {
     await page.goto(BASE, { waitUntil: 'load' });
-    const [sw, w] = await page.evaluate(() => [document.documentElement.scrollWidth, window.innerWidth]);
-    expect(sw <= w, `scrollWidth ${sw} > ${w}`);
-    await page.locator('#archive').scrollIntoViewIfNeeded();
-    await page.click('.drawer[data-drawer="sources"] .drawer__front', { position: { x: 20, y: 20 } });
-    await page.waitForTimeout(800);
-    const front = await page.locator('.drawer[data-drawer="sources"] .drawer__front').boundingBox();
-    const reception = await page.locator('#ask-title').boundingBox();
-    expect(front.y + front.height < reception.y, `drawer bottom ${front.y + front.height} over Reception at ${reception.y}`);
-    const gap = reception.y - (front.y + front.height);
-    await page.locator('.folder[data-piece="sourced"] .folder__tab').click();
-    await cardOpen(page);
-    expect((await cardTitle(page)) === 'Sourced', 'phone folder');
-    expect(problems.length === 0, problems.join(' | '));
-    return { gapBelowOpenDrawerPx: Math.round(gap) };
+    await page.locator('#ask').scrollIntoViewIfNeeded();
+    await page.getByRole('button', { name: 'What happens if you change one byte?' }).click();
+    await page.waitForFunction(() => document.querySelector('ask-the-record')?.result?.kind, null, { timeout: 30000 });
+    const kind = await page.evaluate(() => document.querySelector('ask-the-record').result.kind);
+    if (kind === 'answer') {
+      await cardOpen(page);
+      await page.waitForTimeout(500);
+      await shot(page, 'answer', 'phone');
+      return { opened: await cardTitle(page) };
+    }
+    return { kind };
   });
 }

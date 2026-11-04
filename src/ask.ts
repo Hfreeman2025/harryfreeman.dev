@@ -54,7 +54,16 @@ export function sourceOf(quote: unknown): { piece: PieceId } | { cv: string } | 
   return { cv: `/cv.html#:~:text=${encodeURIComponent(words).replace(/-/g, '%2D')}` };
 }
 
-export function setupAsk(options: { onAnswer: (pieces: PieceId[]) => void; onSource: (piece: PieceId) => void }): void {
+export interface AskOptions {
+  /** Runs before the element loads: whatever an answer will be marked in must be in the page first. */
+  readonly prepare?: () => Promise<unknown>;
+  readonly onAnswer: (pieces: PieceId[]) => void;
+  /** The first quote found in the page, as a range, once an answer has been marked. */
+  readonly onLocated?: (range: Range | null) => void;
+  readonly onSource: (piece: PieceId) => void;
+}
+
+export function setupAsk(options: AskOptions): void {
   const box = document.getElementById('ask-box') as AskElement | null;
   const section = document.getElementById('ask');
   if (!box || !section) return;
@@ -72,6 +81,7 @@ export function setupAsk(options: { onAnswer: (pieces: PieceId[]) => void; onSou
       const src = box.dataset.src;
       if (!src) return false;
       box.setAttribute('src', src);
+      await options.prepare?.();
       try {
         await import(/* @vite-ignore */ new URL(ELEMENT_URL, location.href).href);
       } catch (error) {
@@ -124,6 +134,11 @@ export function setupAsk(options: { onAnswer: (pieces: PieceId[]) => void; onSou
     options.onAnswer(piecesQuoted(detail?.result));
   });
   box.addEventListener('ask-the-record:clear', () => options.onAnswer([]));
+  box.addEventListener('ask-the-record:located', (event) => {
+    const located = (event as CustomEvent<{ located?: ReadonlyArray<{ range?: unknown }> }>).detail?.located;
+    const range = located?.[0]?.range;
+    options.onLocated?.(range instanceof Range ? range : null);
+  });
   // The record merges eleven sources into one page, so its own section links would go nowhere here.
   box.addEventListener('ask-the-record:source', (event) => {
     const target = sourceOf((event as CustomEvent<{ quote?: unknown }>).detail?.quote);

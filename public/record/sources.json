@@ -1,5 +1,5 @@
 {
-  "builtAt": "2026-11-03T16:01:32.123Z",
+  "builtAt": "2026-11-04T16:27:03.729Z",
   "sources": [
     {
       "section": "Harry Freeman’s CV",
@@ -19,8 +19,8 @@
       "section": "Real or Hallucinated?",
       "piece": "real-or-hallucinated",
       "path": "~/Personal/lab/real-or-hallucinated/README.md",
-      "sha256": "15dc2a958e4ec44c412072fcaf67be3e32ef5634034647478c5465a24c993d89",
-      "bytes": 17439
+      "sha256": "40a07b6f511eb96b31175924ab7197412f93ffdec56f7d9d12837f8a35dc3df0",
+      "bytes": 17563
     },
     {
       "section": "Agent Race",
@@ -47,15 +47,15 @@
       "section": "Listen to the Grid",
       "piece": "listen-to-the-grid",
       "path": "~/Personal/lab/listen-to-the-grid/README.md",
-      "sha256": "139e5b7948bfc95de8239eec39091cd87a83ae349f8e8f6aa0cdaabbe7360b92",
-      "bytes": 14013
+      "sha256": "525e40f7140ce162e4a45646feaddcc5b76ff1882f1d615fbb488af59ac9b275",
+      "bytes": 14832
     },
     {
       "section": "Sourced",
       "piece": "sourced",
       "path": "~/Personal/lab/sourced/README.md",
-      "sha256": "8af038519ab67ec8ae32d60b23e221eb7c631dab225bbf3cf50c31c2dbe9030b",
-      "bytes": 27262
+      "sha256": "a863ecec481a8ff0fd39c92b852ad27c2bb2f4019b6e0cd3586c83be542761b6",
+      "bytes": 28099
     },
     {
       "section": "ask-the-record",

@@ -5,7 +5,7 @@
 import { PIECE_IDS, type PieceId } from '../content/pieces';
 
 export type Vec3 = readonly [number, number, number];
-export type Material = 'card' | 'wood' | 'grey' | 'dark' | 'cork' | 'screen';
+export type Material = 'card' | 'wood' | 'grey' | 'dark' | 'cork' | 'screen' | 'steel' | 'radio';
 
 export interface Box {
   readonly min: Vec3;
@@ -85,7 +85,21 @@ export const REVIEW = {
 } as const;
 
 /** The accepted board: a pinboard on legs to the right of the review table, facing the room's front. */
-export const BOARD = { x: 3.4, z: 3.35, width: 2.0, height: 0.95, bottom: 0.95 } as const;
+/** The accepted board: a cork board on the back wall, right of the briefs. */
+export const BOARD = { x: 4.1, z: ROOM.z0 + 0.03, width: 2.0, height: 0.95, bottom: 1.05 } as const;
+
+/** The filing cabinet stands just inside the door on the left, facing the door. */
+export const CABINET = { x: -4.7, z: 3.25, width: 1.0, height: 1.42, depth: 0.7, drawers: 4, plinth: 0.08 } as const;
+
+/** Reception: a counter just inside the door on the right. */
+export const RECEPTION = { x: 4.6, z: 3.35, width: 2.1, depth: 0.72, height: 1.02 } as const;
+
+/** A shelf on the back wall with the radio on it, left of the briefs. */
+export const SHELF = { x: -2.2, y: 1.22, width: 0.95, depth: 0.3 } as const;
+export const RADIO = { x: -2.2, width: 0.56, height: 0.34, depth: 0.22 } as const;
+
+/** The grid sign: a plate on the back wall, far left. */
+export const SIGN = { x: -5.8, y: 1.9, width: 1.1, height: 0.62 } as const;
 
 /** The brief: a drafting table against the back wall with the three briefs pinned above it. */
 export const BRIEF = {
@@ -166,10 +180,33 @@ export function staticBoxes(): Box[] {
   );
 
   const b = BOARD;
+  boxes.push(box([b.x - b.width / 2, b.bottom, ROOM.z0], [b.x + b.width / 2, b.bottom + b.height, ROOM.z0 + 0.04], 'cork'));
+
+  // The cabinet's carcass (its drawers move, so they are drawn live), the counter, the shelf, the
+  // radio and the sign plate.
+  const c = CABINET;
+  boxes.push(box([c.x - c.width / 2, 0, c.z - c.depth / 2], [c.x + c.width / 2, c.height, c.z + c.depth / 2], 'steel'));
+  const rc = RECEPTION;
   boxes.push(
-    box([b.x - b.width / 2, b.bottom, b.z - 0.02], [b.x + b.width / 2, b.bottom + b.height, b.z + 0.02], 'cork'),
-    box([b.x - b.width / 2 + 0.1, 0, b.z - 0.03], [b.x - b.width / 2 + 0.15, b.bottom, b.z + 0.03], 'dark'),
-    box([b.x + b.width / 2 - 0.15, 0, b.z - 0.03], [b.x + b.width / 2 - 0.1, b.bottom, b.z + 0.03], 'dark'),
+    box([rc.x - rc.width / 2, 0, rc.z - rc.depth / 2], [rc.x + rc.width / 2, rc.height, rc.z + rc.depth / 2], 'wood'),
+    box(
+      [rc.x - rc.width / 2 - 0.03, rc.height, rc.z - rc.depth / 2 - 0.03],
+      [rc.x + rc.width / 2 + 0.03, rc.height + 0.04, rc.z + rc.depth / 2 + 0.03],
+      'card',
+    ),
+  );
+  boxes.push(
+    box([SHELF.x - SHELF.width / 2, SHELF.y - 0.04, ROOM.z0], [SHELF.x + SHELF.width / 2, SHELF.y, ROOM.z0 + SHELF.depth], 'wood'),
+    box(
+      [RADIO.x - RADIO.width / 2, SHELF.y, ROOM.z0 + 0.04],
+      [RADIO.x + RADIO.width / 2, SHELF.y + RADIO.height, ROOM.z0 + 0.04 + RADIO.depth],
+      'radio',
+    ),
+    box(
+      [SIGN.x - SIGN.width / 2, SIGN.y - SIGN.height / 2, ROOM.z0],
+      [SIGN.x + SIGN.width / 2, SIGN.y + SIGN.height / 2, ROOM.z0 + 0.025],
+      'card',
+    ),
   );
 
   const bt = BRIEF.table;

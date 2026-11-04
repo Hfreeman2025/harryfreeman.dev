@@ -6,7 +6,7 @@ import { marked } from 'marked';
 import { defineConfig, type Plugin } from 'vite';
 import { BRIEFS_HTML } from './src/content/briefs';
 import { parseConfig } from './src/content/config';
-import { renderLabels, renderList, renderTimelineJson } from './src/content/render';
+import { renderList, renderRoomLabels, renderTimelineJson } from './src/content/render';
 import { renderCabinet, renderDirectory, renderPlan } from './src/office/render';
 import placeholder from './src/timeline/placeholder.json' with { type: 'json' };
 import { parseTimeline, type Timeline } from './src/timeline/schema';
@@ -111,18 +111,18 @@ function studio(): Plugin {
           const body = marked.parse(readFileSync(join(root, 'src/content/cv.md'), 'utf8'), { async: false });
           return html.replace('<!--cv:body-->', body).replaceAll('%EMAIL%', config.email).replaceAll('%LINKEDIN%', config.linkedin);
         }
-        if (!ctx.filename.endsWith('index.html') && !ctx.filename.endsWith('studio.html')) return html;
+        if (!ctx.filename.endsWith('index.html')) return html;
         const source = loadTimeline(strict);
         const status = source.problem
           ? `<p class="timeline-problem" role="alert">The real timeline could not be read (${source.problem.replace(/[<>&]/g, '')}). Playing the placeholder instead.</p>`
           : '';
         return html
-          .replace('<!--studio:labels-->', renderLabels())
+          .replace('<!--room:labels-->', renderRoomLabels())
           .replace('<!--studio:briefs-->', BRIEFS_HTML)
           .replace('<!--office:directory-->', renderDirectory())
           .replace('<!--office:cabinet-->', renderCabinet())
           .replace('<!--office:plan-->', renderPlan())
-          .replace('<!--studio:list-->', renderList(config, source.timeline, ctx.filename.endsWith('studio.html') ? 'studio' : 'office'))
+          .replace('<!--studio:list-->', renderList(config, source.timeline))
           .replace('<!--studio:timeline-->', renderTimelineJson(source.timeline) + status)
           .replaceAll('%CV%', config.cv)
           .replaceAll('%EMAIL%', config.email)
@@ -150,6 +150,9 @@ export default defineConfig({
   plugins: [studio()],
   build: {
     target: 'es2022',
+    // No injected modulepreload links: WebKit warns when one re-preloads a chunk the page already ran.
+    // The page starts its own lazy chunks in parallel instead (src/main.ts).
+    modulePreload: false,
     // Three.js is one chunk by nature, loaded after first paint.
     chunkSizeWarningLimit: 700,
     rollupOptions: {
@@ -157,7 +160,6 @@ export default defineConfig({
         index: join(root, 'index.html'),
         cv: join(root, 'cv.html'),
         terminal: join(root, 'terminal.html'),
-        studio: join(root, 'studio.html'),
       },
     },
   },

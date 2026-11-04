@@ -2,8 +2,9 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { piecesQuoted, sourceOf } from '../src/ask';
 import { parseConfig } from '../src/content/config';
+import { DRAWERS } from '../src/content/drawers';
 import { PIECE_IDS, PIECES } from '../src/content/pieces';
-import { esc, openLabel, renderLabels, renderList } from '../src/content/render';
+import { esc, openLabel, renderList, renderRoomLabels } from '../src/content/render';
 import { parseCast } from '../src/terminal-cast';
 import placeholder from '../src/timeline/placeholder.json' with { type: 'json' };
 import { parseTimeline } from '../src/timeline/schema';
@@ -25,7 +26,6 @@ describe('content', () => {
       readFileSync(new URL('../src/content/cv.md', import.meta.url), 'utf8'),
       JSON.stringify(PIECES),
       readFileSync(new URL('../index.html', import.meta.url), 'utf8'),
-      readFileSync(new URL('../studio.html', import.meta.url), 'utf8'),
     ].join('\n');
     expect(text).not.toMatch(/Simply\s*(Sustainable|Carbon)/i);
     expect(text).not.toMatch(/redacted-term|redacted-term|redacted-term|redacted-term/);
@@ -63,15 +63,27 @@ describe('render', () => {
     expect(esc(`<a href="x">'&'</a>`)).toBe('&lt;a href=&quot;x&quot;&gt;&#39;&amp;&#39;&lt;/a&gt;');
   });
 
-  it('renders every desk as a real link, plus the brief', () => {
-    const labels = renderLabels();
-    for (const id of PIECE_IDS) expect(labels).toContain(`href="#work-${id}"`);
-    expect(labels).toContain('href="#brief"');
-    expect(labels).toContain('>Accepted<');
+  it('renders every object in the room as a real link or button, hidden until the room places it', () => {
+    const labels = renderRoomLabels();
+    for (const id of PIECE_IDS) {
+      expect(labels).toContain(`data-target="desk:${id}" data-at="door"`);
+      expect(labels).toContain(`href="#folder-${id}" data-target="folder:${id}" data-at="cabinet" data-place="centre"`);
+    }
+    for (const d of DRAWERS)
+      expect(labels).toContain(`data-target="drawer:${d.id}" data-at="cabinet" data-place="cover" aria-expanded="false"`);
+    for (const target of ['cabinet', 'reception', 'brief', 'reviewer', 'board']) expect(labels).toContain(`data-target="${target}"`);
+    const tags = labels.match(/<(a|button) [^>]*>/g) ?? [];
+    expect(tags.length).toBe(2 + 10 + 3 + 4 + 10);
+    for (const tag of tags) expect(tag).toMatch(/^<(a|button) hidden tabindex="0" /);
+  });
+
+  it('files each drawer’s folders straight after it, so Tab goes from a drawer into its folders', () => {
+    const order = [...renderRoomLabels().matchAll(/data-target="((drawer|folder):[^"]+)"/g)].map((m) => m[1]);
+    expect(order).toEqual(DRAWERS.flatMap((d) => [`drawer:${d.id}`, ...d.pieces.map((p) => `folder:${p}`)]));
   });
 
   it('renders the list with open links from the config and labels the placeholder', () => {
-    const list = renderList(config, timeline, 'office');
+    const list = renderList(config, timeline);
     for (const id of PIECE_IDS) expect(list).toContain(`id="work-${id}"`);
     expect(list).toContain('href="http://127.0.0.1:4317/"');
     expect(list.match(/placeholder timeline, not the real record/g)?.length).toBe(10);
@@ -80,14 +92,13 @@ describe('render', () => {
   });
 
   it('does not label a real timeline as a placeholder', () => {
-    const list = renderList(config, { ...timeline, placeholder: false }, 'studio');
+    const list = renderList(config, { ...timeline, placeholder: false });
     expect(list).not.toContain('placeholder timeline');
     expect(list).toContain('the times are inferred');
   });
 
-  it('links each tool between the rooms: office to desk, studio to folder', () => {
-    expect(renderList(config, timeline, 'office')).toContain('href="/studio.html#desk-gridtop"');
-    expect(renderList(config, timeline, 'studio')).toContain('href="/#folder-gridtop"');
+  it('links each entry in the list back to its folder in the cabinet', () => {
+    expect(renderList(config, timeline)).toContain('<a href="#folder-gridtop" data-piece="gridtop">Pull its folder from the cabinet</a>');
   });
 });
 

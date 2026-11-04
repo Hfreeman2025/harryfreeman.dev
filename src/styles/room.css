@@ -1,0 +1,689 @@
+/* One building, two renderings. Without a mode (no script) and in the office mode, the hall's
+   contents flow into the lobby as the flat office. In the room mode, the hall is the lit 3D studio
+   seen from the door, and everything in it is placed over the model by the engine. */
+
+:root {
+  --room: #15120e;
+  --card: #ece6da;
+  --card-ink: #1b1712;
+  --amber: #f2b544;
+  --vermilion: #ef6a4c;
+}
+
+[hidden] {
+  /* biome-ignore lint/complexity/noImportantStyles: hidden must win over every display rule here. */
+  display: none !important;
+}
+
+/* ---------- Shared: the grid sign, the radio, the README lines ---------- */
+.grid-sign {
+  padding: 12px 16px 13px;
+  background: #fff;
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  border-top: 6px solid var(--sign);
+  border-radius: 3px;
+  font-size: 14.5px;
+  line-height: 1.4;
+}
+.grid-sign__title {
+  font: 600 15px / 1.2 var(--cond);
+  letter-spacing: 0.02em;
+  color: var(--sign);
+}
+.grid-sign__value {
+  margin-top: 4px;
+  font: 500 21px / 1.2 var(--mono);
+}
+.grid-sign[data-state="unavailable"] .grid-sign__value,
+.grid-sign[data-state="loading"] .grid-sign__value {
+  font: 600 19px / 1.2 var(--cond);
+  color: var(--ink-2);
+}
+.grid-sign__detail,
+.grid-sign__light {
+  color: var(--ink-2);
+}
+.grid-sign__source {
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--ink-3);
+}
+.grid-sign__light {
+  display: none;
+}
+
+.radio {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 2px 12px;
+  padding: 10px 14px;
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  font-size: 14px;
+}
+.radio__button {
+  grid-row: span 2;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 6px 12px 7px 30px;
+  position: relative;
+  font: 600 16px / 1.1 var(--cond);
+  color: #fff;
+  background: #7b2f22;
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.radio__button::before {
+  content: "";
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  margin-top: -5px;
+  border-radius: 50%;
+  background: #3b3f3a;
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.4);
+}
+.radio__button[aria-pressed="true"]::before {
+  background: #5fd38a;
+  box-shadow: 0 0 6px #5fd38a;
+}
+.radio__what {
+  font-weight: 400;
+  opacity: 0.85;
+}
+.radio__state {
+  font-family: var(--mono);
+  font-size: 13px;
+}
+.radio[data-state="failed"] .radio__state {
+  color: var(--red);
+}
+.radio__credit {
+  font-size: 12.5px;
+  color: var(--ink-3);
+}
+
+.readme {
+  margin-top: 18px;
+  padding-top: 10px;
+  border-top: 1px solid #d9cfb5;
+}
+.readme summary {
+  font: 600 16px / 1.3 var(--cond);
+  cursor: pointer;
+}
+.readme__lines {
+  position: relative;
+  max-height: 320px;
+  overflow: auto;
+  margin-top: 8px;
+  padding: 6px 0;
+  background: #fff;
+  border: 1px solid #e3dccb;
+  font: 400 12.5px / 1.55 var(--mono);
+}
+.readme__lines .ln {
+  display: grid;
+  grid-template-columns: 3.2em minmax(0, 1fr);
+  gap: 10px;
+  padding: 0 10px;
+}
+.readme__lines .no {
+  color: #9a9282;
+  text-align: right;
+  user-select: none;
+}
+.readme__lines .tx {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.readme__lines .mk {
+  color: #9a9282;
+}
+.readme__lines .h .tx {
+  font-weight: 600;
+}
+::highlight(ask-the-record) {
+  background-color: #f6d76b;
+  color: #1e2225;
+}
+::highlight(ask-the-record-words) {
+  text-decoration: underline 2px #b3352a;
+}
+::highlight(ask-the-record-leans) {
+  text-decoration: underline dotted 2px #1d5a44;
+}
+::highlight(ask-the-record-closest) {
+  background-color: #e7e3d6;
+}
+
+.folder-card__nav {
+  position: absolute;
+  top: 18px;
+  right: 22px;
+  display: flex;
+  gap: 8px;
+}
+.folder-card__nav .folder-card__back {
+  position: static;
+}
+
+.room__status:empty {
+  display: none;
+}
+.room__status {
+  grid-column: 1 / -1;
+  color: var(--ink-2);
+  font-size: 15px;
+}
+
+/* ---------- The flat office ---------- */
+html:not([data-mode="room"]) .hall {
+  display: contents;
+}
+html:not([data-mode="room"]) .room,
+html[data-mode="room"] .board__row--office,
+html[data-mode="room"] .board__row--3d {
+  display: none;
+}
+@media (max-width: 999px) {
+  .board__row--3d {
+    display: none;
+  }
+}
+@media (min-width: 761px) {
+  html:not([data-mode="room"]) .board {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  html:not([data-mode="room"]) .grid-sign {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  html:not([data-mode="room"]) .radio {
+    grid-column: 1;
+    grid-row: 3;
+  }
+  html:not([data-mode="room"]) .archive {
+    grid-column: 2;
+    grid-row: 1 / span 4;
+  }
+  html:not([data-mode="room"]) .ask {
+    grid-column: 3;
+    grid-row: 1 / span 4;
+  }
+}
+@media (min-width: 761px) and (max-width: 1180px) {
+  html:not([data-mode="room"]) .ask {
+    grid-column: 1 / -1;
+    grid-row: 5;
+  }
+}
+
+/* ---------- The room ---------- */
+html[data-mode="room"] .lobby {
+  grid-template-columns: minmax(320px, 390px) minmax(0, 1fr);
+  gap: 0;
+  padding: 0;
+  align-items: stretch;
+}
+html[data-mode="room"] .board {
+  padding: 20px;
+  height: 100svh;
+  min-height: 620px;
+  overflow: auto;
+}
+html[data-mode="room"] .hall {
+  position: relative;
+  height: 100svh;
+  min-height: 620px;
+  overflow: hidden;
+  background: var(--room);
+  color: var(--ink);
+}
+html[data-mode="room"] .archive,
+html[data-mode="room"] .floor {
+  display: none;
+}
+.room {
+  position: absolute;
+  inset: 0;
+}
+.room__title {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.room__poster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.room__stage {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 500ms ease;
+}
+html[data-stage="live"] .room__stage {
+  opacity: 1;
+}
+.room__stage canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: manipulation;
+}
+.room__labels {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.room__labels > *,
+html[data-mode="room"] .grid-sign,
+html[data-mode="room"] .radio {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 2;
+  pointer-events: auto;
+  will-change: transform;
+}
+html[data-mode="room"]:not([data-stage="live"]) .grid-sign,
+html[data-mode="room"]:not([data-stage="live"]) .radio {
+  visibility: hidden;
+}
+html[data-mode="room"] :focus-visible {
+  outline-color: var(--amber);
+}
+
+/* Labels: cards on short leaders, over what they name. */
+.desk-label,
+.obj {
+  display: grid;
+  padding: 2px 8px 3px;
+  background: var(--card);
+  color: var(--card-ink);
+  font: 500 14px / 1.3 var(--cond);
+  text-align: left;
+  text-decoration: none;
+  white-space: nowrap;
+  border: 0;
+  border-radius: 2px;
+  box-shadow: 0 1px 0 rgb(0 0 0 / 0.35);
+  cursor: pointer;
+  transition: background-color 160ms ease;
+}
+.desk-label::after,
+.obj--place::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  width: 1px;
+  height: var(--leader, 16px);
+  background: rgb(236 230 218 / 0.75);
+}
+.obj__name {
+  font-weight: 600;
+}
+.obj__note {
+  font-size: 12.5px;
+  color: #5e5546;
+}
+/* A drawer's button lies over its front: the 3D card holder is the label you read. */
+.obj--drawer {
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 3px;
+}
+.obj--drawer .obj__name,
+.obj--drawer .obj__note {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.obj.obj--drawer:hover,
+.obj.obj--drawer[data-hot="true"] {
+  background: rgb(242 181 68 / 0.14);
+  outline: 2px solid rgb(242 181 68 / 0.7);
+}
+.obj.obj--drawer:focus-visible {
+  background: rgb(242 181 68 / 0.14);
+  outline: 3px solid var(--amber);
+  outline-offset: 2px;
+}
+.obj.obj--drawer[aria-expanded="true"] {
+  background: transparent;
+}
+/* A folder's name, printed on its tab. */
+.obj--folder {
+  padding: 1px 7px 2px;
+  background: #efd8a6;
+  color: #3b2f17;
+  border: 1px solid #b99857;
+  box-shadow: none;
+  font-size: 13px;
+}
+.obj--folder .obj__name {
+  font-weight: 600;
+}
+.desk-label__state {
+  display: none;
+  font-size: 12px;
+  color: #5e5546;
+}
+.desk-label[data-state]:not([data-state=""]) .desk-label__state {
+  display: block;
+}
+.desk-label[data-flash="returned"] {
+  background: var(--vermilion);
+}
+.desk-label[data-flash="accepted"],
+.desk-label:hover,
+.desk-label[data-hot="true"],
+.obj:hover,
+.obj[data-hot="true"],
+.desk-label:focus-visible,
+.obj:focus-visible,
+.obj[aria-expanded="true"] {
+  background: var(--amber);
+}
+.desk-label[data-answering="true"],
+.obj[data-answering="true"] {
+  background: var(--amber);
+  box-shadow: 0 0 0 3px rgb(242 181 68 / 0.35);
+}
+.desk-label--room {
+  background: var(--room);
+  color: var(--ink-on-dark, #f1ebe1);
+  border: 1px solid rgb(241 235 225 / 0.45);
+  box-shadow: none;
+}
+.desk-label--room:hover,
+.desk-label--room:focus-visible {
+  background: var(--room);
+  color: var(--amber);
+  border-color: var(--amber);
+}
+
+/* The sign and the radio, in the room: cards above the back wall, on lines down to the plate and the
+   radio on its shelf. */
+html[data-mode="room"] .grid-sign {
+  width: 196px;
+  padding: 7px 10px 8px;
+  font-size: 11.5px;
+  line-height: 1.35;
+  border-top-width: 4px;
+  box-shadow: 0 6px 16px -8px rgb(0 0 0 / 0.6);
+}
+html[data-mode="room"] .grid-sign__title {
+  font-size: 12.5px;
+}
+html[data-mode="room"] .grid-sign__value {
+  margin-top: 2px;
+  font-size: 14.5px;
+}
+html[data-mode="room"] .grid-sign[data-state="unavailable"] .grid-sign__value,
+html[data-mode="room"] .grid-sign[data-state="loading"] .grid-sign__value {
+  font-size: 15px;
+}
+html[data-mode="room"] .grid-sign__source {
+  font-size: 10.5px;
+  margin-top: 2px;
+}
+html[data-mode="room"] .grid-sign::after,
+html[data-mode="room"] .radio::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  width: 1px;
+  height: var(--leader, 12px);
+  background: rgb(236 230 218 / 0.6);
+}
+html[data-mode="room"] .grid-sign__light {
+  display: block;
+}
+html[data-mode="room"] .radio__button {
+  white-space: nowrap;
+}
+html[data-mode="room"] .radio {
+  grid-template-columns: auto;
+  width: 200px;
+  padding: 6px 8px;
+  gap: 2px;
+  background: rgb(21 18 14 / 0.82);
+  color: #f1ebe1;
+  border-color: rgb(241 235 225 / 0.3);
+}
+html[data-mode="room"] .radio__button {
+  grid-row: auto;
+  font-size: 14px;
+}
+html[data-mode="room"] .radio__credit {
+  color: #bdb2a1;
+  font-size: 11.5px;
+}
+
+/* Where you stand decides what shows. */
+.room__back {
+  position: absolute;
+  left: 24px;
+  top: 24px;
+  z-index: 4;
+  font: 600 16px var(--cond);
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid var(--steel-edge);
+  border-radius: 3px;
+  padding: 5px 12px;
+  cursor: pointer;
+}
+html:not([data-station="cabinet"]):not([data-station="reception"]) .room__back {
+  display: none;
+}
+html[data-station="reception"] .room__back {
+  left: auto;
+  right: 24px;
+}
+html[data-mode="room"] .ask {
+  position: absolute;
+  left: 24px;
+  top: 24px;
+  z-index: 4;
+  width: min(460px, 44%);
+  max-height: calc(100% - 140px);
+  overflow: auto;
+  padding: 18px 20px 20px;
+  background: var(--wall);
+  color: var(--ink);
+  border-radius: 4px;
+  box-shadow: 0 20px 50px -20px rgb(0 0 0 / 0.7);
+}
+html[data-mode="room"]:not([data-station="reception"]) .ask {
+  display: none;
+}
+
+/* The folder beside the desk's screen. */
+html[data-mode="room"] .folder-card {
+  position: absolute;
+  inset: 24px 24px 24px auto;
+  z-index: 5;
+  width: min(560px, 46%);
+  padding: 0;
+  display: block;
+  background: none;
+  color: var(--ink);
+}
+html[data-mode="room"] .folder-card[data-open="true"] {
+  background: none;
+}
+html[data-mode="room"] .folder-card__open {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  overflow: auto;
+  transform: none;
+}
+html[data-mode="room"] .folder-card__leaf--text {
+  display: contents;
+}
+html[data-mode="room"] #card-body {
+  order: 1;
+  margin: 0 12px;
+  padding: 16px 20px 18px;
+  background: #fbfaf5;
+  border: 1px solid #d9cfb5;
+}
+html[data-mode="room"] .folder-card__leaf--loop {
+  order: 2;
+  border-right: 0;
+  padding: 14px 18px 4px;
+}
+html[data-mode="room"] .readme {
+  order: 3;
+  margin: 0 12px 14px;
+  padding: 8px 12px 10px;
+  background: #fbfaf5;
+  border: 1px solid #d9cfb5;
+}
+html[data-mode="room"] .folder-card__video {
+  display: none;
+}
+/* The way back stays in reach however far the folder is scrolled. */
+html[data-mode="room"] .folder-card__open {
+  align-items: stretch;
+}
+html[data-mode="room"] .folder-card__nav {
+  position: sticky;
+  top: 0;
+  right: auto;
+  z-index: 2;
+  order: 0;
+  justify-content: flex-end;
+  padding: 10px 14px;
+  background: var(--manila);
+  border-bottom: 1px solid var(--manila-edge);
+  margin-bottom: 12px;
+}
+html[data-mode="room"] .folder-card__leaf--text .work__title,
+html[data-mode="room"] #card-body .work__title {
+  padding-right: 0;
+}
+html[data-mode="room"] .folder-card {
+  font-size: 15px;
+}
+html[data-mode="room"] #card-body .work__line {
+  font-size: 16.5px;
+}
+html[data-mode="room"] #card-body .work__technique,
+html[data-mode="room"] #card-body li {
+  font-size: 14.5px;
+}
+html[data-mode="room"] .folder-card__recorded {
+  font-size: 12px;
+}
+.room__screen {
+  position: absolute;
+  z-index: 3;
+  object-fit: cover;
+  background: #000;
+}
+
+/* The replay's caption, under the room. */
+.room__caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  padding: 12px 24px 14px;
+  background: linear-gradient(transparent, rgb(21 18 14 / 0.88) 36%);
+  color: #f1ebe1;
+  pointer-events: none;
+}
+.room__caption {
+  /* A fixed box, filled from the top, one line per row: the replay moving in and its text changing
+     move nothing on the page. */
+  height: 104px;
+  overflow: hidden;
+}
+.room__caption .replay {
+  pointer-events: auto;
+  margin: 0;
+  max-width: none;
+  color: #f1ebe1;
+  grid-template-rows: 22px 22px 22px;
+  grid-auto-rows: 0;
+  row-gap: 0;
+  align-content: start;
+}
+.room__caption .replay__now,
+.room__caption .replay__evidence,
+.room__caption .replay__note {
+  height: 22px;
+  line-height: 22px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.room__caption .replay__evidence:empty {
+  display: block;
+}
+/* Mono time and sans text share a line; top-aligned, the line does not move when the text changes. */
+.room__caption .replay__now > span {
+  display: inline-block;
+  height: 22px;
+  line-height: 22px;
+  vertical-align: top;
+}
+.room__caption .replay__evidence,
+.room__caption .replay__note {
+  color: #bdb2a1;
+}
+html[data-station="desk"] .room__caption,
+html[data-station="reception"] .room__caption {
+  display: none;
+}
+html[data-mode="room"] .room__status {
+  position: absolute;
+  left: 24px;
+  bottom: 110px;
+  z-index: 4;
+  max-width: 440px;
+  color: #f1ebe1;
+}
+
+/* Photo mode: the bare model, for the poster and the social image. */
+html[data-photo] .lobby {
+  grid-template-columns: 1fr;
+}
+html[data-photo] .board,
+html[data-photo] .room__labels,
+html[data-photo] .room__poster,
+html[data-photo] .room__caption,
+html[data-photo] .grid-sign,
+html[data-photo] .radio,
+html[data-photo] .room__back {
+  /* biome-ignore lint/complexity/noImportantStyles: photo mode hides these whatever their state. */
+  display: none !important;
+}

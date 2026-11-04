@@ -27,6 +27,8 @@ const MATERIAL_COLOUR: Record<Material, string> = {
   grey: PALETTE.grey,
   dark: PALETTE.dark,
   cork: PALETTE.cork,
+  steel: '#b4b8ac',
+  radio: '#7b2f22',
   screen: '#000000',
 };
 
@@ -41,6 +43,8 @@ export interface Model {
   readonly pools: ReadonlyMap<PieceId, Mesh<PlaneGeometry, MeshBasicMaterial>>;
   readonly boardSheets: ReadonlyMap<PieceId, Mesh<PlaneGeometry, MeshBasicMaterial>>;
   readonly briefGlow: ReadonlyMap<string, Mesh<PlaneGeometry, MeshBasicMaterial>>;
+  /** The baked floor and workbench, tinted when the room's light changes. */
+  readonly baked: readonly MeshBasicMaterial[];
 }
 
 /** The atlas holds ten loops in a 5 × 2 grid, in desk order. */
@@ -224,6 +228,7 @@ export function buildModel(floor: Texture, ground: Texture, poster: Texture): Mo
 
   return {
     group,
+    baked: [groundMesh.material, floorMesh.material],
     screens: {
       meshes: screenMeshes,
       setTexture(texture: Texture) {

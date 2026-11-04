@@ -1,10 +1,11 @@
-// Server-side HTML for the desks: the labels over the model and the full list below it. Rendered
-// into index.html at build time, so every desk is a real link before any script runs.
+// Server-side HTML for the room's labels and the full list of folders. Rendered into index.html at
+// build time, so every tool is a real link before any script runs.
 
 import type { Timeline } from '../timeline/schema';
 import { pieceRecord } from '../timeline/schema';
 import type { SiteConfig } from './config';
-import { PIECES, type Piece } from './pieces';
+import { DRAWERS } from './drawers';
+import { PIECES, type Piece, pieceById } from './pieces';
 
 const ESCAPES: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
 export function esc(text: string): string {
@@ -31,34 +32,45 @@ export function recordLine(timeline: Timeline, piece: Piece): { builder: string;
   return { builder: record.builder.label, reviewer: record.reviewer.label, rounds };
 }
 
-export function renderLabels(): string {
+/**
+ * The labels over the room: real buttons and links, placed over what they name by the engine.
+ * `data-target` says what each names, `data-at` where you must stand to see it.
+ */
+export function renderRoomLabels(): string {
+  const objects = [
+    `<button type="button" class="obj obj--place" data-target="cabinet" data-at="door"><span class="obj__name">Filing cabinet</span><span class="obj__note">ten tools in four drawers</span></button>`,
+    `<button type="button" class="obj obj--place" data-target="reception" data-at="door"><span class="obj__name">Reception</span><span class="obj__note">ask about Harry or any tool</span></button>`,
+  ];
   const desks = PIECES.map(
     (p) =>
-      `<a class="desk-label" href="#work-${p.id}" data-piece="${p.id}"><span class="desk-label__name">${esc(p.title)}</span><span class="desk-label__state" aria-hidden="true"></span></a>`,
-  ).join('');
+      `<a class="desk-label" href="#folder-${p.id}" data-target="desk:${p.id}" data-at="door" data-piece="${p.id}"><span class="desk-label__name">${esc(p.title)}</span><span class="desk-label__state" aria-hidden="true"></span></a>`,
+  );
   const furniture = [
     ['brief', '#brief', 'The brief'],
     ['reviewer', '#brief', 'The reviewer'],
-    ['board', '#work', 'Accepted'],
-  ]
-    .map(
-      ([key, href, name]) =>
-        `<a class="desk-label desk-label--room" href="${href}" data-piece="${key}"><span class="desk-label__name">${name}</span></a>`,
-    )
-    .join('');
-  return desks + furniture;
+    ['board', '#files', 'Accepted'],
+  ].map(
+    ([key, href, name]) =>
+      `<a class="desk-label desk-label--room" href="${href}" data-target="${key}" data-at="door"><span class="desk-label__name">${name}</span></a>`,
+  );
+  // Each drawer, then the folders in it, so Tab goes from a drawer into its folders.
+  const filed = DRAWERS.flatMap((d) => [
+    `<button type="button" class="obj obj--drawer" data-target="drawer:${d.id}" data-at="cabinet" data-place="cover" aria-expanded="false"><span class="obj__name">${esc(d.label)}</span><span class="obj__note">${esc(d.position)}</span></button>`,
+    ...d.pieces.map(
+      (id) =>
+        `<a class="obj obj--folder" href="#folder-${id}" data-target="folder:${id}" data-at="cabinet" data-place="centre" data-piece="${id}"><span class="obj__name">${esc(pieceById(id).title)}</span></a>`,
+    ),
+  ]);
+  // Hidden until the engine places them, so nothing shows or takes focus before the room is up. An
+  // explicit tabindex puts them in Safari's Tab order too, which by default skips links and buttons.
+  return [...objects, ...desks, ...furniture, ...filed].map((html) => html.replace(/^<(a|button) /, '<$1 hidden tabindex="0" ')).join('\n');
 }
 
-/** Which room a list is in: the office links each tool to its desk, the studio to its folder. */
-export type Room = 'office' | 'studio';
-
-function crossLink(piece: Piece, room: Room): string {
-  return room === 'office'
-    ? `<p class="work__elsewhere"><a href="/studio.html#desk-${piece.id}">See its desk on the studio floor</a></p>`
-    : `<p class="work__elsewhere"><a href="/#folder-${piece.id}">Find its folder in the archive</a></p>`;
+function crossLink(piece: Piece): string {
+  return `<p class="work__elsewhere"><a href="#folder-${piece.id}" data-piece="${piece.id}">Pull its folder from the cabinet</a></p>`;
 }
 
-function renderPiece(piece: Piece, config: SiteConfig, timeline: Timeline, room: Room): string {
+function renderPiece(piece: Piece, config: SiteConfig, timeline: Timeline): string {
   const url = config.pieces[piece.id];
   const record = recordLine(timeline, piece);
   const placeholder = timeline.placeholder
@@ -84,13 +96,13 @@ function renderPiece(piece: Piece, config: SiteConfig, timeline: Timeline, room:
     </div>
     ${run}
     <p class="work__open"><a class="open" href="${esc(url)}">Open ${esc(piece.title)}</a><span class="work__where">${esc(openLabel(piece, url))}</span></p>
-    ${crossLink(piece, room)}
+    ${crossLink(piece)}
   </div>
 </li>`;
 }
 
-export function renderList(config: SiteConfig, timeline: Timeline, room: Room): string {
-  return PIECES.map((p) => renderPiece(p, config, timeline, room)).join('\n');
+export function renderList(config: SiteConfig, timeline: Timeline): string {
+  return PIECES.map((p) => renderPiece(p, config, timeline)).join('\n');
 }
 
 /** The timeline goes into the page as inert JSON for the replay; the page re-validates it. */
