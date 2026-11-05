@@ -738,15 +738,15 @@ export class Nameplate {
   }
 }
 
-/** Harry's card, lying on the desk by the nameplate: his intro and his links printed on it. */
-export const BCARD = { width: 14.4, depth: 7.9, inset: 0.62 } as const;
+/** Harry's card, a 5 × 7 inch card lying on the desk by the nameplate: his intro and his links printed on it. */
+export const BCARD = { width: 13.2, depth: 9.4, inset: 0.62 } as const;
 export class BusinessCard {
   readonly group = new Group();
   readonly faceMesh: Mesh;
   /** Where each link is printed on the face, from its top left (0 to 1). */
   readonly links: FaceBox[] = [];
-  // The text area's aspect, about 2.03 to 1.
-  readonly #print = new Printed(1300, 640);
+  // The text area's aspect, about 1.49 to 1.
+  readonly #print = new Printed(1300, 872);
   #words: { intro: string; links: readonly CardLink[] } = { intro: '', links: [] };
   #focus: number | null = null;
   #hover: number | null = null;
@@ -774,8 +774,12 @@ export class BusinessCard {
     const i = this.links.findIndex((b) => inBox(b, u, 1 - v));
     return i === -1 ? null : i;
   }
+  /** The intro's type size on the card's 1300-pixel-wide print. */
+  introPx = 0;
   #redraw(): void {
-    this.#print.draw(paintCard(this.#words.intro, this.#words.links, PAPER, this.#focus, this.#hover, this.links));
+    const set = { px: 0 };
+    this.#print.draw(paintCard(this.#words.intro, this.#words.links, PAPER, this.#focus, this.#hover, this.links, set));
+    this.introPx = set.px;
   }
   constructor() {
     const card = new Mesh(new BoxGeometry(BCARD.width, 0.08, BCARD.depth), flat(PAPER));

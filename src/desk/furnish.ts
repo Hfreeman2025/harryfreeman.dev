@@ -29,7 +29,10 @@ import {
 } from 'three';
 import { PIECES, type PieceId } from '../content/pieces';
 import { BLUE, CORAL, CREAM, INK, OAK, PAPER, SLATE, SUN } from './palette';
-import { FLOOR, M, ROOM } from './room';
+import { drawn } from './room';
+
+// Drawn in the room's units (room.ts); the engine sets the whole into the world with the room.
+const { FLOOR, M, ROOM } = drawn;
 
 export type Daylight = 'morning' | 'day' | 'evening' | 'night';
 

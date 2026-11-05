@@ -64,7 +64,7 @@ import {
 import { buildOffice, CABINET_AT, standAt, ZONES } from './office';
 import { CREAM } from './palette';
 import { DeskPass } from './pass';
-import { buildRoom, DOOR, FLOOR, M, ROOM as OFFICE, OUTSIDE, TABLE } from './room';
+import { buildRoom, DOOR, DRAWN, drawn, FLOOR, M, ROOM as OFFICE, OUTSIDE, TABLE, toWorld } from './room';
 
 /** 'entrance' is outside the office door; 'door' is seated at the desk (the desk's own first view); 'room' is
  * standing back by the chair, looking round the office. */
@@ -135,23 +135,28 @@ interface MountOptions {
   readonly entrance?: boolean;
 }
 
-/** The desk's layout: where each real-size thing stands, around the model at the origin. */
+/**
+ * The desk's layout: where each thing stands, around the office model at the origin. Everything on the
+ * desk is real-scale (74 units to the metre, 13.5 mm a unit) but the model, a 21 × 14 cm miniature.
+ */
 const PLACES = {
-  box: { x: -14.2, z: 0.6, turn: 0.32 },
-  stamp: { x: -10.8, z: 10.6, turn: 0.12 },
-  sticky: { x: -4.6, z: 10.3, turn: 0.1 },
-  notebook: { x: 15.4, z: -2.4, turn: -0.18 },
-  keyboard: { x: 8.6, z: 13.4, turn: -0.1 },
-  cup: { x: 10.6, z: -12.4 },
-  pencil: { x: 13.6, z: 6.6, turn: -0.5 },
+  box: { x: -18.3, z: 2.4, turn: 0.32 },
+  stamp: { x: -12.5, z: 12.4, turn: 0.12 },
+  sticky: { x: -4.0, z: 11.6, turn: 0.1 },
+  notebook: { x: 17.0, z: -1.6, turn: -0.18 },
+  keyboard: { x: 10.4, z: 14.8, turn: -0.1 },
+  cup: { x: 17.0, z: -14.0 },
+  pencil: { x: 21.0, z: 7.4, turn: 1.65 },
   // The card turned square to the door camera (its azimuth, -12°), so its lines read level; the mic
-  // between them.
-  nameplate: { x: -19.4, z: -13.4, turn: -0.04 },
-  mic: { x: -11.2, z: -11.4, turn: 0.15 },
+  // between it and the nameplate.
+  nameplate: { x: -25.6, z: -17.8, turn: -0.04 },
+  mic: { x: -12.6, z: -13.2, turn: 0.15 },
   // The ultrawide at the back of the desk: seated, only its lower edge shows, along the top of the view.
-  monitor: { x: 1.5, z: -21.5 },
-  card: { x: -0.5, z: -12.6, turn: -0.2 },
+  monitor: { x: 7.5, z: -23.2 },
+  card: { x: 3.8, z: -14.0, turn: -0.2 },
 } as const;
+/** How much bigger than first drawn each thing is, to be its real size (the keyboard and notebook were). */
+const REAL = { box: 1.3, nameplate: 1.5, cup: 1.55, sticky: 1.28, stamp: 1.15, pencil: 1.5, mic: 1.6 } as const;
 
 /**
  * The office lands low and flat, looking across the room at the monitors, whose screens face the front.
@@ -357,12 +362,15 @@ export async function mountDesk({
   for (const o of model.group.children) if ((o as Mesh).material === model.baked[0]) o.visible = false;
   scene.add(deskTop(TABLE.x1 - TABLE.x0, TABLE.z1 - TABLE.z0));
   // The office round the desk, and the door into it: one space, so the walk in ends on the desk's view.
+  // The room around the desk, drawn in its own units and set into the world at its real size.
   const room = buildRoom(doorWords(lettering.door));
+  toWorld(room.group);
   scene.add(room.group);
   // The office, furnished (desk/furnish.ts): the window and the grid outside it, the shelf of sources,
   // the whiteboard, the rug, the lamp; and the kit's CC0 models: the radio on the shelf, a coat stand by
   // the door with a jacket on it, a plant in the corner and a small one on the shelf.
   const furniture = furnish();
+  toWorld(furniture.group);
   scene.add(furniture.group);
   let mixNow: { wind: number; solar: number } | null = null;
   let hourShown = -1;
@@ -375,8 +383,8 @@ export async function mountDesk({
   const [radioGltf, coatGltf, plantGltf, smallGltf] = await Promise.all(
     ['radio', 'coatRackStanding', 'pottedPlant', 'plantSmall2'].map(kitModel),
   );
-  /** A kit model, a copy, stood on a place (centred on it) at a height, turned. */
-  const placeModel = (gltf: GLTF | null | undefined, at: Vector3, height: number, turn = 0): Object3D | null => {
+  /** A kit model, a copy, stood on a place (centred on it) at a height, turned, in a group's own units. */
+  const placeModel = (gltf: GLTF | null | undefined, at: Vector3, height: number, turn = 0, parent: Object3D = scene): Object3D | null => {
     if (!gltf) return null;
     const o = gltf.scene.clone(true);
     o.rotation.y = turn;
@@ -387,22 +395,24 @@ export async function mountDesk({
     const bounds = new Box3().setFromObject(o);
     const centre = bounds.getCenter(new Vector3());
     o.position.set(at.x - centre.x, at.y - bounds.min.y, at.z - centre.z);
-    scene.add(o);
+    parent.add(o);
     return o;
   };
-  const shelfRadio = placeModel(radioGltf, furniture.places.radio, 0.22 * M, 0.3);
-  placeModel(coatGltf, furniture.places.coatStand, 1.8 * M, -0.5);
-  placeModel(plantGltf, furniture.places.plant, 1.1 * M, 0.7);
-  placeModel(smallGltf, furniture.places.shelfPlant, 0.3 * M);
+  // In the room's drawing (its own units), set into the world with it.
+  const shelfRadio = placeModel(radioGltf, furniture.places.radio, 0.22 * drawn.M, 0.3, furniture.group);
+  placeModel(coatGltf, furniture.places.coatStand, 1.8 * drawn.M, -0.5, furniture.group);
+  placeModel(plantGltf, furniture.places.plant, 1.1 * drawn.M, 0.7, furniture.group);
+  placeModel(smallGltf, furniture.places.shelfPlant, 0.3 * drawn.M, 0, furniture.group);
   // The corridor's potted plant, by the door: there from the first frame.
-  placeModel(plantGltf, room.plantAt, room.plantHeight);
+  placeModel(plantGltf, room.plantAt, room.plantHeight, 0, room.group);
 
   // ---------- Daylight: a sun with crisp shadows, and a soft fill ----------
   const sun = new DirectionalLight('#fff6e6', 2.5);
   sun.position.set(-22, 42, 26);
   sun.castShadow = true;
   sun.shadow.mapSize.set(4096, 4096);
-  Object.assign(sun.shadow.camera, { left: -30, right: 30, top: 26, bottom: -26, near: 10, far: 110 });
+  // Wide enough for the whole desk's things at their real size (about 90 × 63 cm).
+  Object.assign(sun.shadow.camera, { left: -42, right: 42, top: 36, bottom: -36, near: 10, far: 130 });
   sun.shadow.bias = -0.0004;
   sun.shadow.normalBias = 0.03;
   const fill = new HemisphereLight('#ffffff', '#c9a77c', 1.35);
@@ -431,6 +441,7 @@ export async function mountDesk({
   const box = new IndexBox();
   box.group.position.set(PLACES.box.x, DESK_Y, PLACES.box.z);
   box.group.rotation.y = PLACES.box.turn;
+  box.group.scale.setScalar(REAL.box);
   const notebook = new Notebook();
   notebook.group.position.set(PLACES.notebook.x, 0, PLACES.notebook.z);
   notebook.group.rotation.y = PLACES.notebook.turn;
@@ -440,24 +451,34 @@ export async function mountDesk({
   const stamp = stampAndPad();
   stamp.position.set(PLACES.stamp.x, 0, PLACES.stamp.z);
   stamp.rotation.y = PLACES.stamp.turn;
+  // Built on the desk top (its parts at DESK_Y), so scaled about it.
+  stamp.scale.setScalar(REAL.stamp);
+  stamp.position.y = DESK_Y * (1 - REAL.stamp);
   const cup = coffee();
   cup.position.set(PLACES.cup.x, DESK_Y, PLACES.cup.z);
+  cup.scale.setScalar(REAL.cup);
   const pen = pencil();
-  pen.position.set(PLACES.pencil.x, DESK_Y + 0.2, PLACES.pencil.z);
+  pen.position.set(PLACES.pencil.x, DESK_Y + 0.2 * REAL.pencil, PLACES.pencil.z);
   pen.rotation.y = PLACES.pencil.turn;
+  pen.scale.setScalar(REAL.pencil);
   let note = sticky(signFor(null));
   note.position.set(PLACES.sticky.x, DESK_Y + 0.02, PLACES.sticky.z);
   note.rotation.z = PLACES.sticky.turn;
+  note.scale.setScalar(REAL.sticky);
   const plate = new Nameplate();
   plate.group.position.set(PLACES.nameplate.x, DESK_Y, PLACES.nameplate.z);
   plate.group.rotation.y = PLACES.nameplate.turn;
+  plate.group.scale.setScalar(REAL.nameplate);
   const card = new BusinessCard();
   card.group.position.set(PLACES.card.x, DESK_Y, PLACES.card.z);
   card.group.rotation.y = PLACES.card.turn;
   const mic = new Microphone();
   mic.group.position.set(PLACES.mic.x, DESK_Y, PLACES.mic.z);
   mic.group.rotation.y = PLACES.mic.turn;
+  mic.group.scale.setScalar(REAL.mic);
+  // The monitor is drawn at 125 units to the metre, like the room: set at its real size.
   const monitor = new Monitor();
+  monitor.group.scale.setScalar(M / DRAWN);
   monitor.group.position.set(PLACES.monitor.x, DESK_Y, PLACES.monitor.z);
   scene.add(box.group, notebook.group, keyboard.group, stamp, cup, pen, note, plate.group, card.group, mic.group, monitor.group);
 
@@ -510,7 +531,10 @@ export async function mountDesk({
     ...box.corners(),
     ...notebook.corners(),
     ...keyboard.corners(),
-    v3(PLACES.cup.x + 3, 4.5, PLACES.cup.z - 3),
+    ...(() => {
+      const b = new Box3().setFromObject(cup);
+      return [b.min, b.max];
+    })(),
     ...plate.corners(),
     ...card.corners(),
     ...mic.corners(),
@@ -534,11 +558,13 @@ export async function mountDesk({
       // Standing back near the door, the whole back wall: the shelf, the window, the whiteboard.
       const pos = v3(0, FLOOR + 1.6 * M, OFFICE.z1 - 0.6 * M);
       const look = v3(0, FLOOR + 1.12 * M, OFFICE.z0);
-      const half = Math.atan(318 / pos.distanceTo(look));
+      const half = Math.atan((2.55 * M) / pos.distanceTo(look));
       return { pos, look, fov: Math.max(46, (2 * Math.atan(Math.tan(half) / aspect) * 180) / Math.PI) };
     }
     // The foot of the window is kept for the index.
-    if (s === 'door') return framed(fromAngles(52, -12), 26, aspect, deskScene(), 0, { top: 0.92, bottom: -0.8, side: 0.96 });
+    // Seated: a wider eye and a lower angle than a camera on a stand, so with the desk's things at their real
+    // size it sits about 1.4 m above the floor, a person at the desk (the walk in lowers into it).
+    if (s === 'door') return framed(fromAngles(47, -12), 34, aspect, deskScene(), 0, { top: 0.92, bottom: -0.8, side: 0.96 });
     if (s === 'office')
       return framed(fromAngles(OFFICE_ANGLE.elevation, OFFICE_ANGLE.azimuth), 15, aspect, modelCorners, 0, {
         top: 0.9,
@@ -645,7 +671,7 @@ export async function mountDesk({
     // Up at the top of the seated view, where the room is: always in the same place on the screen.
     // On the monitor's stand, under the screen: up past it is the room.
     if (key === 'room') return monitor.group.localToWorld(v3(0, 3.2, 1.4));
-    if (key === 'shelf') return furniture.shelfFoot.clone();
+    if (key === 'shelf') return furniture.group.localToWorld(furniture.shelfFoot.clone());
     if (key === 'window') return v3(0, FLOOR + 2.3 * M + 12, OFFICE.z0);
     if (key === 'office-reception') return v3(RECEPTION.x, RECEPTION.height * 0.55, RECEPTION.z + RECEPTION.depth / 2 + 0.02);
     if (key === 'office-cabinet')
@@ -1263,6 +1289,7 @@ export async function mountDesk({
       const next = sticky(text);
       next.position.copy(note.position);
       next.rotation.copy(note.rotation);
+      next.scale.copy(note.scale);
       scene.remove(note);
       scene.add(next);
       creditSlip(next, creditText);
@@ -1455,6 +1482,77 @@ export async function mountDesk({
       doorAngle: () => room.hinge.rotation.y,
       knocks: () => knocks,
       windowState: () => furniture.state(),
+      /** For each spot a desk's name tag may take in the office: whether it is in sight, and if not, what is in the way. */
+      tagSight: (piece: string) =>
+        isPieceId(piece)
+          ? tagSpots(piece).map((spot) => {
+              const p = spot.clone().setY(spot.y + 0.15);
+              const dir = p.clone().sub(camera.position);
+              const dist = dir.length();
+              sightRay.set(camera.position, dir.normalize());
+              sightRay.near = camera.near;
+              sightRay.far = dist - Math.max(0.05, dist * 0.02);
+              const hit = sightRay.intersectObjects(solid(), false).find((h) => seen(h.object));
+              if (!hit) return null;
+              const chain: string[] = [];
+              for (let n: Object3D | null = hit.object; n && chain.length < 4; n = n.parent) chain.push(n.name || n.type);
+              return `${chain.join(' < ')} at ${hit.distance.toFixed(2)} of ${dist.toFixed(2)}`;
+            })
+          : null,
+      /** Each of the desk's things, measured in the world: its widest side across the desk and its height, in cm. */
+      sizes: () => {
+        const cm = (o: Object3D) => {
+          // Measured square on: its turn on the desk taken off for the measure, then put back.
+          const turn = o.rotation.y;
+          o.rotation.y = 0;
+          o.updateMatrixWorld(true);
+          const size = new Box3().setFromObject(o).getSize(new Vector3());
+          o.rotation.y = turn;
+          o.updateMatrixWorld(true);
+          return { across: Math.round((Math.max(size.x, size.z) / M) * 1000) / 10, tall: Math.round((size.y / M) * 1000) / 10 };
+        };
+        return {
+          keyboard: cm(keyboard.group),
+          notebook: cm(notebook.group),
+          card: cm(card.group),
+          nameplate: cm(plate.group),
+          cup: cm(cup),
+          // The note itself, not the credit slip stuck under it.
+          sticky: { across: Math.round((((note.geometry as PlaneGeometry).parameters.width * note.scale.x) / M) * 1000) / 10, tall: 0 },
+          mic: cm(mic.group),
+          box: cm(box.group),
+          monitor: cm(monitor.group),
+          model: { across: Math.round(((BASE.x1 - BASE.x0) / M) * 1000) / 10, tall: 0 },
+        };
+      },
+      /** Which of the desk's things stand on each other's ground (their footprints overlapping on the desk). */
+      deskOverlaps: () => {
+        const things: Array<[string, Object3D]> = [
+          ['index box', box.group],
+          ['notebook', notebook.group],
+          ['keyboard', keyboard.group],
+          ['stamp', stamp],
+          ['cup', cup],
+          ['pencil', pen],
+          ['sticky note', note],
+          ['nameplate', plate.group],
+          ['card', card.group],
+          ['mic', mic.group],
+          ['model', model.group],
+          ['monitor', monitor.group],
+        ];
+        const boxes = things.map(([name, o]) => [name, new Box3().setFromObject(o)] as const);
+        const out: string[] = [];
+        for (let i = 0; i < boxes.length; i++)
+          for (let j = i + 1; j < boxes.length; j++) {
+            const [an, a] = boxes[i] ?? ['', new Box3()];
+            const [bn, b] = boxes[j] ?? ['', new Box3()];
+            const x = Math.min(a.max.x, b.max.x) - Math.max(a.min.x, b.min.x);
+            const z = Math.min(a.max.z, b.max.z) - Math.max(a.min.z, b.min.z);
+            if (x > 0.2 && z > 0.2) out.push(`${an} × ${bn} (${x.toFixed(1)} × ${z.toFixed(1)})`);
+          }
+        return out;
+      },
       /** The ultrawide moved on the desk (for finding its place). */
       moveMonitor: (x: number, z: number, tilt = 0) => {
         monitor.group.position.set(x, DESK_Y, z);
@@ -1520,6 +1618,8 @@ export async function mountDesk({
           card: {
             ...cardRect,
             ringed: card.focused(),
+            // The intro's type as it lands on screen, in pixels.
+            introPx: (cardRect.width * card.introPx) / 1300,
             // Each link's middle, on the page (the card lies nearly square to the camera).
             links: card.links.map((b) => ({
               x: cardRect.x + (b.x + b.w / 2) * cardRect.width,
@@ -1582,10 +1682,9 @@ export async function mountDesk({
         const book = furniture.books[i];
         if (!book) return null;
         const r = renderer.domElement.getBoundingClientRect();
-        projected
-          .copy(book.getWorldPosition(new Vector3()))
-          .add(v3(0, 0, 12))
-          .project(camera);
+        // The middle of its spine: the front face of its box.
+        const b = new Box3().setFromObject(book);
+        projected.set((b.min.x + b.max.x) / 2, (b.min.y + b.max.y) / 2, b.max.z).project(camera);
         return { x: r.left + (projected.x * 0.5 + 0.5) * r.width, y: r.top + (-projected.y * 0.5 + 0.5) * r.height };
       },
       /** A still camera anywhere, for close-up shots (the window's turbines). */

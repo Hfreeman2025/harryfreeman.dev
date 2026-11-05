@@ -2,23 +2,23 @@
   "browser": "chromium",
   "mode": "enforce",
   "origin": "https://harryfreeman.dev",
-  "at": "2026-11-05T22:02:25.481Z",
+  "at": "2026-11-05T23:18:14.540Z",
   "results": [
     {
       "station": "door: the pointer over it becomes a knuckle; knock, the voice answers, walk in to the desk",
       "ok": true,
-      "ms": 18608,
+      "ms": 13398,
       "violations": 0,
       "detail": {
-        "hover": "marked by the check (the pointer did not mark it)",
-        "cursor": "auto",
+        "hover": "by the pointer",
+        "cursor": "url(\"https://harryfreeman.dev/cursors/kn",
         "voice": true
       }
     },
     {
       "station": "desk: the dive into the office and back, the notebook, the grid note, the mic",
       "ok": true,
-      "ms": 8830,
+      "ms": 8754,
       "violations": 0,
       "detail": {
         "grid": "175 gCO₂/kWh, moderate"
@@ -27,7 +27,7 @@
     {
       "station": "room: looking round it, the window, three book spines, the shelf by keyboard, the radio on the shelf",
       "ok": true,
-      "ms": 3994,
+      "ms": 3945,
       "violations": 0,
       "detail": {
         "spines": [
@@ -41,7 +41,7 @@
     {
       "station": "card: a card pulled, its loop on the screen, the recording line under it, its stamp checked",
       "ok": true,
-      "ms": 2927,
+      "ms": 2926,
       "violations": 0,
       "detail": {
         "loop": "/loops/gpt-in-a-tab.webm",
@@ -52,7 +52,7 @@
     {
       "station": "Reception: a question of your own, answered by meaning search with the model from Hugging Face",
       "ok": true,
-      "ms": 11913,
+      "ms": 10572,
       "violations": 0,
       "detail": {
         "mode": "hybrid",
@@ -72,14 +72,14 @@
             }
           ],
           "notes": [],
-          "loadMs": 8691.099999904633
+          "loadMs": 7292.800000190735
         }
       }
     },
     {
       "station": "radio: Listen to the Grid plays (device-free) and stops",
       "ok": true,
-      "ms": 6247,
+      "ms": 6274,
       "violations": 0,
       "detail": {
         "state": "playing"
@@ -88,7 +88,7 @@
     {
       "station": "flat office on a phone: a folder, its recording line and stamp, Reception by keyword",
       "ok": true,
-      "ms": 3686,
+      "ms": 3707,
       "violations": 0,
       "detail": {
         "answered": true
@@ -97,7 +97,7 @@
     {
       "station": "pages: the CV, what a stamp proves, both recorded terminal sessions, and a missing page",
       "ok": true,
-      "ms": 8054,
+      "ms": 8090,
       "violations": 0,
       "detail": {
         "missing": 404
@@ -109,7 +109,7 @@
       "document": 17,
       "script": 79,
       "stylesheet": 13,
-      "image": 50,
+      "image": 51,
       "font": 78,
       "fetch": 211,
       "other": 13,
@@ -136,8 +136,8 @@
   "browserOwn": [
     "plain http: http://clients2.google.com/time/1/current",
     "accounts.google.com:443",
-    "update.googleapis.com:443",
     "www.google.com:443",
+    "update.googleapis.com:443",
     "android.clients.google.com:443"
   ],
   "violations": {},

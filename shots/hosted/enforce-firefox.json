@@ -2,23 +2,23 @@
   "browser": "firefox",
   "mode": "enforce",
   "origin": "https://harryfreeman.dev",
-  "at": "2026-11-05T22:03:35.400Z",
+  "at": "2026-11-05T23:19:16.164Z",
   "results": [
     {
       "station": "door: the pointer over it becomes a knuckle; knock, the voice answers, walk in to the desk",
       "ok": true,
-      "ms": 18948,
+      "ms": 13607,
       "violations": 0,
       "detail": {
-        "hover": "marked by the check (the pointer did not mark it)",
-        "cursor": "auto",
+        "hover": "by the pointer",
+        "cursor": "url(\"https://harryfreeman.dev/cursors/kn",
         "voice": true
       }
     },
     {
       "station": "desk: the dive into the office and back, the notebook, the grid note, the mic",
       "ok": true,
-      "ms": 9180,
+      "ms": 9334,
       "violations": 0,
       "detail": {
         "grid": "175 gCO₂/kWh, moderate"
@@ -27,7 +27,7 @@
     {
       "station": "room: looking round it, the window, three book spines, the shelf by keyboard, the radio on the shelf",
       "ok": true,
-      "ms": 3853,
+      "ms": 4165,
       "violations": 0,
       "detail": {
         "spines": [
@@ -41,7 +41,7 @@
     {
       "station": "card: a card pulled, its loop on the screen, the recording line under it, its stamp checked",
       "ok": true,
-      "ms": 3064,
+      "ms": 2953,
       "violations": 0,
       "detail": {
         "loop": "/loops/gpt-in-a-tab.webm",
@@ -52,7 +52,7 @@
     {
       "station": "Reception: a question of your own, answered by meaning search with the model from Hugging Face",
       "ok": true,
-      "ms": 13758,
+      "ms": 11021,
       "violations": 0,
       "detail": {
         "mode": "hybrid",
@@ -72,14 +72,14 @@
             }
           ],
           "notes": [],
-          "loadMs": 10417
+          "loadMs": 7781
         }
       }
     },
     {
       "station": "radio: Listen to the Grid plays (device-free) and stops",
       "ok": true,
-      "ms": 8146,
+      "ms": 7619,
       "violations": 0,
       "detail": {
         "state": "playing"
@@ -88,7 +88,7 @@
     {
       "station": "flat office on a phone: a folder, its recording line and stamp, Reception by keyword",
       "ok": true,
-      "ms": 2825,
+      "ms": 2806,
       "violations": 0,
       "detail": {
         "answered": true
@@ -97,7 +97,7 @@
     {
       "station": "pages: the CV, what a stamp proves, both recorded terminal sessions, and a missing page",
       "ok": true,
-      "ms": 8114,
+      "ms": 8130,
       "violations": 0,
       "detail": {
         "missing": 404
@@ -109,7 +109,7 @@
       "document": 17,
       "script": 79,
       "stylesheet": 13,
-      "image": 54,
+      "image": 65,
       "font": 78,
       "fetch": 211,
       "media": 10
@@ -142,7 +142,7 @@
     {
       "station": "Reception: a question of your own, answered by meaning search with the model from Hugging Face",
       "type": "warning",
-      "text": "[JavaScript Warning: \"WebGPU is disabled by blocklist.\" {file: \"blob:https://harryfreeman.dev/f7ef4b64-82b1-430b-a27c-90755302bb9c\" line: 1}]"
+      "text": "[JavaScript Warning: \"WebGPU is disabled by blocklist.\" {file: \"blob:https://harryfreeman.dev/1dc293ad-c544-4c02-ac7b-93644bfc7570\" line: 1}]"
     },
     {
       "station": "flat office on a phone: a folder, its recording line and stamp, Reception by keyword",

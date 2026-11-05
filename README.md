@@ -1,5 +1,7 @@
 # Harry Freeman: one building
 
+[![Harry Freeman](docs/brand/hf-badge.svg)](https://harryfreeman.dev)
+
 Harry Freeman's personal site, built as one building. You arrive at the door of the studio where his
 ten tools were built, drawn as an architect's study model on a sheet of paper: card walls, a balsa
 floor, stone-white scale figures, the directory board beside it, Reception on one side and, nearest
@@ -31,8 +33,13 @@ The same moment of the replay before and after this redesign: [before](shots/off
 
 ## On this branch: the desk
 
-On `design/desk-miniature` the page opens on Harry's desk at real scale, filling the window, with the
-studio as a living miniature on it, drawn as a management sim: zoned floors with their names painted
+On `design/desk-miniature` the page opens on Harry's desk at real scale, filling the window: everything on
+it is its real size (74 world units to the metre; the room is drawn at 125 to the metre and set into the
+world at its real size, `toWorld` in `src/desk/room.ts`), a compact keyboard, an A6 notebook, a 5 × 7
+inch card, a desk nameplate, a podcast mic, a mug, a card tray, the ultrawide behind, with the studio
+among them as the one miniature, a 21 × 14 cm model with figures about 2 cm tall. The seated camera sits
+about 1.4 m above the floor, a person at the desk, and the walk in lowers into it. On the desk, the
+studio is a living miniature, drawn as a management sim: zoned floors with their names painted
 where nothing stands in front of them, a status gem and a name tag per builder, and the work travelling
 on paths to review. The things on the desk are the site's parts (`src/desk/`):
 
@@ -266,7 +273,12 @@ the check.
   - the room's tags: only the cabinet, Reception and the credit at rest, every object a tabbable link
     or button, and each drawer followed by its folders;
   - the earlier suites: the timeline, replay, rendering, config, CV, filing, cabinet and floor plan.
-- **Browser checks (72 per browser, all passing in Chromium, WebKit and Firefox on 5 November):**
+- **Browser checks (74 per browser, all passing in Chromium, WebKit and Firefox on 5 November):**
+  - real size: measured in the scene, square on, the keyboard 28.9 cm, the notebook 21.9, the card 17.8,
+    the nameplate 19.5, the mug on its saucer 14.3, the sticky note 7.6, the mic 19.6 tall, the card tray
+    16.2, the ultrawide 82.2, each within its real range, and the studio model 20.8 cm, a miniature;
+  - the door: over it the pointer is a knuckle (`public/cursors/knuckle.svg`) and the door brightens,
+    and a click on the door knocks;
   - lettering (`scripts/desk-checks.mjs`): the nameplate's, card's and credit's printed faces fully in
     sight from the seat (sight lines to a grid on each); a plain board stood in front of the nameplate
     hides its words completely (no dark pixels of them left in its place); no DOM text over the scene
@@ -372,9 +384,6 @@ display would pace. WebKit and Firefox do not report layout shift; it is measure
 
 ## What is weak
 
-- **The desk's things are small against the room.** The desk view is a seated person's eyes on a
-  tabletop of miniatures, so the cabinet, keyboard and model are smaller than life; from the doorway
-  and the room view they read as a small cluster on a long desk.
 - **Seated, the room is out of sight.** At this scale the desk fills the seated view to its edges, so
   the window, shelf and whiteboard show on the walk in and from The room, not behind the desk.
 

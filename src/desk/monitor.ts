@@ -109,11 +109,11 @@ export class Monitor {
     const { width: w, height: h, bottom } = SCREEN;
     const pivot = bottom + h * 0.45;
     const at = (x: number, y: number) => this.head.localToWorld(new Vector3(x, y - pivot, 0.82));
-    // A session row is 30 of the canvas's H pixels tall; measured at the last row, just above the dock.
-    const rowAt = bottom + (h * 180) / H;
+    // A session row is 42 of the canvas's H pixels tall; measured at the last row, just above the dock.
+    const rowAt = bottom + (h * 190) / H;
     return {
       corners: [at(-w / 2, bottom), at(w / 2, bottom), at(w / 2, bottom + h), at(-w / 2, bottom + h)],
-      row: [at(0, rowAt), at(0, rowAt + (h * 30) / H)],
+      row: [at(0, rowAt), at(0, rowAt + (h * 42) / H)],
       bottomCentre: at(0, bottom),
     };
   }
@@ -140,7 +140,7 @@ export class Monitor {
     this.#shown = lines.join('\n');
     this.draws++;
     // Sizes as a real 34-inch screen has them: a slim menu bar, terminal rows about 6 mm, a dock about 2 cm.
-    const ROW = 30;
+    const ROW = 42;
     // The wallpaper: the desk's blue, deepening, with a soft band of sun.
     const wall = c.createLinearGradient(0, 0, 0, H);
     wall.addColorStop(0, '#2c58b8');
@@ -160,7 +160,7 @@ export class Monitor {
     const dockW = tiles.length * (size + gap) + gap;
     const dock = { x: (W - dockW) / 2, y: H - 98, w: dockW, h: 88 };
     // Centred in the middle of the ultrawide, where a seated person looks (and where the seated view sees it).
-    const win = { x: 700, y: 58, w: W - 1400, h: dock.y - 24 - 58 };
+    const win = { x: 520, y: 58, w: W - 1040, h: dock.y - 24 - 58 };
     c.fillStyle = 'rgba(0, 0, 0, 0.25)';
     roundRect(c, win.x + 6, win.y + 10, win.w, win.h, 18);
     c.fill();
@@ -186,28 +186,28 @@ export class Monitor {
     c.textAlign = 'left';
     c.textBaseline = 'alphabetic';
     const left = win.x + 32;
-    c.font = `500 24px ${MONO}`;
+    c.font = `500 32px ${MONO}`;
     c.fillStyle = SUN;
     c.fillText('~/studio ❯', left, win.y + 44 + ROW * 1.4);
     c.fillStyle = CREAM;
-    c.fillText('claude --replay the build, round by round', left + 170, win.y + 44 + ROW * 1.4);
+    c.fillText('claude --replay the build, round by round', left + 228, win.y + 44 + ROW * 1.4);
     const statusY = win.y + win.h - 16;
     const lastY = statusY - ROW * 1.3;
     const rows = Math.floor((lastY - (win.y + 44 + ROW * 3)) / ROW);
     const shown = lines.slice(-rows);
-    c.font = `500 26px ${MONO}`;
+    c.font = `500 36px ${MONO}`;
     shown.forEach((line, i) => {
       const y = lastY - (shown.length - 1 - i) * ROW;
       const mark = line.slice(0, 1);
       c.fillStyle = mark === '✓' ? '#5fd38a' : mark === '↩' ? CORAL : mark === '✻' ? SUN : '#9fb4e6';
       c.fillText(mark, left, y);
       c.fillStyle = i === shown.length - 1 ? '#ffffff' : '#c9ccd3';
-      c.fillText(line.slice(2), left + 34, y);
+      c.fillText(line.slice(2), left + 48, y);
     });
     // The status line.
     c.fillStyle = '#2c3446';
     c.fillRect(win.x, statusY - 26, win.w, 1.5);
-    c.font = `500 21px ${MONO}`;
+    c.font = `500 28px ${MONO}`;
     c.fillStyle = '#8f96a8';
     c.fillText('auto mode on · 10 builders', left, statusY);
 

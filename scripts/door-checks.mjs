@@ -252,6 +252,28 @@ export async function doorChecks({ check, expect, BASE, shot, name }) {
     },
   );
 
+  await check(
+    'door: over the door the pointer is a knuckle and the door brightens; a click on the door knocks',
+    desk,
+    async (page, problems) => {
+      await page.goto(`${BASE}/?debug`, { waitUntil: 'load' });
+      await doorLive(page);
+      // On the door's leaf, below its plate.
+      const plate = await page.evaluate(() => window.deskDebug.printed().door);
+      const at = { x: plate.x + plate.width / 2, y: plate.y + plate.height * 3 };
+      await page.mouse.move(at.x, at.y);
+      await page.waitForTimeout(150);
+      const over = await page.evaluate(() => {
+        const entrance = document.getElementById('entrance');
+        return { marked: entrance.dataset.hover !== undefined, cursor: getComputedStyle(entrance).cursor };
+      });
+      expect(over.marked && over.cursor.includes('knuckle.svg'), `over the door: ${JSON.stringify(over)}`);
+      await page.mouse.click(at.x, at.y);
+      await page.waitForFunction(() => document.getElementById('entrance').dataset.knocking !== undefined, null, { timeout: 2000 });
+      expect(problems.length === 0, problems.join(' | '));
+    },
+  );
+
   await check('door: Come in before the desk has loaded says Opening… and waits for it', desk, async (page) => {
     // Hold the desk's models back, so the door is still a poster when Come in is pressed.
     let release;

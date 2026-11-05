@@ -420,8 +420,8 @@ export async function deskChecks({ check, expect, BASE, shot, name, config }) {
         expect(f.x >= at.stage.x && f.y >= at.stage.y && f.x + f.width <= at.stage.x + at.stage.width, `the ${k} is off screen`);
       }
       expect(at.printed.nameplate.height >= 60, `the nameplate is ${at.printed.nameplate.height.toFixed(0)}px tall`);
-      // Wide enough that its intro is set at about 11px on screen or more.
-      expect(at.printed.card.width >= 250, `the card is ${at.printed.card.width.toFixed(0)}px wide`);
+      // The intro set at 11px or more on screen.
+      expect(at.printed.card.introPx >= 11, `the card's intro is ${at.printed.card.introPx.toFixed(1)}px on screen`);
       // By keyboard from the name (where arriving puts focus): each card link in turn, ringed on the card.
       await page.focus('.masthead__name');
       const order = [];
@@ -809,6 +809,29 @@ export async function deskChecks({ check, expect, BASE, shot, name, config }) {
       return { rowPx: Number(m.row.toFixed(1)), bottomPx: Math.round(m.bottom - stage.y), lines: m.lines.length };
     },
   );
+
+  await check('desk: everything on the desk is its real size but the studio, a miniature among it', desk, async (page) => {
+    await live(page, DESK());
+    const sizes = await page.evaluate(() => window.deskDebug.sizes());
+    // Real sizes, in cm (the widest side across the desk; the mic by its height).
+    const want = {
+      keyboard: [26, 33, 'across'],
+      notebook: [19, 24, 'across'],
+      card: [16, 19, 'across'],
+      nameplate: [17, 24, 'across'],
+      cup: [11, 16, 'across'],
+      sticky: [7, 9, 'across'],
+      mic: [17, 26, 'tall'],
+      box: [13, 19, 'across'],
+      monitor: [78, 84, 'across'],
+      model: [19, 23, 'across'],
+    };
+    for (const [thing, [lo, hi, side]] of Object.entries(want)) {
+      const v = sizes[thing][side];
+      expect(v >= lo && v <= hi, `the ${thing} is ${v} cm ${side}, not ${lo} to ${hi}`);
+    }
+    return Object.fromEntries(Object.entries(sizes).map(([k, v]) => [k, k === 'mic' ? v.tall : v.across]));
+  });
 
   await check('desk: from the seated view the index box keeps clear of the nameplate at every window shape', desk, async (page) => {
     await live(page, DESK());

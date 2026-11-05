@@ -124,10 +124,13 @@ export function startEntrance({ ready, desk }: EntranceOptions): void {
   new ResizeObserver(() => (entrance.dataset.walking === undefined ? placeWays() : cornerWays())).observe(entrance);
   void ready.then(() => requestAnimationFrame(placeWays));
 
+  /** Over the desk, the door is drawn under this layer: a pointer on the layer itself (not on a button, the
+   *  bubble or the speaker) is a pointer on the scene. */
+  const onScene = (event: Event) => event.target === entrance || event.target === stage;
   // Over the door, it brightens a touch and the pointer becomes a knuckle.
   entrance.addEventListener('pointermove', (event) => {
     const over = overDesk()
-      ? event.target === entrance && Boolean(desk()?.hitsDoor(event.clientX, event.clientY))
+      ? onScene(event) && Boolean(desk()?.hitsDoor(event.clientX, event.clientY))
       : Boolean(door?.hitsDoor(event.clientX, event.clientY));
     if (over === (entrance.dataset.hover !== undefined)) return;
     if (over) entrance.dataset.hover = '';
@@ -274,7 +277,7 @@ export function startEntrance({ ready, desk }: EntranceOptions): void {
   });
   // Over the desk the door is drawn on the desk's own stage, under this layer: a click on the door there.
   entrance.addEventListener('click', (event) => {
-    if (overDesk() && event.target === entrance && desk()?.hitsDoor(event.clientX, event.clientY)) void knockNow();
+    if (overDesk() && onScene(event) && desk()?.hitsDoor(event.clientX, event.clientY)) void knockNow();
   });
   document.addEventListener('keydown', (event) => {
     if (root.dataset.entrance !== 'door') return;

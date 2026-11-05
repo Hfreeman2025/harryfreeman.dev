@@ -129,6 +129,7 @@ export function paintCard(
   focus: number | null,
   hover: number | null,
   out: FaceBox[],
+  set: { px: number } = { px: 0 },
 ) {
   return (c: CanvasRenderingContext2D, w: number, h: number) => {
     c.fillStyle = paper;
@@ -143,6 +144,7 @@ export function paintCard(
       lines = wrap(c, intro, max);
       if (lines.length * px * 1.36 + px * 2.4 <= h - 2 * pad) break;
     }
+    set.px = px;
     c.fillStyle = INK;
     c.textAlign = 'left';
     c.textBaseline = 'alphabetic';

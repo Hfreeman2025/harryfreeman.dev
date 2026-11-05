@@ -1,5 +1,5 @@
 // Photographs the room with the page's own renderer, for the poster shown before the scene is ready,
-// the social image and the PNG favicon. The grid API is mocked never to answer, so the stills show the
+// the social image and the apple-touch icon. The grid API is mocked never to answer, so the stills show the
 // sign reading the grid and the neutral light, never a reading that would go stale. Needs the dev or preview server on 4400.
 //   node scripts/stills.mjs
 import { execFileSync } from 'node:child_process';
@@ -93,10 +93,13 @@ async function openDoor(url, width, height, scale, phone = false) {
 rmSync(join(site, 'public', 'og-studio.png'), { force: true });
 for (const old of ['studio-1600.jpg', 'studio-1600.webp', 'studio-2400.webp', 'studio-960.webp']) rmSync(join(still, old), { force: true });
 
-const context = await browser.newContext({ viewport: { width: 64, height: 64 } });
+// The apple-touch icon: Harry's mark (public/favicon.svg, from docs/brand) drawn at 180 px. The PNG
+// favicons are the brand's own (hf-mark-16/32/64.png).
+const context = await browser.newContext({ viewport: { width: 180, height: 180 } });
 const page = await context.newPage();
-await page.goto(`${base}/favicon.svg`);
-await page.screenshot({ path: join(site, 'public', 'favicon.png'), omitBackground: false });
+await page.setContent(`<body style="margin:0"><img src="${base}/favicon.svg" width="180" height="180" style="display:block"></body>`);
+await page.waitForFunction(() => document.querySelector('img')?.complete);
+await page.screenshot({ path: join(site, 'public', 'apple-touch-icon.png'), omitBackground: false });
 await context.close();
 await browser.close();
-console.log('poster, og.png and favicon.png written');
+console.log('poster, og.png and apple-touch-icon.png written');
