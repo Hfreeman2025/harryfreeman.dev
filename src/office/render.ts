@@ -1,4 +1,4 @@
-// Server-side HTML for the office: the lobby directory board, the filing cabinet and the floor
+// Server-side HTML for the office: the directory (the quiet index), the filing cabinet and the floor
 // plan. Rendered into index.html at build time, so every tool is a real link before any script.
 
 import { DRAWERS } from '../content/drawers';
@@ -6,19 +6,12 @@ import { type PieceId, pieceById } from '../content/pieces';
 import { esc } from '../content/render';
 import { BOARD, BRIEF, CABINET, DESKS, deskFor, RECEPTION, REVIEW, ROOM, SHELF, SIGN } from '../scene/layout';
 
+/** The directory: the ten tools in drawer order, as plain links (the quiet index along the desk's foot). */
 export function renderDirectory(): string {
-  const groups = DRAWERS.map(
-    (d) => `<li class="board__group">
-  <p class="board__place">${esc(d.label)}</p>
-  <ul>${d.pieces
-    .map(
-      (p) =>
-        `<li class="board__row"><a href="#work-${p}" data-piece="${p}">${esc(pieceById(p).title)}</a><span class="board__leader" aria-hidden="true"></span><span class="board__where">${esc(d.position)}</span></li>`,
-    )
-    .join('')}</ul>
-</li>`,
+  const tools = DRAWERS.flatMap((d) =>
+    d.pieces.map((p) => `<li><a href="#work-${p}" data-piece="${p}">${esc(pieceById(p).title)}</a></li>`),
   ).join('');
-  return `<ol class="board__groups">${groups}</ol>`;
+  return `<ul class="index__tools">${tools}</ul>`;
 }
 
 export function renderCabinet(): string {

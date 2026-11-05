@@ -19,6 +19,8 @@ import { placeSlip, printResult } from './printout';
 
 export interface DeskControl {
   answer(pieces: readonly PieceId[], mark: () => Range | null, result?: unknown): void;
+  /** Back to the seated view of the desk, from wherever the visitor was (going back out to the door). */
+  home(): void;
   source(piece: PieceId): void;
   setLight(light: RoomLight): void;
   setSign(text: SignText): void;
@@ -70,6 +72,8 @@ export async function startDesk(timeline: Timeline): Promise<DeskControl> {
   const engine: DeskEngine = await mountDesk({
     stage,
     labels: labelsRoot,
+    // Harry's name and role on the nameplate, his intro and links on the card: real text, laid onto them.
+    onto: [...document.querySelectorAll<HTMLElement>('.masthead [data-place="quad"]')],
     timeline,
     ...(Number.isFinite(at) && at > 0 ? { startAt: at } : {}),
     paused: photo,
@@ -275,7 +279,7 @@ export async function startDesk(timeline: Timeline): Promise<DeskControl> {
 
   // Directory rows, list links and deep links pull the card from wherever you are.
   document.addEventListener('click', (event) => {
-    const link = (event.target as Element | null)?.closest<HTMLAnchorElement>('.board a[data-piece], .work__elsewhere a[data-piece]');
+    const link = (event.target as Element | null)?.closest<HTMLAnchorElement>('.index a[data-piece], .work__elsewhere a[data-piece]');
     const piece = link?.dataset.piece ?? '';
     if (link && isPieceId(piece)) {
       event.preventDefault();
@@ -398,6 +402,9 @@ export async function startDesk(timeline: Timeline): Promise<DeskControl> {
     },
     source(piece) {
       void run(() => toDesk(piece, engine.station()));
+    },
+    home() {
+      if (engine.station() !== 'door') void run(() => toDoor(null));
     },
     setLight(light) {
       engine.setLight(light, !reduced);

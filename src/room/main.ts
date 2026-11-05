@@ -239,7 +239,7 @@ export async function startRoom(timeline: Timeline): Promise<RoomControl> {
 
   // Directory rows, list links and deep links pull the folder from wherever you stand.
   document.addEventListener('click', (event) => {
-    const link = (event.target as Element | null)?.closest<HTMLAnchorElement>('.board a[data-piece], .work__elsewhere a[data-piece]');
+    const link = (event.target as Element | null)?.closest<HTMLAnchorElement>('.index a[data-piece], .work__elsewhere a[data-piece]');
     const piece = link?.dataset.piece ?? '';
     if (link && isPieceId(piece)) {
       event.preventDefault();

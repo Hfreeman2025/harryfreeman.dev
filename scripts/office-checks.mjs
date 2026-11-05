@@ -49,6 +49,19 @@ export async function officeChecks({ check, expect, BASE, config, shot, name }) 
     async (page, problems) => {
       await page.goto(FLAT, { waitUntil: 'load' });
       await page.waitForTimeout(2500);
+      // The front as a plain editorial header: the name, the role, the intro and the links, then the index.
+      for (const [sel, text] of [
+        ['.masthead__name', 'Harry Freeman'],
+        ['.masthead__role', 'Head of AI'],
+        ['.masthead__line', 'I run AI strategy'],
+      ])
+        expect(
+          (await page.locator(sel).isVisible()) && (await page.locator(sel).textContent()).startsWith(text),
+          `the header has no ${text}`,
+        );
+      for (const name of ['CV', 'Email', 'LinkedIn'])
+        expect(await page.locator('.masthead__links').getByRole('link', { name }).isVisible(), `no ${name} link`);
+      expect((await page.locator('.index a:visible').count()) >= 13, 'the index is not all shown');
       const shift = await page.evaluate(() => window.__shift);
       if (shift !== null) expect(shift === 0, `layout shift ${shift}`);
       await shot(page, 'flat-top');
@@ -97,7 +110,7 @@ export async function officeChecks({ check, expect, BASE, config, shot, name }) 
 
   await check('office: the directory, the list and the floor plan all pull the right folder', desk, async (page) => {
     await page.goto(FLAT, { waitUntil: 'load' });
-    await page.click('.board__row a[data-piece="gridtop"]');
+    await page.click('.index a[data-piece="gridtop"]');
     await cardOpen(page);
     expect((await cardTitle(page)) === 'gridtop', 'directory pulled the wrong folder');
     await page.keyboard.press('Escape');

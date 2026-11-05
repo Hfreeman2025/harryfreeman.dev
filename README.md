@@ -31,16 +31,23 @@ The same moment of the replay before and after this redesign: [before](shots/off
 
 ## On this branch: the desk
 
-On `design/desk-miniature` the page opens on Harry's desk at real scale, with the studio as a living
-miniature on it, drawn as a management sim: zoned floors with their names painted where nothing stands
-in front of them, a status gem and a name tag per builder, and the work travelling on paths to review.
-The things on the desk are the site's parts (`src/desk/`):
+On `design/desk-miniature` the page opens on Harry's desk at real scale, filling the window, with the
+studio as a living miniature on it, drawn as a management sim: zoned floors with their names painted
+where nothing stands in front of them, a status gem and a name tag per builder, and the work travelling
+on paths to review. The things on the desk are the site's parts (`src/desk/`):
+
+- **The nameplate and the card.** Harry's name and role are on a nameplate, his one-line intro and his
+  CV, Email and LinkedIn links on a card beside it. Both are the page's real header text
+  (`.masthead`), mapped in perspective onto the 3D faces (`room/quad.ts`), so it reads, selects, focuses
+  and is in the HTML before any script. A quiet index along the foot lists the ten tools, Ask, the
+  briefs and the CV, the directory for keyboards, screen readers and phones. Without WebGL the same
+  header and index are a plain editorial header.
 
 - **The model.** Click it (or scroll down) and the camera swoops in: high over the desk at first, then
   levelling out late into a low three-quarter view across the office, at the monitors, each playing its
   tool's recorded loop. The tilt-shift that makes the desk read as a miniature pulls to sharp on the way
   down. Esc, scrolling up or the visible button rises back out.
-- **The index-card box** is the archive. Pull a card and its builder gets up from their screen while the
+- **The index-card box** is the directory and the archive. Pull a card and its builder gets up from their screen while the
   camera leans in square to it, as if looking over their shoulder: the tool's recorded loop plays on that
   screen (a crisp video laid exactly over it once the camera has squared up; the screen's texture during
   the move), with **Open** under the bezel. The card beside it keeps the details, the stamp and the

@@ -39,27 +39,35 @@
 <body>
   <main>
     <div class="lobby">
-      <section class="board" id="directory" aria-labelledby="board-name">
-        <div class="board__face">
-          <h1 class="board__name" id="board-name">Harry Freeman</h1>
-          <p class="board__role">Head of AI</p>
-          <p class="board__line">I run AI strategy, products and governance at a UK sustainability consultancy; coding agents built these ten tools to my briefs, and a reviewer sent the work back until it met them.</p>
-          <h2 class="board__heading">Directory</h2>
+      <!-- Who this is, and the way round: on the desk, the name on a nameplate and the intro and links on a
+           card (this real text, laid onto them), and a quiet index along the foot; flat, an editorial header. -->
+      <div class="front" id="directory">
+        <header class="masthead">
+          <div class="masthead__plate" data-desk-target="nameplate" data-place="quad">
+            <h1 class="masthead__name">Harry Freeman</h1>
+            <p class="masthead__role">Head of AI</p>
+          </div>
+          <div class="masthead__card" data-desk-target="business-card" data-place="quad">
+            <p class="masthead__line">I run AI strategy, products and governance at a UK sustainability consultancy; coding agents built these ten tools to my briefs, and a reviewer sent the work back until it met them.</p>
+            <p class="masthead__links"><a href="%CV%">CV</a><a href="mailto:%EMAIL%">Email</a><a href="%LINKEDIN%">LinkedIn</a></p>
+          </div>
+        </header>
+        <nav class="index" aria-label="Directory">
           <!--office:directory-->
-          <ul class="board__more">
-            <li class="board__row"><a href="#ask">Ask a question</a><span class="board__leader" aria-hidden="true"></span><span class="board__where">Reception</span></li>
-            <li class="board__row board__row--office"><a href="#floor">Floor plan: who built what</a><span class="board__leader" aria-hidden="true"></span><span class="board__where">Studio floor</span></li>
-            <li class="board__row board__row--3d"><a href="/?room">The studio in 3D</a><span class="board__leader" aria-hidden="true"></span><span class="board__where">Large screens</span></li>
-            <li class="board__row"><a href="#brief">The briefs</a><span class="board__leader" aria-hidden="true"></span><span class="board__where">Back wall</span></li>
-            <li class="board__row"><a href="%CV%">CV</a><span class="board__leader" aria-hidden="true"></span><a href="mailto:%EMAIL%">Email</a><span class="board__sep" aria-hidden="true"> · </span><a href="%LINKEDIN%">LinkedIn</a></li>
+          <ul class="index__more">
+            <li><a href="#ask">Ask</a></li>
+            <li class="index__office"><a href="#floor">Floor plan</a></li>
+            <li class="index__3d"><a href="/?room">The studio in 3D</a></li>
+            <li><a href="#brief">The briefs</a></li>
+            <li><a href="%CV%">CV</a></li>
           </ul>
-        </div>
-      </section>
+        </nav>
+      </div>
 
       <div class="hall" id="hall">
         <section class="room" id="room" aria-labelledby="room-title">
           <h2 class="room__title" id="room-title">The studio, from the door</h2>
-          <img class="room__poster" src="/still/door-1600.webp" srcset="/still/door-1200.webp 1200w, /still/door-1600.webp 1600w, /still/door-2400.webp 2400w" sizes="(min-width: 1000px) calc(100vw - 390px), 100vw" alt="" width="1600" height="1333" loading="lazy" decoding="async" fetchpriority="high">
+          <img class="room__poster" src="/still/door-1600.webp" srcset="/still/door-1200.webp 1200w, /still/door-1600.webp 1600w, /still/door-2400.webp 2400w" sizes="100vw" alt="" width="1600" height="1333" loading="lazy" decoding="async" fetchpriority="high">
           <div class="room__stage" aria-hidden="true"></div>
           <div class="room__labels">
             <!--room:labels-->

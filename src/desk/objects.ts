@@ -7,6 +7,7 @@ import {
   BoxGeometry,
   type CanvasTexture,
   CylinderGeometry,
+  ExtrudeGeometry,
   Group,
   LatheGeometry,
   type Material,
@@ -15,6 +16,7 @@ import {
   type Object3D,
   PlaneGeometry,
   RepeatWrapping,
+  Shape,
   TorusGeometry,
   Vector2,
   Vector3,
@@ -631,4 +633,101 @@ export function printer(): Group {
   group.add(body, slot);
   shadows(group);
   return group;
+}
+
+/**
+ * Harry's nameplate: a wedge on the desk, its slanted face turned up to the door camera. The name is real
+ * text laid over the face (#masthead's plate), so the face is a plain cream plate in an ink frame.
+ */
+export const PLATE = { width: 9.6, depth: 2.6, height: 1.9, inset: 0.22 } as const;
+export class Nameplate {
+  readonly group = new Group();
+  constructor() {
+    const { width: w, depth: d, height: h } = PLATE;
+    // The wedge's side profile, in (−z, y) because turning the extrusion maps the shape's x to −z: flat on
+    // the desk, upright at the back, the face sloping down to the front edge.
+    const shape = new Shape([new Vector2(-d / 2, 0), new Vector2(d / 2, 0), new Vector2(d / 2, h), new Vector2(d / 2 - 0.25, h)]);
+    const body = new Mesh(new ExtrudeGeometry(shape, { depth: w, bevelEnabled: false }), flat(INK));
+    // Extruded along z; turned so the length runs along x.
+    body.rotation.y = Math.PI / 2;
+    body.position.set(-w / 2, 0, 0);
+    const face = new Mesh(new PlaneGeometry(w - 2 * PLATE.inset, this.#slope() - 2 * PLATE.inset), flat(CREAM));
+    face.position.copy(this.#faceCentre(0.012));
+    face.rotation.x = -Math.atan2(d - 0.25, h);
+    face.userData.noEdge = true;
+    this.group.add(body, face);
+    this.group.position.y = DESK_Y;
+    shadows(this.group);
+  }
+  #slope(): number {
+    return Math.hypot(PLATE.depth - 0.25, PLATE.height);
+  }
+  /** The middle of the sloping face, lifted off it by `lift` along its normal. */
+  #faceCentre(lift: number): Vector3 {
+    const { depth: d, height: h } = PLATE;
+    const run = d - 0.25;
+    const n = new Vector3(0, run, h).normalize();
+    return new Vector3(0, h / 2, d / 2 - run / 2).addScaledVector(n, lift);
+  }
+  /** The face's text area, in the room: top-left, top-right, bottom-right, bottom-left as the camera sees it. */
+  face(): Vector3[] {
+    const { width: w, depth: d, height: h, inset } = PLATE;
+    const run = d - 0.25;
+    const along = new Vector3(0, -h, run).normalize();
+    const top = new Vector3(0, h, d / 2 - run).addScaledVector(along, inset);
+    const bottom = new Vector3(0, 0, d / 2).addScaledVector(along, -inset);
+    const x = w / 2 - inset;
+    this.group.updateMatrixWorld(true);
+    return [
+      new Vector3(-x, top.y, top.z),
+      new Vector3(x, top.y, top.z),
+      new Vector3(x, bottom.y, bottom.z),
+      new Vector3(-x, bottom.y, bottom.z),
+    ].map((p) => this.group.localToWorld(p));
+  }
+  corners(): Vector3[] {
+    const { width: w, depth: d, height: h } = PLATE;
+    this.group.updateMatrixWorld(true);
+    const out: Vector3[] = [];
+    for (const x of [-w / 2, w / 2])
+      for (const [y, z] of [
+        [0, d / 2],
+        [h, -d / 2],
+      ] as const)
+        out.push(this.group.localToWorld(new Vector3(x, y, z)));
+    return out;
+  }
+}
+
+/** Harry's card, lying on the desk by the nameplate: the intro and his links are real text laid over it. */
+export const BCARD = { width: 12.8, depth: 7.0, inset: 0.55 } as const;
+export class BusinessCard {
+  readonly group = new Group();
+  constructor() {
+    const card = new Mesh(new BoxGeometry(BCARD.width, 0.08, BCARD.depth), flat(PAPER));
+    card.position.y = 0.04;
+    const rule = new Mesh(new BoxGeometry(BCARD.width, 0.082, 0.18), flat(CORAL));
+    rule.position.set(0, 0.041, -BCARD.depth / 2 + 0.09);
+    this.group.add(card, rule);
+    this.group.position.y = DESK_Y;
+    shadows(this.group);
+  }
+  /** The card's text area, in the room: top-left, top-right, bottom-right, bottom-left. */
+  face(): Vector3[] {
+    const x = BCARD.width / 2 - BCARD.inset;
+    const z = BCARD.depth / 2 - BCARD.inset;
+    this.group.updateMatrixWorld(true);
+    return [new Vector3(-x, 0.09, -z + 0.15), new Vector3(x, 0.09, -z + 0.15), new Vector3(x, 0.09, z), new Vector3(-x, 0.09, z)].map((p) =>
+      this.group.localToWorld(p),
+    );
+  }
+  corners(): Vector3[] {
+    this.group.updateMatrixWorld(true);
+    return [
+      [-1, -1],
+      [1, -1],
+      [1, 1],
+      [-1, 1],
+    ].map(([sx = 0, sz = 0]) => this.group.localToWorld(new Vector3((sx * BCARD.width) / 2, 0.1, (sz * BCARD.depth) / 2)));
+  }
 }

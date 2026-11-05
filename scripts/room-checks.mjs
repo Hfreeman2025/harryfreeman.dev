@@ -83,7 +83,7 @@ export async function roomChecks({ check, expect, BASE, config, shot }) {
     },
     async (page, problems) => {
       await page.goto(ROOM(), { waitUntil: 'commit' });
-      await page.waitForSelector('.board__name', { timeout: 5000 });
+      await page.waitForSelector('.masthead__name', { timeout: 5000 });
       await waitLive(page);
       await page.waitForTimeout(2000);
       const t = await page.evaluate(() => ({
@@ -158,7 +158,7 @@ export async function roomChecks({ check, expect, BASE, config, shot }) {
 
   await check('room: Tab reaches every object at the door', desk, async (page) => {
     await live(page, ROOM());
-    await page.focus('.board__more a[href="#brief"]');
+    await page.focus('.index__more a[href="#brief"]');
     const seen = new Set();
     for (let i = 0; i < 40; i++) {
       await page.keyboard.press('Tab');
@@ -363,10 +363,10 @@ export async function roomChecks({ check, expect, BASE, config, shot }) {
 
   await check('room: a directory row pulls its folder from wherever you stand', desk, async (page) => {
     await live(page, ROOM());
-    await page.click('.board__row a[data-piece="real-or-hallucinated"]');
+    await page.click('.index a[data-piece="real-or-hallucinated"]');
     await cardOpen(page);
     expect((await cardTitle(page)) === 'Real or Hallucinated?', `opened ${await cardTitle(page)}`);
-    await page.click('.board__row a[data-piece="sourced"]');
+    await page.click('.index a[data-piece="sourced"]');
     await page.waitForFunction(() => document.getElementById('card-title')?.textContent.trim() === 'Sourced', null, { timeout: 10000 });
   });
 
@@ -415,7 +415,7 @@ export async function roomChecks({ check, expect, BASE, config, shot }) {
     for (const l of shown) expect(!covering(l), `${l.target} covers a monitor`);
     // Each desk's tag, shown by keyboard focus.
     const desks = [];
-    await page.focus('.board__more a[href="#brief"]');
+    await page.focus('.index__more a[href="#brief"]');
     for (let i = 0; i < 30; i++) {
       await page.keyboard.press('Tab');
       // Tags fade in over 140 ms.
@@ -485,7 +485,7 @@ export async function roomChecks({ check, expect, BASE, config, shot }) {
       await page.keyboard.press('Escape');
       await waitStation(page, 'door');
       await page.locator('[data-target="cabinet"]').waitFor({ state: 'visible' });
-      await page.click('.board__row a[data-piece="gridtop"]');
+      await page.click('.index a[data-piece="gridtop"]');
       await cardOpen(page);
       seen.folder = await inside('#card .folder-card__open');
       for (const [name, v] of Object.entries(seen)) expect(v.ok, `${name} card leaves the viewport: ${JSON.stringify(v.r)}`);

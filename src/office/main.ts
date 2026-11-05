@@ -145,7 +145,7 @@ export function startOffice(): OfficeControl {
   // Folders, directory rows, list links and desks all pull the same folder.
   document.addEventListener('click', (event) => {
     const link = (event.target as Element | null)?.closest<HTMLElement>(
-      '.folder, .board__row a[data-piece], .plan-desk, .work__elsewhere a[data-piece]',
+      '.folder, .index a[data-piece], .plan-desk, .work__elsewhere a[data-piece]',
     );
     const piece = link?.dataset.piece ?? '';
     if (!link || !isPieceId(piece)) return;

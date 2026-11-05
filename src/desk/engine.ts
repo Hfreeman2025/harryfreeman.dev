@@ -31,12 +31,26 @@ import {
 import { drawerOf } from '../content/drawers';
 import { isPieceId, PIECE_IDS, PIECES, type PieceId } from '../content/pieces';
 import { NEUTRAL_LIGHT, type RoomLight, type SignText, signFor } from '../room/grid';
+import { quadTransform } from '../room/quad';
 import { Crew } from '../scene/crew';
 import { BASE, CABINET, DESKS, deskFor, RECEPTION, ROOM, SCREEN, WALL } from '../scene/layout';
 import { atlasRect, buildModel } from '../scene/model';
 import { fitView, fromAngles, type View } from '../scene/style';
 import type { Timeline } from '../timeline/schema';
-import { coffee, DESK_Y, deskTop, IndexBox, Keyboard, Notebook, pencil, type Round, stampAndPad, sticky } from './objects';
+import {
+  BusinessCard,
+  coffee,
+  DESK_Y,
+  deskTop,
+  IndexBox,
+  Keyboard,
+  Nameplate,
+  Notebook,
+  pencil,
+  type Round,
+  stampAndPad,
+  sticky,
+} from './objects';
 import { buildOffice, CABINET_AT, standAt, ZONES } from './office';
 import { CREAM } from './palette';
 import { DeskPass } from './pass';
@@ -71,6 +85,8 @@ interface MountOptions {
   readonly stage: HTMLElement;
   /** Everything laid over the scene: elements under it with a `data-desk-target`. */
   readonly labels: HTMLElement;
+  /** Real text laid exactly onto things on the desk (`data-place="quad"`): the nameplate and the card. */
+  readonly onto?: readonly HTMLElement[];
   readonly timeline: Timeline;
   readonly startAt?: number;
   readonly paused?: boolean;
@@ -86,6 +102,9 @@ const PLACES = {
   keyboard: { x: 8.6, z: 13.4, turn: -0.1 },
   cup: { x: 9.5, z: -11.2 },
   pencil: { x: 13.6, z: 6.6, turn: -0.5 },
+  // The card turned square to the door camera (its azimuth, -12°), so its lines read level.
+  nameplate: { x: -17.6, z: -10.8, turn: -0.04 },
+  card: { x: -5.2, z: -12.4, turn: -0.2 },
 } as const;
 
 /**
@@ -196,6 +215,7 @@ function framed(
 export async function mountDesk({
   stage,
   labels,
+  onto = [],
   timeline,
   startAt = 0,
   paused: startPaused = false,
@@ -298,10 +318,16 @@ export async function mountDesk({
   let note = sticky(signFor(null));
   note.position.set(PLACES.sticky.x, DESK_Y + 0.02, PLACES.sticky.z);
   note.rotation.z = PLACES.sticky.turn;
-  scene.add(box.group, notebook.group, keyboard.group, stamp, cup, pen, note);
+  const plate = new Nameplate();
+  plate.group.position.set(PLACES.nameplate.x, DESK_Y, PLACES.nameplate.z);
+  plate.group.rotation.y = PLACES.nameplate.turn;
+  const card = new BusinessCard();
+  card.group.position.set(PLACES.card.x, DESK_Y, PLACES.card.z);
+  card.group.rotation.y = PLACES.card.turn;
+  scene.add(box.group, notebook.group, keyboard.group, stamp, cup, pen, note, plate.group, card.group);
 
   // Labels: real buttons and links laid over what they name.
-  const labelEls = [...labels.querySelectorAll<HTMLElement>('[data-desk-target]')];
+  const labelEls = [...labels.querySelectorAll<HTMLElement>('[data-desk-target]'), ...onto];
   const nameTags = labelEls.filter((el) => el.dataset.place === 'nametag');
   const placementOrder = [...labelEls.filter((el) => el.dataset.place !== 'nametag'), ...nameTags];
 
@@ -326,13 +352,16 @@ export async function mountDesk({
     ...notebook.corners(),
     ...keyboard.corners(),
     v3(PLACES.cup.x + 3, 4.5, PLACES.cup.z - 3),
+    ...plate.corners(),
+    ...card.corners(),
     ...worldOf(stamp, [
       [-7, 0, -2],
       [3, 0, 2.5],
     ]),
   ];
   const viewOf = (s: Station, aspect: number): View => {
-    if (s === 'door') return framed(fromAngles(52, -12), 26, aspect, deskScene(), 0, { top: 0.92, bottom: -0.9, side: 0.96 });
+    // The foot of the window is kept for the index.
+    if (s === 'door') return framed(fromAngles(52, -12), 26, aspect, deskScene(), 0, { top: 0.92, bottom: -0.8, side: 0.96 });
     if (s === 'office')
       return framed(fromAngles(OFFICE_ANGLE.elevation, OFFICE_ANGLE.azimuth), 15, aspect, modelCorners, 0, {
         top: 0.9,
@@ -552,6 +581,23 @@ export async function mountDesk({
       const key = el.dataset.deskTarget ?? '';
       const place = el.dataset.place ?? 'tag';
       const show = shownAt(el) && !glide;
+      if (place === 'quad') {
+        // Text laid onto a thing on the desk, in perspective, wherever that thing is in view and faces the
+        // camera (during a glide too: it moves with the thing, so it never floats).
+        const thing = key === 'nameplate' ? plate : key === 'business-card' ? card : null;
+        const corners = thing?.group.visible ? thing.face().map((c) => c.clone().project(camera)) : [];
+        const pts = corners.map((c) => [(c.x * 0.5 + 0.5) * w, (-c.y * 0.5 + 0.5) * h] as const);
+        const [a, b, , d] = pts;
+        const facing = a && b && d ? (b[0] - a[0]) * (d[1] - a[1]) - (b[1] - a[1]) * (d[0] - a[0]) > 0 : false;
+        const onScreen = corners.length === 4 && corners.every((c) => c.z < 1 && Math.abs(c.x) < 1.3 && Math.abs(c.y) < 1.3) && facing;
+        if (!onScreen) {
+          if (el.dataset.placed !== undefined) delete el.dataset.placed;
+          continue;
+        }
+        el.style.transform = quadTransform(el.offsetWidth, el.offsetHeight, pts as unknown as Parameters<typeof quadTransform>[2]);
+        if (el.dataset.placed === undefined) el.dataset.placed = '';
+        continue;
+      }
       if (place === 'cover' || place === 'screen') {
         const corners = show ? (place === 'screen' ? screenCorners() : coverOf(key)).map((c) => c.clone().project(camera)) : [];
         const onScreen = corners.length > 0 && corners.every((c) => c.z < 1);
@@ -627,7 +673,7 @@ export async function mountDesk({
     const clear = focusNow.cut > 0.5;
     if (clear !== cleared) {
       cleared = clear;
-      for (const thing of [box.group, notebook.group, keyboard.group, stamp, cup, pen]) thing.visible = !clear;
+      for (const thing of [box.group, notebook.group, keyboard.group, stamp, cup, pen, plate.group, card.group]) thing.visible = !clear;
       office.openSide(clear);
       office.solo(clear && station.startsWith('desk:') ? (station.slice(5) as PieceId) : null);
     }
@@ -951,6 +997,26 @@ export async function mountDesk({
           // How square the camera is to the screen: the angle between where it looks and the screen's normal.
           facing: (Math.acos(Math.min(1, Math.max(-1, -camera.getWorldDirection(new Vector3()).z))) * 180) / Math.PI,
         };
+      },
+      /** The nameplate's and the card's faces on screen, in page pixels, for checking the text laid onto them. */
+      faces: () => {
+        const r = stage.getBoundingClientRect();
+        const box = (pts: Vector3[]) => {
+          const xs: number[] = [];
+          const ys: number[] = [];
+          for (const p of pts) {
+            projected.copy(p).project(camera);
+            xs.push(r.left + (projected.x * 0.5 + 0.5) * stage.clientWidth);
+            ys.push(r.top + (-projected.y * 0.5 + 0.5) * stage.clientHeight);
+          }
+          return {
+            x: Math.min(...xs),
+            y: Math.min(...ys),
+            width: Math.max(...xs) - Math.min(...xs),
+            height: Math.max(...ys) - Math.min(...ys),
+          };
+        };
+        return { nameplate: box(plate.face()), card: box(card.face()) };
       },
       /** The painted zone names' boxes on screen, so a check can see nothing covers them. */
       zoneRects: () => {

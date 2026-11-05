@@ -82,15 +82,25 @@ async function live(page, url) {
   await page.waitForTimeout(500);
 }
 
-export async function deskChecks({ check, expect, BASE, shot }) {
+export async function deskChecks({ check, expect, BASE, shot, name }) {
+  // Links are in the Tab order everywhere but Safari, where a keyboard reaches them with Option+Tab.
+  const linkTab = name === 'webkit' ? 'Alt+Tab' : 'Tab';
   const DESK = (query = '') => `${BASE}/?debug${query ? `&${query}` : ''}`;
 
   await check('desk: the HTML carries the desk’s objects, the name tags and every card before any script', {}, async () => {
     const html = await (await fetch(`${BASE}/`)).text();
-    expect((html.match(/data-desk-target=/g) ?? []).length === 35, `desk targets: ${(html.match(/data-desk-target=/g) ?? []).length}`);
+    expect((html.match(/data-desk-target=/g) ?? []).length === 37, `desk targets: ${(html.match(/data-desk-target=/g) ?? []).length}`);
     for (const action of ['office', 'cabinet', 'notebook', 'reception', 'stamp', 'sign'])
       expect(html.includes(`data-action="${action}"`), `no ${action}`);
     expect(html.includes('id="notebook-panel"') && html.includes('id="printout"'), 'no notebook panel or printout');
+    // Who this is, as real text before any script: the name, the role, the intro and the links.
+    expect(html.includes('<h1 class="masthead__name">Harry Freeman</h1>') && html.includes('>Head of AI</p>'), 'no name or role');
+    expect(html.includes('class="masthead__line">I run AI strategy'), 'no intro');
+    expect(
+      /class="masthead__links"><a href="[^"]+">CV<\/a><a href="mailto:[^"]+">Email<\/a><a href="https:[^"]+">LinkedIn<\/a>/.test(html),
+      'no CV, Email and LinkedIn',
+    );
+    expect(!html.includes('class="board'), 'the directory board is still there');
   });
 
   await check(
@@ -265,6 +275,82 @@ export async function deskChecks({ check, expect, BASE, shot }) {
       await page.keyboard.press('Escape');
       await waitStation(page, 'office');
       return { tags: tags.length };
+    },
+  );
+
+  await check(
+    'desk: the name and role are on the nameplate and the intro and links on the card, as real text; the card’s links and the index reach everything by keyboard',
+    desk,
+    async (page, problems) => {
+      await live(page, DESK());
+      await page.waitForFunction(() => document.querySelectorAll('.masthead [data-placed]').length === 2, null, { timeout: 5000 });
+      const at = await page.evaluate(() => {
+        const rect = (sel) => document.querySelector(sel).getBoundingClientRect().toJSON();
+        return {
+          faces: window.deskDebug.faces(),
+          plate: rect('.masthead__plate'),
+          card: rect('.masthead__card'),
+          name: rect('.masthead__name'),
+          line: document.querySelector('.masthead__line').textContent,
+          stage: rect('.room__stage'),
+        };
+      });
+      // Laid onto the faces: the text boxes land on the 3D faces, and are big enough to read.
+      for (const k of ['plate', 'card']) {
+        const face = at.faces[k === 'plate' ? 'nameplate' : 'card'];
+        for (const d of ['x', 'y', 'width', 'height'])
+          expect(
+            Math.abs(at[k][d] - face[d]) < 3,
+            `the ${k}’s text is off its face (${d}: ${at[k][d].toFixed(0)} vs ${face[d].toFixed(0)})`,
+          );
+        expect(at[k].x >= at.stage.x && at[k].y >= at.stage.y, `the ${k} is off screen`);
+      }
+      expect(at.name.height >= 22, `the name is ${at.name.height.toFixed(0)}px tall`);
+      // The intro's type, as it lands on screen: its set size times the card's scale.
+      const intro = await page.evaluate(() => {
+        const el = document.querySelector('.masthead__card');
+        return (Number.parseFloat(getComputedStyle(document.querySelector('.masthead__line')).fontSize) * el.getBoundingClientRect().width) / el.offsetWidth;
+      });
+      expect(intro >= 12, `the intro is set at ${intro.toFixed(1)}px on screen`);
+      expect(at.line.startsWith('I run AI strategy'), 'the intro is not on the card');
+      // The card's links, in order, by keyboard.
+      await page.focus('.masthead__links a');
+      const order = [await page.evaluate(() => document.activeElement.textContent)];
+      for (let i = 0; i < 2; i++) {
+        await page.keyboard.press(linkTab);
+        order.push(await page.evaluate(() => document.activeElement.textContent));
+      }
+      expect(order.join(',') === 'CV,Email,LinkedIn', `Tab on the card: ${order.join(', ')}`);
+      // Then the quiet index: the ten tools, Ask, the briefs and the CV, every one shown and reachable.
+      const index = [];
+      for (let i = 0; i < 13; i++) {
+        await page.keyboard.press(linkTab);
+        index.push(
+          await page.evaluate(() => {
+            const el = document.activeElement;
+            const r = el.getBoundingClientRect();
+            return { text: el.textContent, inIndex: Boolean(el.closest('.index')), shown: r.width > 0 && r.bottom <= innerHeight };
+          }),
+        );
+      }
+      expect(
+        index.every((l) => l.inIndex && l.shown),
+        `the index: ${index.map((l) => `${l.text}${l.inIndex && l.shown ? '' : ' (missed)'}`).join(', ')}`,
+      );
+      expect(
+        index
+          .slice(-3)
+          .map((l) => l.text)
+          .join(',') === 'Ask,The briefs,CV',
+        `the index ends ${index.slice(-3).map((l) => l.text)}`,
+      );
+      await shot(page, 'desk-front');
+      // An index link pulls its card, as the board's rows did.
+      await page.click('.index a[data-piece="sourced"]');
+      await cardOpen(page);
+      await waitStation(page, 'desk:sourced');
+      expect(problems.length === 0, problems.join(' | '));
+      return { index: index.length };
     },
   );
 
