@@ -18,8 +18,8 @@ Four things in the room are live. The lamp follows Great Britain's grid, and the
 carbon intensity is printed on a sign on the wall, with its credit beside it. A radio on the shelf beside it plays Listen to
 the Grid, silent until pressed. The sign's and the radio's cards open on hover, focus or click. Reception answers questions with quotations from Harry's CV and the tools'
 READMEs; when an answer comes from a README, the camera turns to that desk and the quoted line is
-marked in its folder. (Receipt stamps on the folders, verified in the browser, are next: they wait on
-the receipts package.)
+marked in its folder. Every folder carries the tool's receipt stamp: its latest signed check results,
+which you can check in the browser.
 
 On a phone, with reduced motion, without WebGL or without script, the same building is the flat
 office: the same directory, cabinet, folders, Reception, sign and radio as HTML. Both come from one
@@ -95,6 +95,21 @@ tool's README as numbered source lines (ask-the-record's own `renderSourceView`,
 quotes a README, that README goes into the folder before the element marks the line, then the camera
 turns to the desk and the folder opens scrolled to it. A refusal says so and moves nothing.
 
+**Receipt stamps** (`src/room/stamp.ts`). Each folder, in both renderings, shows the tool's latest
+stamp from the receipts project: the tool, the short commit, PASSED or FAILED and the result line,
+labelled as what the stamp claims. Pressing it fetches the signed envelope and runs the receipts
+project's own `verifyStamp` (WebCrypto Ed25519, the key pinned to `e201c249…`) in the browser. While it
+runs the stamp says so; only when it resolves does it show the outcome, as two separate facts: whether
+the signature is valid, and whether the checks passed. Then come the signed statement's commands, exit
+codes, times and how they were captured, and the exact signed text. dreaming's stamp is validly signed
+and records a failed unit-test run, with the reason and its separately signed supplement (run outside
+the sandbox, not network-isolated). Earlier captures are listed and check too. gpt-in-a-tab's folder
+can change one byte (the shipped tampered copy) to show the signature failing. A browser without
+Ed25519 is told it cannot verify. What a stamp proves, and what it does not, is at `/stamps.html`, from
+the receipts project's own `docs/site-stamps.md`. The packet is vendored unmodified by
+`npm run vendor stamps` from receipts commit `0f84c7e`, recorded with file hashes in
+`public/vendor/stamps/SOURCE.json`.
+
 **Identity.** [IDENTITY.md](IDENTITY.md): one office building; IBM Plex throughout; putty steel, manila,
 black felt and green wayfinding signs in the office; the studio is an architect's study model, in
 stone, balsa and card on pale paper.
@@ -128,11 +143,15 @@ Automation is silent and offline from the world: every browser gets a device-fre
 (`scripts/silent.mjs`), the Carbon Intensity API is always mocked, and any request off the machine fails
 the check.
 
-- **Unit tests (Vitest, 52):**
+- **Unit tests (Vitest, 57):**
   - the scale figures: about 1.75 m standing and 1.4 m seated, and at every 0.1 s step of both the
     real and the placeholder replay, no two figures' bounding boxes intersect and no part of any figure
     intersects any piece of furniture (contact within 2 mm counts as sitting or resting, not
     overlapping), with a control proving the check catches a figure pushed into its desk;
+  - the receipt stamps, with their own verifier: the pinned key matches the reported fingerprint;
+    every tool's latest stamp and every earlier capture verifies and names its tool and commit;
+    dreaming is validly signed with failed checks, and its supplement is validly signed and marked not
+    network-isolated; the tampered copy and a stamp under another key are rejected;
   - the screen overlay's transform landing exactly on a keystoned monitor's corners;
   - the grid: bands, measured value over forecast, refusing old, future, malformed and empty
     half-hours, HTTP errors, expiry, a sign that never shows a number when data is unavailable, and
@@ -140,7 +159,7 @@ the check.
   - the room's tags: only the cabinet, Reception and the credit at rest, every object a tabbable link
     or button, and each drawer followed by its folders;
   - the earlier suites: the timeline, replay, rendering, config, CV, filing, cabinet and floor plan.
-- **Browser checks (38 per browser, all passing in Chromium, WebKit and Firefox on 5 November):**
+- **Browser checks (43 per browser, all passing in Chromium, WebKit and Firefox on 5 November):**
   - the HTML before scripts;
   - the first screen (directory and poster), a clean console and zero layout shift;
   - by keyboard, cabinet → drawer → folder → the desk turn → Esc back, step by step, with focus
@@ -162,6 +181,11 @@ the check.
     the credit beside it, and stopping on leaving;
   - deep links, the directory and the replay;
   - the fallback without WebGL;
+  - **stamps:** a real stamp verifies in the browser, with the page checked while the check is held
+    open to show that nothing says verified before it resolves; the one-byte change is rejected with
+    nothing shown as fact; dreaming shows a valid signature, failed checks with the reason, its
+    supplement and an earlier capture checking; a browser without Ed25519 is told it cannot verify;
+    and the flat office's folder carries the same stamp on a phone;
   - the flat office: phone, reduced motion and `?flat` with no canvas and no poster download, the
     cabinet, folders, Reception's marked line, sign and radio, tabs, plan, and zero layout shift on the
     phone.
@@ -187,8 +211,6 @@ display would pace. WebKit and Firefox do not report layout shift; it is measure
 
 ## What is weak
 
-- **Receipt stamps are not in yet.** They wait on the receipts package (statements, key and verifier);
-  no signature or "verified" state is written by hand meanwhile.
 - **Loopback numbers.** Paint and scene-ready times are from a local preview; over a network the
   three.js chunk (142 KB gzipped) and the baked textures add their transfer time.
 - **The poster is one framing.** It is shot at the hall's shape on a laptop; on much wider screens the

@@ -1,0 +1,899 @@
+{
+  "version": 1,
+  "attestedAt": "2026-11-05T12:11:47.836Z",
+  "keyId": "e201c24958d158d09f607f1951d2440aa3f0ce76061e5a67c0e6bcd7bc4ba023",
+  "publicKey": "public-key.json",
+  "verifier": "verify-stamp.mjs",
+  "scope": "typecheck, lint, unit-tests; latest observed commands, not a full release gate",
+  "entries": [
+    {
+      "tool": "gpt-in-a-tab",
+      "commit": "193619ee720bf4a7d71da31fae9cf9c2d13a9e01",
+      "status": "passed",
+      "capture": "captures/gpt-in-a-tab-193619ee720bf4a7d71da31fae9cf9c2d13a9e01-20261104171904649.json",
+      "captureSha256": "ed0782c65a2f8188d3beebaa3b423309d4e958816a687915d801859eebbabcb3",
+      "envelope": "stamps/gpt-in-a-tab-193619ee720bf4a7d71da31fae9cf9c2d13a9e01-20261104171904649.dsse.json",
+      "resultLine": "gpt-in-a-tab: PASSED — typecheck: passed; lint: passed; unit-tests: passed (Tests  48 passed (48))",
+      "checks": [
+        {
+          "kind": "typecheck",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "typecheck: observed exit 0"
+        },
+        {
+          "kind": "lint",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "lint: observed exit 0"
+        },
+        {
+          "kind": "unit-tests",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "Tests  48 passed (48)"
+        }
+      ],
+      "history": [
+        "history/gpt-in-a-tab-bootstrap-abort.dsse.json",
+        "stamps/gpt-in-a-tab.dsse.json"
+      ]
+    },
+    {
+      "tool": "real-or-hallucinated",
+      "commit": "afe6065317edb31331fdd3e230c20c1ae86b4295",
+      "status": "passed",
+      "capture": "captures/real-or-hallucinated-afe6065317edb31331fdd3e230c20c1ae86b4295-20261104172114497.json",
+      "captureSha256": "41e9401a846e29c1da82477fb7f714405499b98648f226ffb81cf55f8af39ad0",
+      "envelope": "stamps/real-or-hallucinated-afe6065317edb31331fdd3e230c20c1ae86b4295-20261104172114497.dsse.json",
+      "resultLine": "real-or-hallucinated: PASSED — typecheck: passed; lint: passed; unit-tests: passed (ℹ tests 61; ℹ pass 61; ℹ fail 0; ℹ cancelled 0; ℹ skipped 0)",
+      "checks": [
+        {
+          "kind": "typecheck",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "typecheck: observed exit 0"
+        },
+        {
+          "kind": "lint",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "lint: observed exit 0"
+        },
+        {
+          "kind": "unit-tests",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "ℹ tests 61; ℹ pass 61; ℹ fail 0; ℹ cancelled 0; ℹ skipped 0"
+        }
+      ],
+      "history": [
+        "history/real-or-hallucinated-first-capture.dsse.json",
+        "stamps/real-or-hallucinated.dsse.json"
+      ]
+    },
+    {
+      "tool": "agent-race",
+      "commit": "e9871e8af05838e67d02c3ae86149370a3f37d02",
+      "status": "passed",
+      "capture": "captures/agent-race-e9871e8af05838e67d02c3ae86149370a3f37d02-20261105121047937.json",
+      "captureSha256": "ae3648365923df3eb425e571d4c8682f8069e03d6ac47e186b4debc3f31aa344",
+      "envelope": "stamps/agent-race-e9871e8af05838e67d02c3ae86149370a3f37d02-20261105121047937.dsse.json",
+      "resultLine": "agent-race: PASSED — typecheck: passed; lint: passed; unit-tests: passed (Tests  76 passed (76))",
+      "checks": [
+        {
+          "kind": "typecheck",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "typecheck: observed exit 0"
+        },
+        {
+          "kind": "lint",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "lint: observed exit 0"
+        },
+        {
+          "kind": "unit-tests",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "Tests  76 passed (76)"
+        }
+      ],
+      "history": [
+        "history/agent-race-first-capture.dsse.json",
+        "stamps/agent-race.dsse.json",
+        "stamps/agent-race-647ea417af718e963b26ff2de44c707076c30780-20261104172144504.dsse.json"
+      ]
+    },
+    {
+      "tool": "receipts",
+      "commit": "5c8b8fbd876494bb55224ed7034761cb150e957d",
+      "status": "passed",
+      "capture": "captures/receipts-5c8b8fbd876494bb55224ed7034761cb150e957d-20261105121132798.json",
+      "captureSha256": "84f4139a9974270ba8bbcdacc129b3fb91a44aef97c64a9268bb00f267099c7a",
+      "envelope": "stamps/receipts-5c8b8fbd876494bb55224ed7034761cb150e957d-20261105121132798.dsse.json",
+      "resultLine": "receipts: PASSED — typecheck: passed; lint: passed; unit-tests: passed (Tests  530 passed (530))",
+      "checks": [
+        {
+          "kind": "typecheck",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "typecheck: observed exit 0"
+        },
+        {
+          "kind": "lint",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "lint: observed exit 0"
+        },
+        {
+          "kind": "unit-tests",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "Tests  530 passed (530)"
+        }
+      ],
+      "history": [
+        "stamps/receipts-5313dea7d30dd8ee6c3d375a80df48881027e6ea-20261105095822096.dsse.json"
+      ]
+    },
+    {
+      "tool": "dreaming",
+      "commit": "070b67d4a201561b228730625bb304b8a87613a4",
+      "status": "failed",
+      "capture": "captures/dreaming-070b67d4a201561b228730625bb304b8a87613a4-20261104172539227.json",
+      "captureSha256": "8d6c7857430f63eecb62deeb1ab4afe9d51341fb8df965bf284d447a08df79d8",
+      "envelope": "stamps/dreaming-070b67d4a201561b228730625bb304b8a87613a4-20261104172539227.dsse.json",
+      "resultLine": "dreaming: FAILED — typecheck: passed; lint: passed; unit-tests: failed (Tests  1 failed | 455 passed | 1 skipped (457))",
+      "checks": [
+        {
+          "kind": "typecheck",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "typecheck: observed exit 0"
+        },
+        {
+          "kind": "lint",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "lint: observed exit 0"
+        },
+        {
+          "kind": "unit-tests",
+          "status": "failed",
+          "exitCode": 1,
+          "resultLine": "Tests  1 failed | 455 passed | 1 skipped (457)"
+        }
+      ],
+      "history": [
+        "history/dreaming-first-capture.dsse.json",
+        "stamps/dreaming.dsse.json"
+      ]
+    },
+    {
+      "tool": "grid-weather",
+      "commit": "1f3a0f73696969a9f6aa3639d393ea570b0b05ed",
+      "status": "passed",
+      "capture": "captures/grid-weather-1f3a0f73696969a9f6aa3639d393ea570b0b05ed-20261104172157282.json",
+      "captureSha256": "3d477b9bd9e75ae6a4fb69e7c622669790f6687fde2c37f643c4549e2b755c04",
+      "envelope": "stamps/grid-weather-1f3a0f73696969a9f6aa3639d393ea570b0b05ed-20261104172157282.dsse.json",
+      "resultLine": "grid-weather: PASSED — typecheck: passed; lint: passed; unit-tests: passed (ℹ tests 54; ℹ pass 54; ℹ fail 0; ℹ cancelled 0; ℹ skipped 0)",
+      "checks": [
+        {
+          "kind": "typecheck",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "typecheck: observed exit 0"
+        },
+        {
+          "kind": "lint",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "lint: observed exit 0"
+        },
+        {
+          "kind": "unit-tests",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "ℹ tests 54; ℹ pass 54; ℹ fail 0; ℹ cancelled 0; ℹ skipped 0"
+        }
+      ],
+      "history": [
+        "stamps/grid-weather.dsse.json"
+      ]
+    },
+    {
+      "tool": "gridtop",
+      "commit": "b70bbf9358e1aa045fa15643f919145a08f38ed2",
+      "status": "passed",
+      "capture": "captures/gridtop-b70bbf9358e1aa045fa15643f919145a08f38ed2-20261105120530861.json",
+      "captureSha256": "bc2f81bda92f821be7f99053d2055f0ad421434ee2a84606cd27fbc066d322de",
+      "envelope": "stamps/gridtop-b70bbf9358e1aa045fa15643f919145a08f38ed2-20261105120530861.dsse.json",
+      "resultLine": "gridtop: PASSED — typecheck: passed; lint: passed; unit-tests: passed (test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s | test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s | test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s | test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s | test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.95s | test result: ok. 5 p)",
+      "checks": [
+        {
+          "kind": "typecheck",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "typecheck: observed exit 0"
+        },
+        {
+          "kind": "lint",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "lint: observed exit 0"
+        },
+        {
+          "kind": "unit-tests",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s | test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s | test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s | test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s | test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.95s | test result: ok. 5 p"
+        }
+      ],
+      "history": [
+        "history/gridtop-first-capture.dsse.json",
+        "stamps/gridtop.dsse.json",
+        "stamps/gridtop-b70bbf9358e1aa045fa15643f919145a08f38ed2-20261104172222856.dsse.json"
+      ]
+    },
+    {
+      "tool": "listen-to-the-grid",
+      "commit": "cd664696636a531e3dcd4799a3bf856c49efbc79",
+      "status": "passed",
+      "capture": "captures/listen-to-the-grid-cd664696636a531e3dcd4799a3bf856c49efbc79-20261104172241923.json",
+      "captureSha256": "679227b65e05c86ec7dd025aa8d039c0f4d1f1988a216ec482765ba112e994d2",
+      "envelope": "stamps/listen-to-the-grid-cd664696636a531e3dcd4799a3bf856c49efbc79-20261104172241923.dsse.json",
+      "resultLine": "listen-to-the-grid: PASSED — typecheck: passed; lint: passed; unit-tests: passed (Tests  183 passed (183))",
+      "checks": [
+        {
+          "kind": "typecheck",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "typecheck: observed exit 0"
+        },
+        {
+          "kind": "lint",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "lint: observed exit 0"
+        },
+        {
+          "kind": "unit-tests",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "Tests  183 passed (183)"
+        }
+      ],
+      "history": [
+        "stamps/listen-to-the-grid.dsse.json"
+      ]
+    },
+    {
+      "tool": "ask-the-record",
+      "commit": "138597c1e9543de5ac2914755ed5b9475a7b8f97",
+      "status": "passed",
+      "capture": "captures/ask-the-record-138597c1e9543de5ac2914755ed5b9475a7b8f97-20261104172413308.json",
+      "captureSha256": "65225163b90bad77758781c2bd64942a025b5911329aa6b4d93a320c17918893",
+      "envelope": "stamps/ask-the-record-138597c1e9543de5ac2914755ed5b9475a7b8f97-20261104172413308.dsse.json",
+      "resultLine": "ask-the-record: PASSED — typecheck: passed; lint: passed; unit-tests: passed (Tests  389 passed (389))",
+      "checks": [
+        {
+          "kind": "typecheck",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "typecheck: observed exit 0"
+        },
+        {
+          "kind": "lint",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "lint: observed exit 0"
+        },
+        {
+          "kind": "unit-tests",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "Tests  389 passed (389)"
+        }
+      ],
+      "history": [
+        "stamps/ask-the-record.dsse.json"
+      ]
+    },
+    {
+      "tool": "sourced",
+      "commit": "969411a7829228a1bd503c3ee0311ffaa257413d",
+      "status": "passed",
+      "capture": "captures/sourced-969411a7829228a1bd503c3ee0311ffaa257413d-20261104172442428.json",
+      "captureSha256": "f3be1fc9070a5cf9eb6e5f33506467f850c7dd6a2b600a33bd3d6c4e6ffb01a9",
+      "envelope": "stamps/sourced-969411a7829228a1bd503c3ee0311ffaa257413d-20261104172442428.dsse.json",
+      "resultLine": "sourced: PASSED — typecheck: passed; lint: passed; unit-tests: passed (ℹ tests 90; ℹ pass 90; ℹ fail 0; ℹ cancelled 0; ℹ skipped 0)",
+      "checks": [
+        {
+          "kind": "typecheck",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "typecheck: observed exit 0"
+        },
+        {
+          "kind": "lint",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "lint: observed exit 0"
+        },
+        {
+          "kind": "unit-tests",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "ℹ tests 90; ℹ pass 90; ℹ fail 0; ℹ cancelled 0; ℹ skipped 0"
+        }
+      ],
+      "history": [
+        "history/sourced-first-capture.dsse.json",
+        "stamps/sourced.dsse.json"
+      ]
+    }
+  ],
+  "history": [
+    {
+      "tool": "agent-race",
+      "commit": "647ea417af718e963b26ff2de44c707076c30780",
+      "status": "failed",
+      "capture": "history/agent-race-first-capture.json",
+      "captureSha256": "d3fd88cc6052f92df121846629869b6ef151b604a2d0cd7747fe4f012a2a3899",
+      "envelope": "history/agent-race-first-capture.dsse.json",
+      "resultLine": "agent-race: FAILED — typecheck: passed; lint: passed; unit-tests: failed (Tests  1 failed | 73 passed (74))",
+      "checks": [
+        {
+          "kind": "typecheck",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "typecheck: observed exit 0"
+        },
+        {
+          "kind": "lint",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "lint: observed exit 0"
+        },
+        {
+          "kind": "unit-tests",
+          "status": "failed",
+          "exitCode": 1,
+          "resultLine": "Tests  1 failed | 73 passed (74)"
+        }
+      ],
+      "reason": "Earlier capture retained. Retried at the same commit after correcting the clone-local Unix IPC/Git-excludes capture policy; no project source was patched. Its failed results remain signed here; this note does not attribute every failure to that policy."
+    },
+    {
+      "tool": "dreaming",
+      "commit": "2d1f18bd11080065668e080e7c834aa2de052835",
+      "status": "failed",
+      "capture": "history/dreaming-first-capture.json",
+      "captureSha256": "a7c70912ba5cd1314ff2df0ae3a67f7f6aaa4cd833c4a5b6ad731ed51c08f02f",
+      "envelope": "history/dreaming-first-capture.dsse.json",
+      "resultLine": "dreaming: FAILED — typecheck: passed; lint: passed; unit-tests: failed (Tests  4 failed | 452 passed | 1 skipped (457))",
+      "checks": [
+        {
+          "kind": "typecheck",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "typecheck: observed exit 0"
+        },
+        {
+          "kind": "lint",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "lint: observed exit 0"
+        },
+        {
+          "kind": "unit-tests",
+          "status": "failed",
+          "exitCode": 1,
+          "resultLine": "Tests  4 failed | 452 passed | 1 skipped (457)"
+        }
+      ],
+      "reason": "Earlier capture retained. Retried at the same commit after correcting the clone-local Unix IPC/Git-excludes capture policy; no project source was patched. Its failed results remain signed here; this note does not attribute every failure to that policy."
+    },
+    {
+      "tool": "gpt-in-a-tab",
+      "commit": "193619ee720bf4a7d71da31fae9cf9c2d13a9e01",
+      "status": "failed",
+      "capture": "history/gpt-in-a-tab-bootstrap-abort.json",
+      "captureSha256": "0aa70fa3ff30ca7d7d5f531a1398fbbdf90bc2af65e52a6d85dc0ab0a363dcee",
+      "envelope": "history/gpt-in-a-tab-bootstrap-abort.dsse.json",
+      "resultLine": "gpt-in-a-tab: FAILED — typecheck: not-run; lint: not-run; unit-tests: not-run (Not run: Dependency/prerequisite setup did not pass; see signed setup result)",
+      "checks": [
+        {
+          "kind": "typecheck",
+          "status": "not-run",
+          "exitCode": null,
+          "resultLine": "Not run: Dependency/prerequisite setup did not pass; see signed setup result"
+        },
+        {
+          "kind": "lint",
+          "status": "not-run",
+          "exitCode": null,
+          "resultLine": "Not run: Dependency/prerequisite setup did not pass; see signed setup result"
+        },
+        {
+          "kind": "unit-tests",
+          "status": "not-run",
+          "exitCode": null,
+          "resultLine": "Not run: Dependency/prerequisite setup did not pass; see signed setup result"
+        }
+      ],
+      "reason": "Operator preflight: over-restrictive first filesystem policy aborted Node before npm could start; retained, not presented as a tool test result."
+    },
+    {
+      "tool": "gridtop",
+      "commit": "b70bbf9358e1aa045fa15643f919145a08f38ed2",
+      "status": "failed",
+      "capture": "history/gridtop-first-capture.json",
+      "captureSha256": "f1dd4d8879671bfc3054958b231827360d1bda28ddceebca389bf12fb7734f24",
+      "envelope": "history/gridtop-first-capture.dsse.json",
+      "resultLine": "gridtop: FAILED — typecheck: failed; lint: failed; unit-tests: failed (Operation not permitted (os error 1))",
+      "checks": [
+        {
+          "kind": "typecheck",
+          "status": "failed",
+          "exitCode": 101,
+          "resultLine": "Operation not permitted (os error 1)"
+        },
+        {
+          "kind": "lint",
+          "status": "failed",
+          "exitCode": 101,
+          "resultLine": "Operation not permitted (os error 1)"
+        },
+        {
+          "kind": "unit-tests",
+          "status": "failed",
+          "exitCode": 101,
+          "resultLine": "Operation not permitted (os error 1)"
+        }
+      ],
+      "reason": "Earlier capture retained. Retried at the same commit after correcting the clone-local Unix IPC/Git-excludes capture policy; no project source was patched. Its failed results remain signed here; this note does not attribute every failure to that policy."
+    },
+    {
+      "tool": "real-or-hallucinated",
+      "commit": "afe6065317edb31331fdd3e230c20c1ae86b4295",
+      "status": "failed",
+      "capture": "history/real-or-hallucinated-first-capture.json",
+      "captureSha256": "76e914b67b81f07d7086951b62e1a039e59ea3fc5c6c5c5121944034e7ab303b",
+      "envelope": "history/real-or-hallucinated-first-capture.dsse.json",
+      "resultLine": "real-or-hallucinated: FAILED — typecheck: passed; lint: passed; unit-tests: failed (errno: -1,)",
+      "checks": [
+        {
+          "kind": "typecheck",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "typecheck: observed exit 0"
+        },
+        {
+          "kind": "lint",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "lint: observed exit 0"
+        },
+        {
+          "kind": "unit-tests",
+          "status": "failed",
+          "exitCode": 1,
+          "resultLine": "errno: -1,"
+        }
+      ],
+      "reason": "Earlier capture retained. Retried at the same commit after correcting the clone-local Unix IPC/Git-excludes capture policy; no project source was patched. Its failed results remain signed here; this note does not attribute every failure to that policy."
+    },
+    {
+      "tool": "sourced",
+      "commit": "969411a7829228a1bd503c3ee0311ffaa257413d",
+      "status": "failed",
+      "capture": "history/sourced-first-capture.json",
+      "captureSha256": "730ccfcd0ddc9c3c856cb09c62138c881f54f6ed5143fe1d27b5dd473fa6f287",
+      "envelope": "history/sourced-first-capture.dsse.json",
+      "resultLine": "sourced: FAILED — typecheck: passed; lint: passed; unit-tests: failed (errno: -1,)",
+      "checks": [
+        {
+          "kind": "typecheck",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "typecheck: observed exit 0"
+        },
+        {
+          "kind": "lint",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "lint: observed exit 0"
+        },
+        {
+          "kind": "unit-tests",
+          "status": "failed",
+          "exitCode": 1,
+          "resultLine": "errno: -1,"
+        }
+      ],
+      "reason": "Earlier capture retained. Retried at the same commit after correcting the clone-local Unix IPC/Git-excludes capture policy; no project source was patched. Its failed results remain signed here; this note does not attribute every failure to that policy."
+    },
+    {
+      "tool": "gpt-in-a-tab",
+      "commit": "193619ee720bf4a7d71da31fae9cf9c2d13a9e01",
+      "status": "passed",
+      "capture": "captures/gpt-in-a-tab.json",
+      "captureSha256": "ff778abebce01f2dc7d182ef11dc2abc16b21f9277261d572e4e715e6becbfe9",
+      "envelope": "stamps/gpt-in-a-tab.dsse.json",
+      "resultLine": "gpt-in-a-tab: PASSED — typecheck: passed; lint: passed; unit-tests: passed (Tests  48 passed (48))",
+      "checks": [
+        {
+          "kind": "typecheck",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "typecheck: observed exit 0"
+        },
+        {
+          "kind": "lint",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "lint: observed exit 0"
+        },
+        {
+          "kind": "unit-tests",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "Tests  48 passed (48)"
+        }
+      ]
+    },
+    {
+      "tool": "real-or-hallucinated",
+      "commit": "afe6065317edb31331fdd3e230c20c1ae86b4295",
+      "status": "passed",
+      "capture": "captures/real-or-hallucinated.json",
+      "captureSha256": "56072829d33f58576a2f7cc146642810b696f5230ba74e85c4b66021d763478b",
+      "envelope": "stamps/real-or-hallucinated.dsse.json",
+      "resultLine": "real-or-hallucinated: PASSED — typecheck: passed; lint: passed; unit-tests: passed (ℹ tests 61; ℹ pass 61; ℹ fail 0; ℹ cancelled 0; ℹ skipped 0)",
+      "checks": [
+        {
+          "kind": "typecheck",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "typecheck: observed exit 0"
+        },
+        {
+          "kind": "lint",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "lint: observed exit 0"
+        },
+        {
+          "kind": "unit-tests",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "ℹ tests 61; ℹ pass 61; ℹ fail 0; ℹ cancelled 0; ℹ skipped 0"
+        }
+      ]
+    },
+    {
+      "tool": "agent-race",
+      "commit": "647ea417af718e963b26ff2de44c707076c30780",
+      "status": "passed",
+      "capture": "captures/agent-race.json",
+      "captureSha256": "3f7626f2d3e61e0934e0245547e4d78ba0f35cd23ad01ed0c1c738552109f70b",
+      "envelope": "stamps/agent-race.dsse.json",
+      "resultLine": "agent-race: PASSED — typecheck: passed; lint: passed; unit-tests: passed (Tests  74 passed (74))",
+      "checks": [
+        {
+          "kind": "typecheck",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "typecheck: observed exit 0"
+        },
+        {
+          "kind": "lint",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "lint: observed exit 0"
+        },
+        {
+          "kind": "unit-tests",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "Tests  74 passed (74)"
+        }
+      ]
+    },
+    {
+      "tool": "agent-race",
+      "commit": "647ea417af718e963b26ff2de44c707076c30780",
+      "status": "failed",
+      "capture": "captures/agent-race-647ea417af718e963b26ff2de44c707076c30780-20261104172144504.json",
+      "captureSha256": "01467870b3cff8c62beb39319c9eb1042cb82fc50d0ce3a457b86dba6a4ded94",
+      "envelope": "stamps/agent-race-647ea417af718e963b26ff2de44c707076c30780-20261104172144504.dsse.json",
+      "resultLine": "agent-race: FAILED — typecheck: passed; lint: passed; unit-tests: failed (Tests  1 failed | 73 passed (74))",
+      "checks": [
+        {
+          "kind": "typecheck",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "typecheck: observed exit 0"
+        },
+        {
+          "kind": "lint",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "lint: observed exit 0"
+        },
+        {
+          "kind": "unit-tests",
+          "status": "failed",
+          "exitCode": 1,
+          "resultLine": "Tests  1 failed | 73 passed (74)"
+        }
+      ]
+    },
+    {
+      "tool": "receipts",
+      "commit": "5313dea7d30dd8ee6c3d375a80df48881027e6ea",
+      "status": "passed",
+      "capture": "captures/receipts-5313dea7d30dd8ee6c3d375a80df48881027e6ea-20261105095822096.json",
+      "captureSha256": "c8b9aa48a94b598b3f349cd535fb3e68ffe2a736160b80cd8f7e2750889b84b7",
+      "envelope": "stamps/receipts-5313dea7d30dd8ee6c3d375a80df48881027e6ea-20261105095822096.dsse.json",
+      "resultLine": "receipts: PASSED — typecheck: passed; lint: passed; unit-tests: passed (Tests  525 passed (525))",
+      "checks": [
+        {
+          "kind": "typecheck",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "typecheck: observed exit 0"
+        },
+        {
+          "kind": "lint",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "lint: observed exit 0"
+        },
+        {
+          "kind": "unit-tests",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "Tests  525 passed (525)"
+        }
+      ]
+    },
+    {
+      "tool": "dreaming",
+      "commit": "2d1f18bd11080065668e080e7c834aa2de052835",
+      "status": "failed",
+      "capture": "captures/dreaming.json",
+      "captureSha256": "37077b8fd0dd167b6ee43d0047b0f19193c163901c35537f5d07b3e4f3ba3703",
+      "envelope": "stamps/dreaming.dsse.json",
+      "resultLine": "dreaming: FAILED — typecheck: passed; lint: passed; unit-tests: failed (Tests  3 failed | 453 passed | 1 skipped (457))",
+      "checks": [
+        {
+          "kind": "typecheck",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "typecheck: observed exit 0"
+        },
+        {
+          "kind": "lint",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "lint: observed exit 0"
+        },
+        {
+          "kind": "unit-tests",
+          "status": "failed",
+          "exitCode": 1,
+          "resultLine": "Tests  3 failed | 453 passed | 1 skipped (457)"
+        }
+      ]
+    },
+    {
+      "tool": "grid-weather",
+      "commit": "1f3a0f73696969a9f6aa3639d393ea570b0b05ed",
+      "status": "passed",
+      "capture": "captures/grid-weather.json",
+      "captureSha256": "04a1642ed70aedd79d73b2ea7c4537e1acaea54edea06ff0e2ecfd3d86966d3f",
+      "envelope": "stamps/grid-weather.dsse.json",
+      "resultLine": "grid-weather: PASSED — typecheck: passed; lint: passed; unit-tests: passed (unit-tests: observed exit 0)",
+      "checks": [
+        {
+          "kind": "typecheck",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "typecheck: observed exit 0"
+        },
+        {
+          "kind": "lint",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "lint: observed exit 0"
+        },
+        {
+          "kind": "unit-tests",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "unit-tests: observed exit 0"
+        }
+      ]
+    },
+    {
+      "tool": "gridtop",
+      "commit": "b70bbf9358e1aa045fa15643f919145a08f38ed2",
+      "status": "passed",
+      "capture": "captures/gridtop.json",
+      "captureSha256": "9c5d28c9a4af0c17ab029704c886aefd8a4950218786655224b0ea8b7fdf9433",
+      "envelope": "stamps/gridtop.dsse.json",
+      "resultLine": "gridtop: PASSED — typecheck: passed; lint: passed; unit-tests: passed (test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s | test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s | test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s | test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s | test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.95s | test result: ok. 5 p)",
+      "checks": [
+        {
+          "kind": "typecheck",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "typecheck: observed exit 0"
+        },
+        {
+          "kind": "lint",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "lint: observed exit 0"
+        },
+        {
+          "kind": "unit-tests",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s | test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s | test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s | test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s | test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.95s | test result: ok. 5 p"
+        }
+      ]
+    },
+    {
+      "tool": "gridtop",
+      "commit": "b70bbf9358e1aa045fa15643f919145a08f38ed2",
+      "status": "failed",
+      "capture": "captures/gridtop-b70bbf9358e1aa045fa15643f919145a08f38ed2-20261104172222856.json",
+      "captureSha256": "9b1d15150fba4393b5c39e3e49f6dcd8a15a8bf9a6a8ed7dc90c40987f6c23d0",
+      "envelope": "stamps/gridtop-b70bbf9358e1aa045fa15643f919145a08f38ed2-20261104172222856.dsse.json",
+      "resultLine": "gridtop: FAILED — typecheck: failed; lint: failed; unit-tests: failed (error: could not compile `libc` (build script) due to 1 previous error)",
+      "checks": [
+        {
+          "kind": "typecheck",
+          "status": "failed",
+          "exitCode": 101,
+          "resultLine": "error: could not compile `proc-macro2` (build script) due to 1 previous error"
+        },
+        {
+          "kind": "lint",
+          "status": "failed",
+          "exitCode": 101,
+          "resultLine": "error: could not compile `libc` (build script) due to 1 previous error"
+        },
+        {
+          "kind": "unit-tests",
+          "status": "failed",
+          "exitCode": 101,
+          "resultLine": "error: could not compile `libc` (build script) due to 1 previous error"
+        }
+      ]
+    },
+    {
+      "tool": "listen-to-the-grid",
+      "commit": "b2d2d549811f702d5356c8993dca94c4bb311475",
+      "status": "passed",
+      "capture": "captures/listen-to-the-grid.json",
+      "captureSha256": "07c19f298b66570c7dc919873f9f20c1bdd03a51d18c05c0e62f39717e2ca840",
+      "envelope": "stamps/listen-to-the-grid.dsse.json",
+      "resultLine": "listen-to-the-grid: PASSED — typecheck: passed; lint: passed; unit-tests: passed (Tests  182 passed (182))",
+      "checks": [
+        {
+          "kind": "typecheck",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "typecheck: observed exit 0"
+        },
+        {
+          "kind": "lint",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "lint: observed exit 0"
+        },
+        {
+          "kind": "unit-tests",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "Tests  182 passed (182)"
+        }
+      ]
+    },
+    {
+      "tool": "ask-the-record",
+      "commit": "138597c1e9543de5ac2914755ed5b9475a7b8f97",
+      "status": "passed",
+      "capture": "captures/ask-the-record.json",
+      "captureSha256": "4085ae67d2a53bc4180f279d356f174fc108a9a6a6c034a526c45514d1b70244",
+      "envelope": "stamps/ask-the-record.dsse.json",
+      "resultLine": "ask-the-record: PASSED — typecheck: passed; lint: passed; unit-tests: passed (Tests  389 passed (389))",
+      "checks": [
+        {
+          "kind": "typecheck",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "typecheck: observed exit 0"
+        },
+        {
+          "kind": "lint",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "lint: observed exit 0"
+        },
+        {
+          "kind": "unit-tests",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "Tests  389 passed (389)"
+        }
+      ]
+    },
+    {
+      "tool": "sourced",
+      "commit": "969411a7829228a1bd503c3ee0311ffaa257413d",
+      "status": "passed",
+      "capture": "captures/sourced.json",
+      "captureSha256": "3823fb246931fce4f92845015d9f0e3bf30cd6e9df9197c196e25887336c9843",
+      "envelope": "stamps/sourced.dsse.json",
+      "resultLine": "sourced: PASSED — typecheck: passed; lint: passed; unit-tests: passed (ℹ tests 90; ℹ pass 90; ℹ fail 0; ℹ cancelled 0; ℹ skipped 0)",
+      "checks": [
+        {
+          "kind": "typecheck",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "typecheck: observed exit 0"
+        },
+        {
+          "kind": "lint",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "lint: observed exit 0"
+        },
+        {
+          "kind": "unit-tests",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "ℹ tests 90; ℹ pass 90; ℹ fail 0; ℹ cancelled 0; ℹ skipped 0"
+        }
+      ]
+    }
+  ],
+  "supplemental": [
+    {
+      "tool": "dreaming",
+      "commit": "070b67d4a201561b228730625bb304b8a87613a4",
+      "status": "incomplete",
+      "capture": "captures/dreaming-070b67d4a201561b228730625bb304b8a87613a4-20261104172539227-eval-outside-sandbox.json",
+      "captureSha256": "6a2200a781a503339071c8c1436ecfede4605180176b54fdf5fe4842cb170fcd",
+      "envelope": "stamps/dreaming-070b67d4a201561b228730625bb304b8a87613a4-20261104172539227-eval-outside-sandbox.dsse.json",
+      "resultLine": "dreaming: INCOMPLETE — typecheck: not-run; lint: not-run; unit-tests: passed (Tests  7 passed (7))",
+      "checks": [
+        {
+          "kind": "typecheck",
+          "status": "not-run",
+          "exitCode": null,
+          "resultLine": "Not run: Supplement only: full typecheck is in the linked sandbox capture"
+        },
+        {
+          "kind": "lint",
+          "status": "not-run",
+          "exitCode": null,
+          "resultLine": "Not run: Supplement only: full lint is in the linked sandbox capture"
+        },
+        {
+          "kind": "unit-tests",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "Tests  7 passed (7)"
+        }
+      ]
+    }
+  ]
+}

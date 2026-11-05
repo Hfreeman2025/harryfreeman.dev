@@ -1,0 +1,155 @@
+{
+  "version": 1,
+  "tool": "agent-race",
+  "repository": {
+    "commit": "647ea417af718e963b26ff2de44c707076c30780",
+    "tree": "4ed4dc9bf7783e3d831efc02d5c11bf58d243a32"
+  },
+  "capturedAt": "2026-11-04T16:41:28.028Z",
+  "status": "failed",
+  "capture": {
+    "method": "fresh-local-clone-non-browser",
+    "source": "Personal/lab/agent-race",
+    "network": "loopback-only",
+    "initialTrackedClean": true,
+    "sourceChangesDuringChecks": false,
+    "dependencies": {
+      "lockfile": "package-lock.json",
+      "sha256": "bf8c54bebf82a1429d24dafce131b24bafd55866e47136026f23a0e8733b2458",
+      "registry": "https://registry.npmjs.org",
+      "policy": "npm-ci-ignore-scripts",
+      "cache": "project-local-discarded"
+    },
+    "runtime": {
+      "node": "v26.12.0",
+      "npm": "11.20.0",
+      "platform": "darwin",
+      "arch": "arm64"
+    }
+  },
+  "setup": [
+    {
+      "kind": "dependency-setup",
+      "argv": [
+        "npm",
+        "ci",
+        "--ignore-scripts",
+        "--registry=https://registry.npmjs.org",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-04T16:41:14.094Z",
+      "endedAt": "2026-11-04T16:41:22.527Z",
+      "stdout": {
+        "sha256": "ec18ab62d6487071dec2238564aee5f27fb86372a4aa655172ba8c5972b62498",
+        "bytes": 25
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "dependency-setup: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    }
+  ],
+  "checks": [
+    {
+      "kind": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-04T16:41:22.793Z",
+      "endedAt": "2026-11-04T16:41:23.629Z",
+      "stdout": {
+        "sha256": "bccf1d5c1c5c2bbcd8bddf185b201d5407a66aaa7a8ffc0362ece76e8f7515fd",
+        "bytes": 46
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "typecheck: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    },
+    {
+      "kind": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-04T16:41:23.639Z",
+      "endedAt": "2026-11-04T16:41:24.886Z",
+      "stdout": {
+        "sha256": "4c7f131c2f620adccca58c43c80f51dcc868a96911b72c431cdcc7b155038358",
+        "bytes": 128
+      },
+      "stderr": {
+        "sha256": "e6dd6b7a03547c287e0c5de1e369a34ba45bd72b35885082fe98823a08200fad",
+        "bytes": 44
+      },
+      "resultLine": "lint: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    },
+    {
+      "kind": "unit-tests",
+      "argv": [
+        "npm",
+        "test",
+        "--",
+        "--maxWorkers=2"
+      ],
+      "status": "failed",
+      "exitCode": 1,
+      "signal": null,
+      "startedAt": "2026-11-04T16:41:24.897Z",
+      "endedAt": "2026-11-04T16:41:28.018Z",
+      "stdout": {
+        "sha256": "fd327a662af234298861419dbbedb0fb29c9d4d192e41068086408f2852d590b",
+        "bytes": 1490
+      },
+      "stderr": {
+        "sha256": "23425de79e37f50f5a2cfa40aaca0cff41f8e37875e753aecdd3365416fb93c6",
+        "bytes": 704
+      },
+      "resultLine": "Tests  1 failed | 73 passed (74)",
+      "reason": "Observed exit 1: Tests  1 failed | 73 passed (74)",
+      "timedOut": false
+    }
+  ],
+  "outputTails": {
+    "setup": [
+      {
+        "stdout": "\nadded 51 packages in 8s\n",
+        "stderr": ""
+      }
+    ],
+    "typecheck": {
+      "stdout": "\n> agent-race@0.1.0 typecheck\n> tsc --noEmit\n\n",
+      "stderr": ""
+    },
+    "lint": {
+      "stdout": "\n> agent-race@0.1.0 lint\n> biome check src web tests scripts index.html package.json tsconfig.json biome.json vitest.config.ts\n\n",
+      "stderr": "Checked 83 files in 22ms. No fixes applied.\n"
+    },
+    "unit-tests": {
+      "stdout": "\n> agent-race@0.1.0 test\n> vitest run --maxWorkers=2\n\n\n RUN  v4.1.12 <clone>\n\n ✓ tests/broadcast.test.ts (8 tests) 4ms\n ✓ tests/trace.test.ts (7 tests) 9ms\n ✓ tests/signatures.test.ts (5 tests) 7ms\n ✓ tests/attestation.test.ts (3 tests) 10ms\n ✓ tests/guards.test.ts (7 tests) 129ms\n ✓ tests/normalise.test.ts (9 tests) 22ms\n ✓ tests/recording.test.ts (7 tests) 14ms\n ✓ tests/trace-audit.test.ts (3 tests) 5ms\n ✓ tests/core.test.ts (12 tests) 8ms\n ✓ tests/challenges.test.ts (3 tests) 1031ms\n     ✓ unicode-slug: weak visible test passes, hidden tests reject bug and accept reference  357ms\n     ✓ date-window: weak visible test passes, hidden tests reject bug and accept reference  339ms\n     ✓ single-flight: weak visible test passes, hidden tests reject bug and accept reference  334ms\n ✓ tests/readiness.test.ts (2 tests) 3ms\n ✓ tests/diffs.test.ts (2 tests) 1ms\n ✓ tests/receipts.test.ts (2 tests) 1298ms\n   ✓ real receipts integration: unbacked → verified → stale → failed  1297ms\n ✓ tests/lines.test.ts (2 tests) 2ms\n ❯ tests/cli.test.ts (1 test | 1 failed) 64ms\n   × help or invalid smoke options never start provider-backed capability jobs 64ms\n ✓ tests/launch.test.ts (1 test) 2ms\n\n Test Files  1 failed | 15 passed (16)\n      Tests  1 failed | 73 passed (74)\n   Start at  16:41:25\n   Duration  2.18s (transform 122ms, setup 0ms, import 493ms, tests 2.61s, environment 1ms)\n\n",
+      "stderr": "\n⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯\n\n FAIL  tests/cli.test.ts > help or invalid smoke options never start provider-backed capability jobs\nAssertionError: expected '' to contain 'agent-race smoke'\n\n- Expected\n+ Received\n\n- agent-race smoke\n\n ❯ tests/cli.test.ts:15:27\n     13|       { ...process.env, PATH: \"/usr/bin:/bin\" },\n     14|     );\n     15|     expect(result.stdout).toContain(\"agent-race smoke\");\n       |                           ^\n     16|     expect(result.stdout).not.toContain(\"Smoke claude: starting\");\n     17|     expect(result.stdout).not.toContain(\"Smoke codex: starting\");\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯\n\n"
+    }
+  },
+  "disclosure": "Raw original output digests and byte counts; displayed tails are bounded, redacted and path-normalized. No browser, model or live hosted check. npm installation lifecycle scripts disabled; no original repo files used beyond the committed local clone. Setup network allowed only for committed registry dependencies; checks OS-sandboxed offline except loopback. Before/after tracked-file status cannot detect transient reverted edits."
+}

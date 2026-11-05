@@ -22,6 +22,12 @@ CODE, VENDORED AS BUILT
     commit and file hashes are in public/vendor/radio/SOURCE.json. Bundled
     inside it: zod, MIT licence, © Colin McDonnell.
 
+  receipts: the site stamps packet (public/vendor/stamps/)
+    Harry Freeman, MIT licence (public/vendor/stamps/LICENSE): the signed
+    stamps, the pinned public key and verify-stamp.mjs, copied unmodified
+    from the receipts project's exports/site-stamps at the commit recorded in
+    public/vendor/stamps/SOURCE.json, with its docs/site-stamps.md.
+
   ask-the-record (served from its own folder at /vendor/ask-the-record/)
     Harry Freeman, MIT licence.
   transformers.js, Apache License 2.0, © Hugging Face.

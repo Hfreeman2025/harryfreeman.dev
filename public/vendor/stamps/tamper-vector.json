@@ -1,0 +1,10 @@
+{
+  "original": "stamps/gpt-in-a-tab-193619ee720bf4a7d71da31fae9cf9c2d13a9e01-20261104171904649.dsse.json",
+  "tampered": "tampered.dsse.json",
+  "changedPayloadByte": 2857,
+  "before": 48,
+  "after": 49,
+  "originalSha256": "e85d06e5d61bf5cf8f28bdcca82baff8e2651c3d99affa3f4fbcf6b011e51c13",
+  "tamperedSha256": "44e0975a7f97d57edbec8529fdc788170fa7519140ec11498af4f60bbf642811",
+  "expected": "invalid signature"
+}

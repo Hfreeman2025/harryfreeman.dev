@@ -1,0 +1,160 @@
+{
+  "version": 1,
+  "tool": "agent-race",
+  "repository": {
+    "commit": "e9871e8af05838e67d02c3ae86149370a3f37d02",
+    "tree": "9cf6df4c22dfb326c67e5bb40e3805e011e0a5db"
+  },
+  "capturedAt": "2026-11-05T12:10:47.937Z",
+  "status": "passed",
+  "capture": {
+    "method": "fresh-local-clone-non-browser",
+    "source": "Personal/lab/agent-race",
+    "network": "loopback-only",
+    "initialTrackedClean": true,
+    "sourceChangesDuringChecks": false,
+    "dependencies": {
+      "lockfile": "package-lock.json",
+      "sha256": "bf8c54bebf82a1429d24dafce131b24bafd55866e47136026f23a0e8733b2458",
+      "registry": "https://registry.npmjs.org",
+      "policy": "npm-ci-ignore-scripts",
+      "cache": "project-local-discarded"
+    },
+    "runtime": {
+      "node": "v26.12.0",
+      "npm": "11.20.0",
+      "platform": "darwin",
+      "arch": "arm64"
+    },
+    "notes": [
+      "Capture policy v2: independent Git object inodes; reads limited to clone/cache/system SDKs; writes limited to this clone and its isolated cache. Setup is loopback-only through a registry allowlist proxy, closed before checks.",
+      "Cloned with git clone --local --no-hardlinks --dissociate; origin removed and global Git configuration disabled. Browser executables denied."
+    ]
+  },
+  "setup": [
+    {
+      "kind": "dependency-setup",
+      "argv": [
+        "npm",
+        "ci",
+        "--ignore-scripts",
+        "--strict-ssl=true",
+        "--registry=https://registry.npmjs.org",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-05T12:10:16.234Z",
+      "endedAt": "2026-11-05T12:10:39.653Z",
+      "stdout": {
+        "sha256": "85366a3a934e26822dd6fe4e9676277f8296c6a134c0cc5def10352dc568d73c",
+        "bytes": 26
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "dependency-setup: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    }
+  ],
+  "checks": [
+    {
+      "kind": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-05T12:10:40.448Z",
+      "endedAt": "2026-11-05T12:10:41.942Z",
+      "stdout": {
+        "sha256": "bccf1d5c1c5c2bbcd8bddf185b201d5407a66aaa7a8ffc0362ece76e8f7515fd",
+        "bytes": 46
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "typecheck: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    },
+    {
+      "kind": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-05T12:10:41.962Z",
+      "endedAt": "2026-11-05T12:10:44.053Z",
+      "stdout": {
+        "sha256": "64ae3c262ed51492beb8667703ea854da7bffc872fb587e8c20de63eab614d41",
+        "bytes": 157
+      },
+      "stderr": {
+        "sha256": "2d3ad6ebd0b87708227a6792de8b1ed346f092ab65545226e63223d9548d156e",
+        "bytes": 44
+      },
+      "resultLine": "lint: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    },
+    {
+      "kind": "unit-tests",
+      "argv": [
+        "npm",
+        "test",
+        "--",
+        "--maxWorkers=2"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-05T12:10:44.069Z",
+      "endedAt": "2026-11-05T12:10:47.916Z",
+      "stdout": {
+        "sha256": "6aa0f3af6b19600472874b8bd39b25d455882280a4a217e1717ba32df9754c92",
+        "bytes": 1577
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "Tests  76 passed (76)",
+      "reason": null,
+      "timedOut": false
+    }
+  ],
+  "outputTails": {
+    "setup": [
+      {
+        "stdout": "\nadded 51 packages in 23s\n",
+        "stderr": ""
+      }
+    ],
+    "typecheck": {
+      "stdout": "\n> agent-race@0.1.0 typecheck\n> tsc --noEmit\n\n",
+      "stderr": ""
+    },
+    "lint": {
+      "stdout": "\n> agent-race@0.1.0 lint\n> biome check src web tests scripts index.html package.json tsconfig.json biome.json vitest.config.ts vitest.integration.config.ts\n\n",
+      "stderr": "Checked 87 files in 28ms. No fixes applied.\n"
+    },
+    "unit-tests": {
+      "stdout": "\n> agent-race@0.1.0 test\n> vitest run --maxWorkers=2\n\n\n RUN  v4.1.12 <clone>\n\n ✓ tests/trace.test.ts (7 tests) 9ms\n ✓ tests/broadcast.test.ts (8 tests) 4ms\n ✓ tests/signatures.test.ts (5 tests) 6ms\n ✓ tests/guards.test.ts (7 tests) 133ms\n ✓ tests/attestation.test.ts (3 tests) 10ms\n ✓ tests/normalise.test.ts (9 tests) 25ms\n ✓ tests/receipts.test.ts (4 tests) 882ms\n   ✓ checks argv/stdin and maps all supported fixture verdicts without a sibling checkout  372ms\n   ✓ reports an absent opt-in integration explicitly and fails an explicitly missing checkout  358ms\n ✓ tests/recording.test.ts (7 tests) 14ms\n ✓ tests/trace-audit.test.ts (3 tests) 5ms\n ✓ tests/core.test.ts (12 tests) 9ms\n ✓ tests/readiness.test.ts (2 tests) 3ms\n ✓ tests/diffs.test.ts (2 tests) 2ms\n ✓ tests/lines.test.ts (2 tests) 2ms\n ✓ tests/cli.test.ts (1 test) 433ms\n   ✓ help or invalid smoke options never start provider-backed capability jobs  432ms\n ✓ tests/launch.test.ts (1 test) 3ms\n ✓ tests/challenges.test.ts (3 tests) 1232ms\n     ✓ unicode-slug: weak visible test passes, hidden tests reject bug and accept reference  361ms\n     ✓ date-window: weak visible test passes, hidden tests reject bug and accept reference  400ms\n     ✓ single-flight: weak visible test passes, hidden tests reject bug and accept reference  470ms\n\n Test Files  16 passed (16)\n      Tests  76 passed (76)\n   Start at  12:10:45\n   Duration  2.48s (transform 121ms, setup 0ms, import 567ms, tests 2.77s, environment 1ms)\n\n",
+      "stderr": ""
+    }
+  },
+  "disclosure": "Original-byte output digests/counts; displayed tails are bounded, redacted and path-normalized. No browser/model downloads or hosted checks. npm lifecycle scripts disabled. Before/after tracked status does not detect transient reverted edits. Network/isolation mode is stated separately for every capture."
+}

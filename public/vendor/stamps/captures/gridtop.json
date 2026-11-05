@@ -1,0 +1,158 @@
+{
+  "version": 1,
+  "tool": "gridtop",
+  "repository": {
+    "commit": "b70bbf9358e1aa045fa15643f919145a08f38ed2",
+    "tree": "6337b004086762342b9fb58603965732cb93c5ea"
+  },
+  "capturedAt": "2026-11-04T16:49:29.122Z",
+  "status": "passed",
+  "capture": {
+    "method": "fresh-local-clone-non-browser",
+    "source": "Personal/lab/gridtop",
+    "network": "loopback-only",
+    "initialTrackedClean": true,
+    "sourceChangesDuringChecks": false,
+    "dependencies": {
+      "lockfile": "Cargo.lock",
+      "sha256": "caa7735ee90d7cce5fb238c812958da04b810bb4d4509022bee3e6c0621624d6",
+      "registry": "https://crates.io",
+      "policy": "cargo-fetch-locked",
+      "cache": "project-local-discarded"
+    },
+    "runtime": {
+      "node": "v26.12.0",
+      "npm": "11.20.0",
+      "platform": "darwin",
+      "arch": "arm64"
+    }
+  },
+  "setup": [
+    {
+      "kind": "dependency-setup",
+      "argv": [
+        "cargo",
+        "fetch",
+        "--locked"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-04T16:48:36.647Z",
+      "endedAt": "2026-11-04T16:48:37.455Z",
+      "stdout": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "dependency-setup: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    }
+  ],
+  "checks": [
+    {
+      "kind": "typecheck",
+      "argv": [
+        "cargo",
+        "check",
+        "--offline",
+        "--locked"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-04T16:48:37.799Z",
+      "endedAt": "2026-11-04T16:49:00.057Z",
+      "stdout": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "stderr": {
+        "sha256": "9a60dfb747141f32a961e0cb11c9ff5b8d69630be51bf10e843a59f63f3f1d6b",
+        "bytes": 4605
+      },
+      "resultLine": "typecheck: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    },
+    {
+      "kind": "lint",
+      "argv": [
+        "cargo",
+        "clippy",
+        "--offline",
+        "--locked",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-04T16:49:00.143Z",
+      "endedAt": "2026-11-04T16:49:03.199Z",
+      "stdout": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "stderr": {
+        "sha256": "4d5032aa31a43090c4edaaa275b1af0b7c5e2d3c1a75e3220962436e2d75f2a1",
+        "bytes": 154
+      },
+      "resultLine": "lint: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    },
+    {
+      "kind": "unit-tests",
+      "argv": [
+        "cargo",
+        "test",
+        "--offline",
+        "--locked"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-04T16:49:03.275Z",
+      "endedAt": "2026-11-04T16:49:29.109Z",
+      "stdout": {
+        "sha256": "1eecf2dc5c995af91f5442b2000a1d6bf114afd085fbd9bd1342767ce9896a73",
+        "bytes": 6767
+      },
+      "stderr": {
+        "sha256": "93f2d067157bd99ce051b8844fd1223990ddb28a7f80c7e721a95f94beac6e27",
+        "bytes": 4790
+      },
+      "resultLine": "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s | test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s | test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s | test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s | test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.95s | test result: ok. 5 p",
+      "reason": null,
+      "timedOut": false
+    }
+  ],
+  "outputTails": {
+    "setup": [
+      {
+        "stdout": "",
+        "stderr": ""
+      }
+    ],
+    "typecheck": {
+      "stdout": "",
+      "stderr": "   Compiling libc v0.2.191\n   Compiling proc-macro2 v1.0.107\n   Compiling unicode-xid v0.2.6\n   Compiling unicode-ident v1.0.27 (<clone>/vendor/unicode-ident)\n   Compiling quote v1.0.47\n    Checking cfg-if v1.0.5\n   Compiling serde_core v1.0.229\n   Compiling syn v3.0.9\n    Checking log v0.4.35\n    Checking itoa v1.0.18\n    Checking mio v1.2.4\n    Checking bitflags v2.13.2\n    Checking bytes v1.12.1\n    Checking once_cell v1.21.4\n    Checking pin-project-lite v0.2.17\n   Compiling shlex v2.0.1\n   Compiling find-msvc-tools v0.1.15\n    Checking futures-core v0.3.34\n   Compiling cc v1.10.0\n    Checking socket2 v0.6.5\n   Compiling ring v0.17.14\n    Checking core-foundation-sys v0.8.7\n   Compiling zmij v1.0.23\n   Compiling serde v1.0.229\n    Checking smallvec v1.16.4\n    Checking tokio v1.54.1\n   Compiling serde_derive v1.0.229\n    Checking http v1.5.0\n    Checking futures-sink v0.3.34\n    Checking percent-encoding v2.3.2\n    Checking zeroize v1.9.1\n    Checking memchr v2.8.3\n   Compiling rustversion v1.0.23\n    Checking rustls-pki-types v1.15.1\n    Checking http-body v1.1.0\n    Checking getrandom v0.2.17\n    Checking errno v0.3.14\n    Checking slab v0.4.12\n    Checking futures-task v0.3.34\n    Checking untrusted v0.9.0\n    Checking futures-io v0.3.34\n   Compiling zerocopy v0.8.63\n   Compiling httparse v1.10.1\n   Compiling serde_json v1.0.154\n   Compiling version_check v0.9.5\n   Compiling ahash v0.8.12\n    Checking futures-util v0.3.34\n   Compiling rustls v0.23.46\n    Checking tinyvec v1.13.3\n    Checking try-lock v0.2.5\n   Compiling objc2 v0.6.5\n   Compiling parking_lot_core v0.9.12\n    Checking tower-service v0.3.3\n   Compiling ident_case v1.0.1\n   Compiling signal-hook v0.3.18\n   Compiling heck v0.5.0\n   Compiling strsim v0.11.1\n   Compiling darling_core v0.24.1\n    Checking want v0.3.2\n    Checking unicode-normalization v0.1.24\n    Checking rustls-webpki v0.103.16\n    Checking signal-hook-registry v1.4.8\n    Checking form_urlencoded v1.2.2\n    Checking core-foundation v0.10.1\n    Checking security-framework-sys v2.17.0\n    Checking tracing-core v0.1.36\n    Checking objc2-encode v4.1.0\n   Compiling cfg_aliases v0.2.2\n    Checking subtle v2.6.1\n   Compiling rustix v0.38.44\n   Compiling autocfg v1.5.1\n    Checking unicode-bidi v0.3.18\n    Checking ryu v1.0.23\n    Checking atomic-waker v1.1.2\n    Checking scopeguard v1.2.0\n    Checking utf8parse v0.2.2\n    Checking lock_api v0.4.14\n    Checking anstyle-parse v1.0.0\n    Checking hyper v1.12.0\n    Checking idna v0.5.0\n   Compiling num-traits v0.2.19\n   Compiling nix v0.31.3\n    Checking tracing v0.1.44\n    Checking security-framework v3.7.0\n   Compiling darling_macro v0.24.1\n    Checking futures-channel v0.3.34\n    Checking sync_wrapper v1.0.2\n   Compiling syn v2.0.119\n    Checking base64 v0.23.1\n    Checking either v1.19.0\n    Checking anstyle v1.0.14\n    Checking colorchoice v1.0.5\n    Checking ipnet v2.12.2\n    Checking is_terminal_polyfill v1.70.2\n    Checking tower-layer v0.3.3\n   Compiling paste v1.0.15\n    Checking anstyle-query v1.1.5\n    Checking allocator-api2 v0.2.21\n    Checking hashbrown v0.14.5\n    Checking anstream v1.0.0\n   Compiling strum_macros v0.26.4\n    Checking tower v0.5.3\n    Checking hyper-util v0.1.21\n    Checking itertools v0.13.0\n    Checking rustls-native-certs v0.8.5\n    Checking parking_lot v0.12.5\n   Compiling darling v0.24.1\n    Checking signal-hook-mio v0.2.5\n    Checking tokio-rustls v0.26.6\n    Checking block2 v0.6.2\n    Checking url v2.5.0\n    Checking castaway v0.2.4\n    Checking unicode-width v0.1.14\n   Compiling indoc v2.0.8\n   Compiling anyhow v1.0.104\n    Checking clap_lex v1.1.1\n    Checking unicode-segmentation v1.13.3\n    Checking static_assertions v1.1.0\n    Checking compact_str v0.8.2\n    Checking unicode-truncate v1.1.0\n    Checking clap_builder v4.6.7\n   Compiling instability v0.3.14\n   Compiling gridtop v0.1.0 (<clone>)\n    Checking crossterm v0.28.1\n    Checking tower-http v0.6.11\n    Checking dispatch2 v0.3.1\n    Checking hyper-rustls v0.27.10\n    Checking strum v0.26.3\n    Checking lru v0.12.4\n    Checking serde_urlencoded v0.7.1\n   Compiling clap_derive v4.6.7\n    Checking http-body-util v0.1.5\n    Checking iana-time-zone v0.1.65\n    Checking cassowary v0.3.0\n    Checking unicode-width v0.2.0\n    Checking base64 v0.22.1\n    Checking reqwest v0.12.28\n    Checking clap v4.6.7\n    Checking ratatui v0.29.0\n    Checking chrono v0.4.45\n    Checking ctrlc v3.5.2\n    Finished `dev` profile [unoptimized] target(s) in 22.22s\n"
+    },
+    "lint": {
+      "stdout": "",
+      "stderr": "   Compiling gridtop v0.1.0 (<clone>)\n    Finished `dev` profile [unoptimized] target(s) in 2.33s\n"
+    },
+    "unit-tests": {
+      "stdout": "0 ignored; 0 measured; 0 filtered out; finished in 0.01s\n\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n\nrunning 5 tests\ntest postcode_validation_and_explicit_sw1_alias ... ok\ntest rejects_wrong_types_unknown_bands_missing_forecasts_and_api_errors ... ok\ntest truncated_forecast_is_never_labelled_as_48_hours ... ok\ntest recorded_national_and_regional_responses_parse ... ok\ntest rejects_impossible_mix_and_duplicate_fuels ... ok\n\ntest result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n\nrunning 8 tests\ntest comparison_preserves_sub_millisecond_planning_instants ... ok\ntest fallback_is_not_available_for_recordings_or_planning_errors ... ok\ntest deadline_caps_full_runtime_and_dst_offsets_are_unambiguous ... ok\ntest integration_weights_fractional_edges_and_rejects_missing_coverage ... ok\ntest final_gate_rejects_recordings_stale_missed_and_deadline_overruns ... ok\ntest compares_against_immediate_partial_slots_and_keeps_signed_deltas ... ok\ntest refreshed_screen_preserves_start_and_original_counterfactual ... ok\ntest grams_require_explicit_energy_and_power_uses_expected_duration ... ok\n\ntest result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n\nrunning 3 tests\ntest next_json_is_a_plan_without_a_command ... ok\ntest recorded_run_dry_plan_is_regional_explicit_and_never_executes ... ok\ntest runner_rejects_unsafe_or_ambiguous_requests_before_fetching ... ok\n\ntest result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.95s\n\n\nrunning 6 tests\ntest orchestration_helper ... ignored, subprocess-only orchestration helper\ntest a_broken_ledger_blocks_execution ... ok\ntest ctrl_c_while_waiting_cancels_and_does_not_spawn ... ok\ntest acquisition_failure_requires_explicit_opt_in_and_writes_no_savings ... ok\ntest scheduled_launch_records_a_forecast_comparison_and_child_exit_code ... ok\ntest interrupts_and_termination_are_forwarded_to_running_children ... ok\n\ntest result: ok. 5 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 1.42s\n\n\nrunning 4 tests\ntest default_tui_refuses_a_pipe_with_actionable_error ... ok\ntest best_recording_returns_a_complete_two_hour_window ... ok\ntest json_recording_is_explicit_and_has_exact_dates ... ok\ntest rejects_invalid_flags_missing_conditions_and_recorded_job_launches ... ok\n\ntest result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s\n\n\nrunning 2 tests\ntest scanline_respects_holes_and_islands ... ok\ntest public_atlas_requires_all_regions_and_continuity ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s\n\n\nrunning 3 tests\ntest corrupt_or_oversized_records_and_path_traversal_fail_explicitly ... ok\ntest concurrent_writers_do_not_lose_runs ... ok\ntest ledger_is_durable_private_atomic_and_contains_no_arguments_or_outputs ... ok\n\ntest result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s\n\n\nrunning 8 tests\ntest tui_mid_slot_selection_uses_the_shared_slot_aligned_scheduler ... ok\ntest offline_snapshot_has_no_fabricated_reading ... ok\ntest help_is_available_while_offline ... ok\ntest compact_snapshot_keeps_cleanest_window ... ok\ntest landscape_snapshot ... ok\ntest stale_and_failed_refresh_can_never_render_live_status ... ok\ntest turbines_move_and_fixed_time_produces_identical_frames ... ok\ntest resize_help_inspection_and_empty_data_are_safe ... ok\n\ntest result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s\n\n\nrunning 2 tests\ntest untrusted_command_text_cannot_inject_terminal_controls ... ok\ntest countdown_states_are_safe_and_window_markers_survive_in_every_theme ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s\n\n\nrunning 3 tests\ntest preserves_signal_exit_status ... ok\ntest passes_shell_characters_as_literal_arguments ... ok\ntest preserves_command_exit_status_and_missing_program_errors ... ok\n\ntest result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s\n\n\nrunning 14 tests\ntest chooses_contiguous_minimum_and_earliest_tie ... ok\ntest duration_equal_to_horizon_and_coverage_boundary ... ok\ntest earliest_aligned_start_wins_a_tie_for_a_non_slot_duration ... ok\ntest mid_slot_cleanest_wait_holds_until_a_complete_api_slot ... ok\ntest injected_clock_obeys_launch_and_expiry_boundaries ... ok\ntest duration_parser_rejects_untrusted_text_without_panicking ... ok\ntest mid_slot_horizon_must_fit_a_complete_aligned_window ... ok\ntest mid_slot_horizon_never_creates_an_unaligned_tail_candidate ... ok\ntest never_includes_past_and_weights_partial_intervals ... ok\ntest mid_slot_now_skips_the_elapsed_slot_even_when_it_is_cleanest ... ok\ntest non_slot_duration_still_starts_at_an_api_boundary ... ok\ntest rejects_gaps_overlaps_empty_and_invalid_windows ... ok\ntest threshold_is_strict_and_requires_current_fresh_data ... ok\ntest matches_an_independent_slot_aligned_minute_resolution_oracle ... ok\n\ntest result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n\nrunning 1 test\ntest exported_capture_is_self_contained_plex_with_unchanged_terminal_text ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s\n\n\nrunning 11 tests\ntest boundary_dno_ids_join_to_api_ids_at_known_public_city_coordinates ... ok\ntest solid_bars_preserve_peaks_zero_and_missing_data ... ok\ntest map_raster_has_all_fourteen_region_ids_and_a_working_hit_test ... ok\ntest postcode_refresh_cannot_overwrite_a_user_selected_region ... ok\ntest keys_and_mouse_share_the_forecast_and_region_selection ... ok\ntest atlas_api_errors_cannot_become_live_or_zero_filled_data ... ok\ntest reduced_motion_and_help_prevent_accidental_playback_or_map_clicks ... ok\ntest startup_recording_and_failed_connection_are_never_labelled_live ... ok\ntest regional_window_cache_tracks_slot_boundaries_duration_and_new_data ... ok\ntest solid_forecasts_keep_band_colours_and_mark_subcolumn_windows_in_every_theme ... ok\ntest every_theme_and_empty_state_renders_at_resize_boundaries ... ok\n\ntest result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.46s\n\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n",
+      "stderr": "   Compiling libc v0.2.191\n   Compiling cfg-if v1.0.5\n   Compiling log v0.4.35\n   Compiling pin-project-lite v0.2.17\n   Compiling bitflags v2.13.2\n   Compiling once_cell v1.21.4\n   Compiling bytes v1.12.1\n   Compiling mio v1.2.4\n   Compiling futures-core v0.3.34\n   Compiling socket2 v0.6.5\n   Compiling smallvec v1.16.4\n   Compiling core-foundation-sys v0.8.7\n   Compiling tokio v1.54.1\n   Compiling http v1.5.0\n   Compiling memchr v2.8.3\n   Compiling futures-sink v0.3.34\n   Compiling percent-encoding v2.3.2\n   Compiling zeroize v1.9.1\n   Compiling rustls-pki-types v1.15.1\n   Compiling http-body v1.1.0\n   Compiling errno v0.3.14\n   Compiling getrandom v0.2.17\n   Compiling slab v0.4.12\n   Compiling futures-task v0.3.34\n   Compiling futures-io v0.3.34\n   Compiling untrusted v0.9.0\n   Compiling ring v0.17.14\n   Compiling futures-util v0.3.34\n   Compiling tower-service v0.3.3\n   Compiling tinyvec v1.13.3\n   Compiling try-lock v0.2.5\n   Compiling want v0.3.2\n   Compiling unicode-normalization v0.1.24\n   Compiling zerocopy v0.8.63\n   Compiling httparse v1.10.1\n   Compiling rustls-webpki v0.103.16\n   Compiling signal-hook-registry v1.4.8\n   Compiling form_urlencoded v1.2.2\n   Compiling core-foundation v0.10.1\n   Compiling security-framework-sys v2.17.0\n   Compiling tracing-core v0.1.36\n   Compiling objc2-encode v4.1.0\n   Compiling unicode-bidi v0.3.18\n   Compiling scopeguard v1.2.0\n   Compiling subtle v2.6.1\n   Compiling atomic-waker v1.1.2\n   Compiling ryu v1.0.23\n   Compiling utf8parse v0.2.2\n   Compiling idna v0.5.0\n   Compiling anstyle-parse v1.0.0\n   Compiling hyper v1.12.0\n   Compiling rustls v0.23.46\n   Compiling lock_api v0.4.14\n   Compiling objc2 v0.6.5\n   Compiling ahash v0.8.12\n   Compiling tracing v0.1.44\n   Compiling security-framework v3.7.0\n   Compiling signal-hook v0.3.18\n   Compiling parking_lot_core v0.9.12\n   Compiling futures-channel v0.3.34\n   Compiling sync_wrapper v1.0.2\n   Compiling ipnet v2.12.2\n   Compiling tower-layer v0.3.3\n   Compiling colorchoice v1.0.5\n   Compiling base64 v0.23.1\n   Compiling allocator-api2 v0.2.21\n   Compiling either v1.19.0\n   Compiling anstyle-query v1.1.5\n   Compiling anstyle v1.0.14\n   Compiling is_terminal_polyfill v1.70.2\n   Compiling itertools v0.13.0\n   Compiling anstream v1.0.0\n   Compiling hashbrown v0.14.5\n   Compiling hyper-util v0.1.21\n   Compiling tower v0.5.3\n   Compiling parking_lot v0.12.5\n   Compiling signal-hook-mio v0.2.5\n   Compiling rustls-native-certs v0.8.5\n   Compiling tokio-rustls v0.26.6\n   Compiling rustix v0.38.44\n   Compiling block2 v0.6.2\n   Compiling url v2.5.0\n   Compiling castaway v0.2.4\n   Compiling static_assertions v1.1.0\n   Compiling clap_lex v1.1.1\n   Compiling unicode-segmentation v1.13.3\n   Compiling unicode-width v0.1.14\n   Compiling clap_builder v4.6.7\n   Compiling unicode-truncate v1.1.0\n   Compiling compact_str v0.8.2\n   Compiling tower-http v0.6.11\n   Compiling nix v0.31.3\n   Compiling crossterm v0.28.1\n   Compiling num-traits v0.2.19\n   Compiling dispatch2 v0.3.1\n   Compiling hyper-rustls v0.27.10\n   Compiling strum v0.26.3\n   Compiling lru v0.12.4\n   Compiling serde_urlencoded v0.7.1\n   Compiling serde_json v1.0.154\n   Compiling http-body-util v0.1.5\n   Compiling iana-time-zone v0.1.65\n   Compiling unicode-width v0.2.0\n   Compiling cassowary v0.3.0\n   Compiling base64 v0.22.1\n   Compiling ratatui v0.29.0\n   Compiling reqwest v0.12.28\n   Compiling chrono v0.4.45\n   Compiling clap v4.6.7\n   Compiling ctrlc v3.5.2\n   Compiling anyhow v1.0.104\n   Compiling gridtop v0.1.0 (<clone>)\n    Finished `test` profile [unoptimized] target(s) in 16.43s\n     Running unittests src/lib.rs (target/debug/deps/gridtop-b4f5ea008c78f147)\n     Running unittests src/main.rs (target/debug/deps/gridtop-ea87c9173c2283a5)\n     Running tests/api.rs (target/debug/deps/api-006dff9cb8c0bd37)\n     Running tests/carbon.rs (target/debug/deps/carbon-274edc28f897261a)\n     Running tests/carbon_cli.rs (target/debug/deps/carbon_cli-60ba5fc4dfc4e59c)\n     Running tests/carbon_flow.rs (target/debug/deps/carbon_flow-2345af547d33358e)\n     Running tests/cli.rs (target/debug/deps/cli-52b4222251aeb48c)\n     Running tests/geography.rs (target/debug/deps/geography-95ea488793459bf0)\n     Running tests/ledger.rs (target/debug/deps/ledger-c2e3c96e91db5403)\n     Running tests/render.rs (target/debug/deps/render-182609fc46abcd6f)\n     Running tests/run_ui.rs (target/debug/deps/run_ui-0cc42986b003a0ef)\n     Running tests/runner.rs (target/debug/deps/runner-bee25a72cf3e550f)\n     Running tests/schedule.rs (target/debug/deps/schedule-a96c3d1645312f7a)\n     Running tests/typography.rs (target/debug/deps/typography-7c0eba5834c0000c)\n     Running tests/v2.rs (target/debug/deps/v2-748fd9a3a1325bde)\n   Doc-tests gridtop\n"
+    }
+  },
+  "disclosure": "Raw original output digests and byte counts; displayed tails are bounded, redacted and path-normalized. No browser, model or live hosted check. npm installation lifecycle scripts disabled; no original repo files used beyond the committed local clone. Setup network allowed only for committed registry dependencies; checks OS-sandboxed offline except loopback. Before/after tracked-file status cannot detect transient reverted edits."
+}

@@ -12,6 +12,7 @@ import { chromium, firefox, webkit } from 'playwright';
 import { officeChecks } from './office-checks.mjs';
 import { roomChecks } from './room-checks.mjs';
 import { silenceLiveAudio } from './silent.mjs';
+import { stampChecks } from './stamp-checks.mjs';
 
 const site = join(dirname(fileURLToPath(import.meta.url)), '..');
 const BASE = process.env.STUDIO_URL ?? 'http://127.0.0.1:4400';
@@ -147,6 +148,7 @@ async function run(name) {
 
   await roomChecks(context);
   await officeChecks(context);
+  await stampChecks(context);
 
   await check('the CV page holds only confirmed claims', {}, async (page, problems) => {
     await page.goto(`${BASE}/cv.html`, { waitUntil: 'load' });

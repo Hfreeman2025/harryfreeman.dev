@@ -111,6 +111,12 @@ function studio(): Plugin {
           const body = marked.parse(readFileSync(join(root, 'src/content/cv.md'), 'utf8'), { async: false });
           return html.replace('<!--cv:body-->', body).replaceAll('%EMAIL%', config.email).replaceAll('%LINKEDIN%', config.linkedin);
         }
+        if (ctx.filename.endsWith('stamps.html')) {
+          // What a stamp proves, from the receipts project's own words, as vendored with the stamps.
+          const doc = marked.parse(readFileSync(join(root, 'public/vendor/stamps/site-stamps.md'), 'utf8'), { async: false });
+          const source = JSON.parse(readFileSync(join(root, 'public/vendor/stamps/SOURCE.json'), 'utf8')) as { commit: string };
+          return html.replace('<!--stamps:doc-->', doc).replace('%STAMPS_COMMIT%', source.commit.slice(0, 7));
+        }
         if (!ctx.filename.endsWith('index.html')) return html;
         const source = loadTimeline(strict);
         const status = source.problem
@@ -159,6 +165,7 @@ export default defineConfig({
       input: {
         index: join(root, 'index.html'),
         cv: join(root, 'cv.html'),
+        stamps: join(root, 'stamps.html'),
         terminal: join(root, 'terminal.html'),
       },
     },

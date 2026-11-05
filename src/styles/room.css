@@ -652,3 +652,265 @@ html[data-photo] .room__back {
   /* biome-ignore lint/complexity/noImportantStyles: photo mode hides these whatever their state. */
   display: none !important;
 }
+
+/* ---------- Receipt stamps, in every folder ---------- */
+.stamp-slot {
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 1px solid #d9cfb5;
+}
+html[data-mode="room"] #card-stamp {
+  order: 3;
+  /* Clear of the folder's pinned way back when scrolled to. */
+  scroll-margin-top: 64px;
+  margin: 0 12px 12px;
+  padding: 12px 14px 14px;
+  background: #fbfaf5;
+  border: 1px solid #d9cfb5;
+}
+html[data-mode="room"] .readme {
+  order: 4;
+}
+.stamp__heading {
+  margin-bottom: 8px;
+  font: 600 16px / 1.3 var(--cond);
+}
+/* The face: what the stamp claims, set as an inked stamp; pressing it runs the check. */
+.stamp__face {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 4px 14px;
+  align-items: center;
+  width: 100%;
+  padding: 10px 12px;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  background: #fff;
+  border: 1px solid #d9cfb5;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.stamp__face:hover {
+  border-color: var(--manila-edge);
+}
+.stamp__ring {
+  grid-row: span 2;
+  display: grid;
+  justify-items: center;
+  padding: 6px 12px 7px;
+  color: var(--green);
+  border: 3px double currentColor;
+  border-radius: 6px;
+  transform: rotate(-3deg);
+}
+.stamp__face[data-result="failed"] .stamp__ring {
+  color: var(--red);
+}
+.stamp__face[data-tampered="true"] .stamp__ring {
+  color: #8a6d1f;
+  border-style: dashed;
+}
+.stamp__result {
+  font: 700 17px / 1.1 var(--cond);
+  letter-spacing: 0.08em;
+}
+.stamp__tool {
+  font: 600 13px / 1.2 var(--cond);
+  color: var(--ink);
+}
+.stamp__commit {
+  font: 400 12px / 1.2 var(--mono);
+  color: var(--ink-2);
+}
+.stamp__line {
+  font: 400 12.5px / 1.4 var(--mono);
+  color: var(--ink-2);
+  overflow-wrap: anywhere;
+}
+.stamp__action {
+  font: 600 14px / 1.2 var(--cond);
+  color: var(--sign);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+.stamp__status {
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--ink-2);
+}
+.stamp__status[data-state="checking"] {
+  color: #8a6d1f;
+}
+.stamp__status[data-state="unsupported"],
+.stamp__status[data-state="error"] {
+  color: var(--red);
+}
+/* Two facts, kept apart: the signature, then what the checks did. */
+.stamp__outcome {
+  margin-top: 6px;
+}
+.stamp__sig {
+  font-weight: 600;
+  color: var(--sign);
+}
+.stamp__sig--bad,
+.stamp__checks--failed {
+  color: var(--red);
+}
+.stamp__checks {
+  margin-top: 2px;
+  font-weight: 600;
+}
+.stamp__checks--passed {
+  color: var(--green);
+}
+.stamp__checks--incomplete {
+  color: #8a6d1f;
+}
+.stamp__aside {
+  margin-top: 2px;
+  font-size: 14px;
+  color: var(--ink-3);
+}
+.stamp__facts {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 2px 12px;
+  margin: 10px 0 0;
+  font-size: 14px;
+}
+.stamp__facts dt {
+  color: var(--ink-3);
+}
+.stamp__facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.stamp__runs {
+  display: grid;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.stamp__run {
+  padding: 6px 8px;
+  background: #fff;
+  border-left: 3px solid var(--green);
+  font-size: 13.5px;
+}
+.stamp__run--failed {
+  border-left-color: var(--red);
+}
+.stamp__run--not-run {
+  border-left-color: var(--rule);
+}
+.stamp__run-head {
+  display: flex;
+  justify-content: space-between;
+  font: 600 14px / 1.3 var(--cond);
+}
+.stamp__run-argv {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.stamp__run-line,
+.stamp__run-when {
+  color: var(--ink-2);
+}
+.stamp__run-reason {
+  color: var(--red);
+}
+.stamp__more {
+  margin-top: 8px;
+  font-size: 14px;
+}
+.stamp__more summary,
+.stamp__history summary {
+  cursor: pointer;
+  font: 600 14px / 1.3 var(--cond);
+}
+.stamp__payload {
+  max-height: 240px;
+  overflow: auto;
+  margin: 6px 0 0;
+  padding: 8px;
+  background: #fff;
+  border: 1px solid #e3dccb;
+  font: 400 11.5px / 1.45 var(--mono);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.stamp__supplement {
+  margin-top: 10px;
+  padding: 8px 10px;
+  background: #fff;
+  border: 1px dashed #b9a87e;
+}
+.stamp__supplement-title {
+  margin: 0 0 2px;
+  font: 600 14px / 1.3 var(--cond);
+}
+.stamp__tamper {
+  display: block;
+  margin-top: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.stamp__history {
+  margin-top: 10px;
+}
+.stamp__history ul {
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 6px;
+}
+.stamp__earlier {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  gap: 2px 10px;
+  align-items: baseline;
+  font-size: 13px;
+}
+.stamp__earlier-result {
+  font: 700 12px / 1.2 var(--cond);
+  letter-spacing: 0.06em;
+  color: var(--green);
+}
+.stamp__earlier[data-result="failed"] .stamp__earlier-result {
+  color: var(--red);
+}
+.stamp__earlier-commit {
+  font-family: var(--mono);
+}
+.stamp__earlier-line {
+  font-family: var(--mono);
+  color: var(--ink-2);
+  overflow-wrap: anywhere;
+}
+.stamp__earlier-check {
+  font: 600 13px var(--cond);
+  color: var(--sign);
+  background: none;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 1px 8px;
+  cursor: pointer;
+}
+.stamp__earlier-status,
+.stamp__earlier > div {
+  grid-column: 1 / -1;
+}
+.stamp__earlier-status:empty {
+  display: none;
+}
+.stamp__note {
+  margin-top: 10px;
+  font-size: 13.5px;
+  color: var(--ink-3);
+}

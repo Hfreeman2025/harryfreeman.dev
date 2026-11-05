@@ -1,0 +1,160 @@
+{
+  "version": 1,
+  "tool": "agent-race",
+  "repository": {
+    "commit": "647ea417af718e963b26ff2de44c707076c30780",
+    "tree": "4ed4dc9bf7783e3d831efc02d5c11bf58d243a32"
+  },
+  "capturedAt": "2026-11-04T17:21:44.504Z",
+  "status": "failed",
+  "capture": {
+    "method": "fresh-local-clone-non-browser",
+    "source": "Personal/lab/agent-race",
+    "network": "loopback-only",
+    "initialTrackedClean": true,
+    "sourceChangesDuringChecks": false,
+    "dependencies": {
+      "lockfile": "package-lock.json",
+      "sha256": "bf8c54bebf82a1429d24dafce131b24bafd55866e47136026f23a0e8733b2458",
+      "registry": "https://registry.npmjs.org",
+      "policy": "npm-ci-ignore-scripts",
+      "cache": "project-local-discarded"
+    },
+    "runtime": {
+      "node": "v26.12.0",
+      "npm": "11.20.0",
+      "platform": "darwin",
+      "arch": "arm64"
+    },
+    "notes": [
+      "Capture policy v2: independent Git object inodes; reads limited to clone/cache/system SDKs; writes limited to this clone and its isolated cache. Setup is loopback-only through a registry allowlist proxy, closed before checks.",
+      "Cloned with git clone --local --no-hardlinks --dissociate; origin removed and global Git configuration disabled. Browser executables denied."
+    ]
+  },
+  "setup": [
+    {
+      "kind": "dependency-setup",
+      "argv": [
+        "npm",
+        "ci",
+        "--ignore-scripts",
+        "--strict-ssl=true",
+        "--registry=https://registry.npmjs.org",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-04T17:21:17.492Z",
+      "endedAt": "2026-11-04T17:21:38.496Z",
+      "stdout": {
+        "sha256": "87e3f8804568e411e061edaba81f5161207bbdd4f316b635af3cc874d260c700",
+        "bytes": 26
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "dependency-setup: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    }
+  ],
+  "checks": [
+    {
+      "kind": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-04T17:21:38.585Z",
+      "endedAt": "2026-11-04T17:21:39.441Z",
+      "stdout": {
+        "sha256": "bccf1d5c1c5c2bbcd8bddf185b201d5407a66aaa7a8ffc0362ece76e8f7515fd",
+        "bytes": 46
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "typecheck: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    },
+    {
+      "kind": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-04T17:21:39.451Z",
+      "endedAt": "2026-11-04T17:21:41.427Z",
+      "stdout": {
+        "sha256": "4c7f131c2f620adccca58c43c80f51dcc868a96911b72c431cdcc7b155038358",
+        "bytes": 128
+      },
+      "stderr": {
+        "sha256": "87d3bdffe284d7474742b311504bb1f6b6305f579374abc0d13b87f980a89e42",
+        "bytes": 44
+      },
+      "resultLine": "lint: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    },
+    {
+      "kind": "unit-tests",
+      "argv": [
+        "npm",
+        "test",
+        "--",
+        "--maxWorkers=2"
+      ],
+      "status": "failed",
+      "exitCode": 1,
+      "signal": null,
+      "startedAt": "2026-11-04T17:21:41.440Z",
+      "endedAt": "2026-11-04T17:21:44.494Z",
+      "stdout": {
+        "sha256": "2e8a05e45f73b39b6fae1ae87004d39d194e6439eb423ced86503117cecf4ad2",
+        "bytes": 1567
+      },
+      "stderr": {
+        "sha256": "9efbce39fcb0e4c6f1e7bee8d187b4d58d8a1b9b6b567ec1675528bcd6749d77",
+        "bytes": 1410
+      },
+      "resultLine": "Tests  1 failed | 73 passed (74)",
+      "reason": "Observed exit 1: Tests  1 failed | 73 passed (74)",
+      "timedOut": false
+    }
+  ],
+  "outputTails": {
+    "setup": [
+      {
+        "stdout": "\nadded 51 packages in 21s\n",
+        "stderr": ""
+      }
+    ],
+    "typecheck": {
+      "stdout": "\n> agent-race@0.1.0 typecheck\n> tsc --noEmit\n\n",
+      "stderr": ""
+    },
+    "lint": {
+      "stdout": "\n> agent-race@0.1.0 lint\n> biome check src web tests scripts index.html package.json tsconfig.json biome.json vitest.config.ts\n\n",
+      "stderr": "Checked 83 files in 29ms. No fixes applied.\n"
+    },
+    "unit-tests": {
+      "stdout": "\n> agent-race@0.1.0 test\n> vitest run --maxWorkers=2\n\n\n RUN  v4.1.12 <clone>\n\n ✓ tests/broadcast.test.ts (8 tests) 4ms\n ✓ tests/trace.test.ts (7 tests) 10ms\n ✓ tests/signatures.test.ts (5 tests) 8ms\n ✓ tests/attestation.test.ts (3 tests) 11ms\n ✓ tests/guards.test.ts (7 tests) 137ms\n ✓ tests/normalise.test.ts (9 tests) 24ms\n ✓ tests/recording.test.ts (7 tests) 17ms\n ✓ tests/trace-audit.test.ts (3 tests) 5ms\n ✓ tests/core.test.ts (12 tests) 8ms\n ❯ tests/receipts.test.ts (2 tests | 1 failed) 65ms\n   × real receipts integration: unbacked → verified → stale → failed 64ms\n   ✓ an empty optional CI path resolves to the documented local sibling 0ms\n ✓ tests/readiness.test.ts (2 tests) 3ms\n ✓ tests/diffs.test.ts (2 tests) 1ms\n ✓ tests/lines.test.ts (2 tests) 2ms\n ✓ tests/cli.test.ts (1 test) 398ms\n   ✓ help or invalid smoke options never start provider-backed capability jobs  397ms\n ✓ tests/launch.test.ts (1 test) 2ms\n ✓ tests/challenges.test.ts (3 tests) 1072ms\n     ✓ unicode-slug: weak visible test passes, hidden tests reject bug and accept reference  354ms\n     ✓ date-window: weak visible test passes, hidden tests reject bug and accept reference  367ms\n     ✓ single-flight: weak visible test passes, hidden tests reject bug and accept reference  350ms\n\n Test Files  1 failed | 15 passed (16)\n      Tests  1 failed | 73 passed (74)\n   Start at  17:21:42\n   Duration  1.91s (transform 122ms, setup 0ms, import 539ms, tests 1.77s, environment 1ms)\n\n",
+      "stderr": "\n⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯\n\n FAIL  tests/receipts.test.ts > real receipts integration: unbacked → verified → stale → failed\nError: Receipts check failed: node:internal/modules/helpers:89\n    modulesBinding.getNearestParentPackageJSONType(checkPath),\n                   ^\n\nError: Cannot read package config <receipts>/package.json: operation not permitted.\n    at getNearestParentPackageJSONType (node:internal/modules/helpers:89:20)\n    at Object.loaderMethodWrapper [as getNearestParentPackageJSONType] (node:internal/modules/helpers:123:12)\n    at shouldUseESMLoader (node:internal/modules/run_main:77:30)\n    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:166:20)\n    at node:internal/main/run_main_module:33:47 {\n  code: 'ERR_INVALID_PACKAGE_CONFIG'\n}\n\nNode.js v26.12.0\n\n ❯ checkClaims src/harness/receipts.ts:36:32\n     34| ): Promise<z.infer<typeof ClaimSchema>[]> {\n     35|   const output = await command(process.execPath, [receiptsCli, \"check\"…\n     36|   if (output.code !== 0) throw new Error(`Receipts check failed: ${out…\n       |                                ^\n     37|   const raw: unknown = JSON.parse(output.stdout);\n     38|   const checked = CheckSchema.parse(raw);\n ❯ tests/receipts.test.ts:18:13\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯\n\n"
+    }
+  },
+  "disclosure": "Original-byte output digests/counts; displayed tails are bounded, redacted and path-normalized. No browser/model downloads or hosted checks. npm lifecycle scripts disabled. Before/after tracked status does not detect transient reverted edits. Network/isolation mode is stated separately for every capture."
+}

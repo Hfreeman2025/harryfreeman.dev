@@ -1,0 +1,188 @@
+{
+  "version": 1,
+  "tool": "receipts",
+  "repository": {
+    "commit": "5313dea7d30dd8ee6c3d375a80df48881027e6ea",
+    "tree": "be59484d6b3530468a04ed0d057cf89256d8b1a8"
+  },
+  "capturedAt": "2026-11-05T09:58:22.097Z",
+  "status": "passed",
+  "capture": {
+    "method": "fresh-local-clone-non-browser",
+    "source": "Personal/oss/receipts",
+    "network": "loopback-only",
+    "initialTrackedClean": true,
+    "sourceChangesDuringChecks": false,
+    "dependencies": {
+      "lockfile": "package-lock.json",
+      "sha256": "ec967ff372cb4629ebb71562873140c5c83953119ebea18cb888cf1d6dab729c",
+      "registry": "https://registry.npmjs.org",
+      "policy": "npm-ci-ignore-scripts",
+      "cache": "project-local-discarded"
+    },
+    "runtime": {
+      "node": "v26.12.0",
+      "npm": "11.20.0",
+      "platform": "darwin",
+      "arch": "arm64"
+    },
+    "notes": [
+      "Capture policy v2: independent Git object inodes; reads limited to clone/cache/system SDKs; writes limited to this clone and its isolated cache. Setup is loopback-only through a registry allowlist proxy, closed before checks.",
+      "Cloned with git clone --local --no-hardlinks --dissociate; origin removed and global Git configuration disabled. Browser executables denied."
+    ]
+  },
+  "setup": [
+    {
+      "kind": "dependency-setup",
+      "argv": [
+        "npm",
+        "ci",
+        "--ignore-scripts",
+        "--strict-ssl=true",
+        "--registry=https://registry.npmjs.org",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-05T09:57:34.646Z",
+      "endedAt": "2026-11-05T09:57:57.788Z",
+      "stdout": {
+        "sha256": "85366a3a934e26822dd6fe4e9676277f8296c6a134c0cc5def10352dc568d73c",
+        "bytes": 26
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "dependency-setup: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    },
+    {
+      "kind": "prerequisite-build",
+      "argv": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-05T09:57:57.790Z",
+      "endedAt": "2026-11-05T09:57:59.884Z",
+      "stdout": {
+        "sha256": "85877ee33ed3f37dcf4d6a7544f86c9f542682fdc7d19bbf4f30a6e0977ad50b",
+        "bytes": 54
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "prerequisite-build: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    }
+  ],
+  "checks": [
+    {
+      "kind": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-05T09:58:00.012Z",
+      "endedAt": "2026-11-05T09:58:00.379Z",
+      "stdout": {
+        "sha256": "866e2ae670b90979019dc5161830a3f796f2ad8abfd6bc12d0f821bc5bb1eb2f",
+        "bytes": 44
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "typecheck: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    },
+    {
+      "kind": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-05T09:58:00.395Z",
+      "endedAt": "2026-11-05T09:58:02.551Z",
+      "stdout": {
+        "sha256": "f9778493efa526b12bc3fc8e609e08c1f94988e97a520fb83a83e20238899f32",
+        "bytes": 40
+      },
+      "stderr": {
+        "sha256": "13e38d8ccd3daa0fc440279c609e696838c2008f1ccea8ea0d8c313446614d92",
+        "bytes": 45
+      },
+      "resultLine": "lint: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    },
+    {
+      "kind": "unit-tests",
+      "argv": [
+        "npm",
+        "test",
+        "--",
+        "--maxWorkers=2"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-05T09:58:02.637Z",
+      "endedAt": "2026-11-05T09:58:22.072Z",
+      "stdout": {
+        "sha256": "83cd2ef18946a97db99752296fbcb620d54d35279254a080134fc2e5937aebe7",
+        "bytes": 4527
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "Tests  525 passed (525)",
+      "reason": null,
+      "timedOut": false
+    }
+  ],
+  "outputTails": {
+    "setup": [
+      {
+        "stdout": "\nadded 51 packages in 23s\n",
+        "stderr": ""
+      },
+      {
+        "stdout": "\n> receipts@0.1.0 build\n> tsc -p tsconfig.build.json\n\n",
+        "stderr": ""
+      }
+    ],
+    "typecheck": {
+      "stdout": "\n> receipts@0.1.0 typecheck\n> tsc --noEmit\n\n",
+      "stderr": ""
+    },
+    "lint": {
+      "stdout": "\n> receipts@0.1.0 lint\n> biome check .\n\n",
+      "stderr": "Checked 132 files in 30ms. No fixes applied.\n"
+    },
+    "unit-tests": {
+      "stdout": "\n> receipts@0.1.0 test\n> npm run build && vitest run --maxWorkers=2\n\n\n> receipts@0.1.0 build\n> tsc -p tsconfig.build.json\n\n\n RUN  v4.1.12 <clone>\n\n ✓ test/attestation-crypto.test.ts (48 tests) 21ms\n ✓ test/attestation-files.test.ts (13 tests) 1340ms\n ✓ test/site-stamp.test.ts (19 tests) 42ms\n ✓ test/check.test.ts (63 tests) 22ms\n ✓ test/attestation-policy.test.ts (11 tests) 63ms\n ✓ test/claims-expansion.test.ts (76 tests) 20ms\n ✓ test/terminal.test.ts (10 tests) 16ms\n ✓ test/verification.test.ts (69 tests) 25ms\n ✓ test/hook.test.ts (22 tests) 5074ms\n     ✓ requires fresh aggregate verification for bare done and claim-free messages  472ms\n     ✓ checks every explicit claim, quotes failures and does not bypass on continuations  496ms\n     ✓ blocks malformed/oversized payloads, wrong cwd and corrupt evidence  302ms\n     ✓ executes both host configs from a subdirectory, with hostile paths, and blocks/continues end to end  1691ms\n ✓ test/run.test.ts (6 tests) 1197ms\n   ✓ terminates inherited-stdio descendants after their direct parent has exited  333ms\n ✓ test/integration-verification.test.ts (5 tests) 4245ms\n     ✓ requires a receipt, verifies ./verify, then rejects changed source  1497ms\n     ✓ reports a nonzero aggregate verification command as FAILED  683ms\n     ✓ does not treat an individual test receipt as aggregate verification evidence  727ms\n     ✓ keeps a labelled dry run from backing aggregate verification  590ms\n     ✓ accepts an explicitly labelled custom aggregate command without backing individual tests  747ms\n ✓ test/integration-cli.test.ts (7 tests) 4439ms\n     ✓ blocks unbacked prose, permits a real synthetic command receipt, then rejects stale code  1296ms\n     ✓ checks recognized wording through both the CLI and Stop hook: 'All 218 tests pass'  645ms\n     ✓ checks recognized wording through both the CLI and Stop hook: 'The test suite passes'  569ms\n     ✓ checks recognized wording through both the CLI and Stop hook: 'npm test passes'  571ms\n     ✓ checks recognized wording through both the CLI and Stop hook: 'Lint and typecheck are clean'  600ms\n     ✓ checks recognized wording through both the CLI and Stop hook: 'Everything is green'  593ms\n ✓ test/cli.test.ts (15 tests) 4966ms\n     ✓ takes UNBACKED → VERIFIED → MISMATCH → STALE → FAILED paths in a real unborn git repo  1020ms\n     ✓ lists, shows, verifies and annotates receipts without global installs  1021ms\n     ✓ fails closed on corrupted ledger and malformed config  682ms\n     ✓ passes through signals, fails spawn explicitly and supports intentional shell opt-in  568ms\n     ✓ caps file and stdin claim inputs, and reports no claims honestly  413ms\n   ✓ strictly mismatches numerical coordinated claims with definite articles  347ms\n ✓ test/integrations.test.ts (14 tests) 1175ms\n     ✓ blocks claim-free and repeated unsupported stops  358ms\n     ✓ accepts only a current successful aggregate receipt, using the shared checker  319ms\n ✓ test/ledger.test.ts (12 tests) 199ms\n ✓ test/eval-cli.test.ts (6 tests) 622ms\n ✓ test/evaluation.test.ts (11 tests) 15ms\n ✓ test/report.test.ts (8 tests) 21ms\n ✓ test/hook-cli.test.ts (2 tests) 2999ms\n     ✓ installs both default commands and dispatches them through a fake host for the complete receipt lifecycle  2712ms\n ✓ test/fingerprint.test.ts (6 tests) 560ms\n ✓ test/output.test.ts (34 tests) 5ms\n ✓ test/stamp-capture.test.ts (8 tests) 670ms\n ✓ test/redact.test.ts (16 tests) 4ms\n ✓ test/licenses.test.ts (7 tests) 551ms\n ✓ test/claims.test.ts (13 tests) 21ms\n ✓ test/evaluation-policy.test.ts (4 tests) 11ms\n ✓ test/evaluation-frozen.test.ts (2 tests) 27ms\n ✓ test/attestation-cli.test.ts (3 tests) 769ms\n   ✓ signs actual file subjects and verifies the DSSE envelope against a separately pinned key  569ms\n ✓ test/claim-performance.test.ts (3 tests) 243ms\n ✓ test/report-cli.test.ts (2 tests) 1078ms\n   ✓ reports actual unbacked, current, stale and corrupted evidence  765ms\n   ✓ rejects malformed report flags and renders text-input errors fail closed  312ms\n ✓ test/terminal-cli.test.ts (2 tests) 263ms\n ✓ test/config.test.ts (7 tests) 13ms\n ✓ test/integration-hook-contract.test.ts (1 test) 274ms\n\n Test Files  33 passed (33)\n      Tests  525 passed (525)\n   Start at  09:58:04\n   Duration  17.64s (transform 319ms, setup 0ms, import 1.19s, tests 30.99s, environment 1ms)\n\n",
+      "stderr": ""
+    }
+  },
+  "disclosure": "Original-byte output digests/counts; displayed tails are bounded, redacted and path-normalized. No browser/model downloads or hosted checks. npm lifecycle scripts disabled. Before/after tracked status does not detect transient reverted edits. Network/isolation mode is stated separately for every capture."
+}

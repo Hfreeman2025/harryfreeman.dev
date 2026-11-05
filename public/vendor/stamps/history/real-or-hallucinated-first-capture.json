@@ -1,0 +1,165 @@
+{
+  "version": 1,
+  "tool": "real-or-hallucinated",
+  "repository": {
+    "commit": "afe6065317edb31331fdd3e230c20c1ae86b4295",
+    "tree": "e90595fa0fc1e513794faedebede278fd773b1b9"
+  },
+  "capturedAt": "2026-11-04T16:41:13.387Z",
+  "status": "failed",
+  "capture": {
+    "method": "fresh-local-clone-non-browser",
+    "source": "Personal/lab/real-or-hallucinated",
+    "network": "loopback-only",
+    "initialTrackedClean": true,
+    "sourceChangesDuringChecks": false,
+    "dependencies": {
+      "lockfile": "package-lock.json",
+      "sha256": "3262f02a8cad9e28079c7e12d8e8da942549eddeb3e0b5ea1f40f798bf28c2ea",
+      "registry": "https://registry.npmjs.org",
+      "policy": "npm-ci-ignore-scripts",
+      "cache": "project-local-discarded"
+    },
+    "runtime": {
+      "node": "v26.12.0",
+      "npm": "11.20.0",
+      "platform": "darwin",
+      "arch": "arm64"
+    }
+  },
+  "setup": [
+    {
+      "kind": "dependency-setup",
+      "argv": [
+        "npm",
+        "ci",
+        "--ignore-scripts",
+        "--registry=https://registry.npmjs.org",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-04T16:40:45.878Z",
+      "endedAt": "2026-11-04T16:41:10.797Z",
+      "stdout": {
+        "sha256": "7a22c44df8648d4ac8b4a1a50eab547f5087e286412bad600e9c0ca7ab204d6d",
+        "bytes": 26
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "dependency-setup: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    }
+  ],
+  "checks": [
+    {
+      "kind": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-04T16:41:11.063Z",
+      "endedAt": "2026-11-04T16:41:12.329Z",
+      "stdout": {
+        "sha256": "50155e0c7238960f6b84e5f9bccfe04b198fcb09b2b426e4112453c347cae0ed",
+        "bytes": 56
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "typecheck: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    },
+    {
+      "kind": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-04T16:41:12.340Z",
+      "endedAt": "2026-11-04T16:41:13.089Z",
+      "stdout": {
+        "sha256": "27f6f334845447046e444215704d7322d98e84c0ffbb0010b33a6808389348ac",
+        "bytes": 165
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "lint: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    },
+    {
+      "kind": "unit-tests",
+      "argv": [
+        "node_modules/.bin/tsx",
+        "--test",
+        "--test-concurrency=2",
+        "tests/chunk-cache.test.ts",
+        "tests/content.test.ts",
+        "tests/core.test.ts",
+        "tests/detector.test.ts",
+        "tests/display.test.ts",
+        "tests/download-progress.test.ts",
+        "tests/model-cache.test.ts",
+        "tests/nli-wire.test.ts",
+        "tests/sampling.test.ts",
+        "tests/v2.test.ts",
+        "tests/verification.test.ts"
+      ],
+      "status": "failed",
+      "exitCode": 1,
+      "signal": null,
+      "startedAt": "2026-11-04T16:41:13.099Z",
+      "endedAt": "2026-11-04T16:41:13.378Z",
+      "stdout": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "stderr": {
+        "sha256": "4128c0be7bc1d8622be3fe2cef3505992b86e0b0ba63c1c98ddecb93c7239ec1",
+        "bytes": 1067
+      },
+      "resultLine": "errno: -1,",
+      "reason": "Observed exit 1: errno: -1,",
+      "timedOut": false
+    }
+  ],
+  "outputTails": {
+    "setup": [
+      {
+        "stdout": "\nadded 42 packages in 25s\n",
+        "stderr": ""
+      }
+    ],
+    "typecheck": {
+      "stdout": "\n> real-or-hallucinated@3.0.0 typecheck\n> tsc --noEmit\n\n",
+      "stderr": ""
+    },
+    "lint": {
+      "stdout": "\n> real-or-hallucinated@3.0.0 lint\n> biome check src scripts tests package.json tsconfig.json index.html vite.config.ts\n\nChecked 90 files in 21ms. No fixes applied.\n",
+      "stderr": ""
+    },
+    "unit-tests": {
+      "stdout": "",
+      "stderr": "node:net:2368\n      const error = new UVExceptionWithHostPort(rval, 'listen', address, port);\n                    ^\n\nError: listen EPERM: operation not permitted <clone>/.capture-tmp/tsx-501/4582.pipe\n    at Server.setupListenHandle [as _listen2] (node:net:2368:21)\n    at listenInCluster (node:net:2499:12)\n    at Server.listen (node:net:2641:5)\n    at file://<clone>/node_modules/tsx/dist/cli.mjs:53:31537\n    at new Promise (<anonymous>)\n    at createIpcServer (file://<clone>/node_modules/tsx/dist/cli.mjs:53:31515)\n    at async file://<clone>/node_modules/tsx/dist/cli.mjs:55:459 {\n  code: 'EPERM',\n  errno: -1,\n  syscall: 'listen',\n  address: '<clone>/.capture-tmp/tsx-501/4582.pipe',\n  port: -1\n}\n\nNode.js v26.12.0\n"
+    }
+  },
+  "disclosure": "Raw original output digests and byte counts; displayed tails are bounded, redacted and path-normalized. No browser, model or live hosted check. npm installation lifecycle scripts disabled; no original repo files used beyond the committed local clone. Setup network allowed only for committed registry dependencies; checks OS-sandboxed offline except loopback. Before/after tracked-file status cannot detect transient reverted edits."
+}

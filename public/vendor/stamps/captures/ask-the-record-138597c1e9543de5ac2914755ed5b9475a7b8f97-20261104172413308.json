@@ -1,0 +1,160 @@
+{
+  "version": 1,
+  "tool": "ask-the-record",
+  "repository": {
+    "commit": "138597c1e9543de5ac2914755ed5b9475a7b8f97",
+    "tree": "15f573b8b4bfc5fe0b409e025a5e20a728ef139c"
+  },
+  "capturedAt": "2026-11-04T17:24:13.308Z",
+  "status": "passed",
+  "capture": {
+    "method": "fresh-local-clone-non-browser",
+    "source": "Personal/oss/ask-the-record",
+    "network": "loopback-only",
+    "initialTrackedClean": true,
+    "sourceChangesDuringChecks": false,
+    "dependencies": {
+      "lockfile": "package-lock.json",
+      "sha256": "5363f3d329b33a2553bc675cd2482d86e088cd02f9bff76b489705d9651d86f4",
+      "registry": "https://registry.npmjs.org",
+      "policy": "npm-ci-ignore-scripts",
+      "cache": "project-local-discarded"
+    },
+    "runtime": {
+      "node": "v26.12.0",
+      "npm": "11.20.0",
+      "platform": "darwin",
+      "arch": "arm64"
+    },
+    "notes": [
+      "Capture policy v2: independent Git object inodes; reads limited to clone/cache/system SDKs; writes limited to this clone and its isolated cache. Setup is loopback-only through a registry allowlist proxy, closed before checks.",
+      "Cloned with git clone --local --no-hardlinks --dissociate; origin removed and global Git configuration disabled. Browser executables denied."
+    ]
+  },
+  "setup": [
+    {
+      "kind": "dependency-setup",
+      "argv": [
+        "npm",
+        "ci",
+        "--ignore-scripts",
+        "--strict-ssl=true",
+        "--registry=https://registry.npmjs.org",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-04T17:22:42.636Z",
+      "endedAt": "2026-11-04T17:24:03.220Z",
+      "stdout": {
+        "sha256": "b4b45181a110e7e6a3b9e363042945d0a818b7f033f0ebe1df87f2933c154976",
+        "bytes": 26
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "dependency-setup: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    }
+  ],
+  "checks": [
+    {
+      "kind": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-04T17:24:03.386Z",
+      "endedAt": "2026-11-04T17:24:05.980Z",
+      "stdout": {
+        "sha256": "e2f7ddf8e1c2cf5a1fb9c0ed9e8a4bbbfd457f6b800f16c8c349ac99defe04e8",
+        "bytes": 118
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "typecheck: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    },
+    {
+      "kind": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-04T17:24:05.990Z",
+      "endedAt": "2026-11-04T17:24:10.270Z",
+      "stdout": {
+        "sha256": "4397a4ac1bcba9d97639a76159a5fea797c3ecdce65f478d4cb71917130e8f39",
+        "bytes": 41
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "lint: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    },
+    {
+      "kind": "unit-tests",
+      "argv": [
+        "npm",
+        "test",
+        "--",
+        "--maxWorkers=2"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-04T17:24:10.280Z",
+      "endedAt": "2026-11-04T17:24:13.298Z",
+      "stdout": {
+        "sha256": "3af4106ba82b33b358850d97d6658aa127954f64414cb436b5739b330a40dc48",
+        "bytes": 1713
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "Tests  389 passed (389)",
+      "reason": null,
+      "timedOut": false
+    }
+  ],
+  "outputTails": {
+    "setup": [
+      {
+        "stdout": "\nadded 177 packages in 1m\n",
+        "stderr": ""
+      }
+    ],
+    "typecheck": {
+      "stdout": "\n> ask-the-record@0.1.0 typecheck\n> tsc -p tsconfig.json && tsc -p tsconfig.core.json && tsc -p tsconfig.worker.json\n\n",
+      "stderr": ""
+    },
+    "lint": {
+      "stdout": "\n> ask-the-record@0.1.0 lint\n> eslint .\n\n",
+      "stderr": ""
+    },
+    "unit-tests": {
+      "stdout": "\n> ask-the-record@0.1.0 test\n> vitest run --maxWorkers=2\n\n\n RUN  v5.0.5 <clone>\n\n ✓ test/unit/parse.test.ts (31 tests) 25ms\n ✓ test/unit/cli.test.ts (18 tests) 38ms\n ✓ test/unit/model.test.ts (18 tests) 9ms\n ✓ test/unit/guards.test.ts (13 tests) 23ms\n ✓ test/unit/meaning.test.ts (12 tests) 36ms\n ✓ test/unit/verify.test.ts (17 tests) 8ms\n ✓ test/unit/record.test.ts (20 tests) 30ms\n ✓ test/unit/ask.test.ts (17 tests) 10ms\n ✓ test/unit/policy.test.ts (16 tests) 5ms\n ✓ test/unit/verify-claims.test.ts (6 tests) 9ms\n ✓ test/unit/bm25.test.ts (11 tests) 4ms\n ✓ test/unit/demo.test.ts (12 tests) 192ms\n ✓ test/unit/tsne.test.ts (9 tests) 8ms\n ✓ test/unit/text.test.ts (16 tests) 8ms\n ✓ test/unit/highlight.test.ts (9 tests) 7ms\n ✓ test/unit/links.test.ts (11 tests) 2ms\n ✓ test/unit/question.test.ts (8 tests) 5ms\n ✓ test/unit/fetch-record.test.ts (8 tests) 43ms\n ✓ test/unit/vector.test.ts (8 tests) 8ms\n ✓ test/unit/source-view.test.ts (6 tests) 9ms\n ✓ test/unit/lint.test.ts (9 tests) 56ms\n ✓ test/unit/stem.test.ts (80 tests) 5ms\n ✓ test/unit/sentences.test.ts (10 tests) 5ms\n ✓ test/unit/attribution.test.ts (7 tests) 4ms\n ✓ test/unit/plan.test.ts (4 tests) 3ms\n ✓ test/unit/fusion.test.ts (8 tests) 2ms\n ✓ test/unit/map.test.ts (5 tests) 2ms\n\n Test Files  27 passed (27)\n      Tests  389 passed (389)\n   Start at  17:24:11\n   Duration  1.93s (import 39%, tests 38%, transform 20%, worker 3%)\n\n    Isolate  27 workers spawned · ~84ms startup each (spawn + environment, per file)\n             at least ~1.05s faster with isolate: false — reuses workers across files instead of one per file\n\n",
+      "stderr": ""
+    }
+  },
+  "disclosure": "Original-byte output digests/counts; displayed tails are bounded, redacted and path-normalized. No browser/model downloads or hosted checks. npm lifecycle scripts disabled. Before/after tracked status does not detect transient reverted edits. Network/isolation mode is stated separately for every capture."
+}

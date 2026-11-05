@@ -9,6 +9,7 @@
       "!public/casts",
       "!public/record",
       "!public/vendor/radio",
+      "!public/vendor/stamps",
       "!public/vendor/transformers/transformers.min.js",
       "!src/timeline/placeholder.json",
       "!shots"

@@ -1,0 +1,155 @@
+{
+  "version": 1,
+  "tool": "gpt-in-a-tab",
+  "repository": {
+    "commit": "193619ee720bf4a7d71da31fae9cf9c2d13a9e01",
+    "tree": "53baa36f5dc3815869ae95ea792c2c2d8c038c30"
+  },
+  "capturedAt": "2026-11-04T16:40:45.456Z",
+  "status": "passed",
+  "capture": {
+    "method": "fresh-local-clone-non-browser",
+    "source": "Personal/lab/gpt-in-a-tab",
+    "network": "loopback-only",
+    "initialTrackedClean": true,
+    "sourceChangesDuringChecks": false,
+    "dependencies": {
+      "lockfile": "package-lock.json",
+      "sha256": "e7fef2bd6f834658fb2858d9a188e9e9d5a5c984a314839aba1708f193f29647",
+      "registry": "https://registry.npmjs.org",
+      "policy": "npm-ci-ignore-scripts",
+      "cache": "project-local-discarded"
+    },
+    "runtime": {
+      "node": "v26.12.0",
+      "npm": "11.20.0",
+      "platform": "darwin",
+      "arch": "arm64"
+    }
+  },
+  "setup": [
+    {
+      "kind": "dependency-setup",
+      "argv": [
+        "npm",
+        "ci",
+        "--ignore-scripts",
+        "--registry=https://registry.npmjs.org",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-04T16:40:07.290Z",
+      "endedAt": "2026-11-04T16:40:36.582Z",
+      "stdout": {
+        "sha256": "d854acb4a1d3f3021f639cccc89c0c971c6981fff0666f058c0e408e0b9beaf5",
+        "bytes": 26
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "dependency-setup: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    }
+  ],
+  "checks": [
+    {
+      "kind": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-04T16:40:36.954Z",
+      "endedAt": "2026-11-04T16:40:38.192Z",
+      "stdout": {
+        "sha256": "e92b21486d988f83c08c5c8ae73837c7b6e163dd34a2a27d5973a77486d4b67e",
+        "bytes": 48
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "typecheck: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    },
+    {
+      "kind": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-04T16:40:38.272Z",
+      "endedAt": "2026-11-04T16:40:40.200Z",
+      "stdout": {
+        "sha256": "415e96ea166013001df522100e5efd5726d6401b24ac7229d37b9f3949130020",
+        "bytes": 43
+      },
+      "stderr": {
+        "sha256": "d93809ceac21534bd0e4bdffc6b7289a31cc8934895a3be396d6fec88619f149",
+        "bytes": 44
+      },
+      "resultLine": "lint: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    },
+    {
+      "kind": "unit-tests",
+      "argv": [
+        "npm",
+        "test",
+        "--",
+        "--maxWorkers=2"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-04T16:40:40.210Z",
+      "endedAt": "2026-11-04T16:40:45.375Z",
+      "stdout": {
+        "sha256": "2e500405753abd0335bd9b5ebbd70e839673b7d2c9941f1c34c94018f3d3a5b7",
+        "bytes": 649
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "Tests  48 passed (48)",
+      "reason": null,
+      "timedOut": false
+    }
+  ],
+  "outputTails": {
+    "setup": [
+      {
+        "stdout": "\nadded 41 packages in 29s\n",
+        "stderr": ""
+      }
+    ],
+    "typecheck": {
+      "stdout": "\n> gpt-in-a-tab@0.1.0 typecheck\n> tsc --noEmit\n\n",
+      "stderr": ""
+    },
+    "lint": {
+      "stdout": "\n> gpt-in-a-tab@0.1.0 lint\n> biome lint .\n\n",
+      "stderr": "Checked 82 files in 25ms. No fixes applied.\n"
+    },
+    "unit-tests": {
+      "stdout": "\n> gpt-in-a-tab@0.1.0 test\n> vitest run --maxWorkers=2\n\n\n RUN  v5.0.5 <clone>\n\n ✓ tests/gradcheck.test.ts (13 tests) 9ms\n ✓ tests/model-bits.test.ts (14 tests) 862ms\n   ✓ parameter layout (3)\n     ✓ initialises deterministically 848ms\n ✓ tests/microscope.test.ts (6 tests) 17ms\n ✓ tests/scrub.test.ts (5 tests) 45ms\n ✓ tests/model.test.ts (10 tests) 3837ms\n   ✓ training (3)\n     ✓ overfits a tiny text: loss is driven near zero 3295ms\n\n Test Files  5 passed (5)\n      Tests  48 passed (48)\n   Start at  16:40:41\n   Duration  4.01s (tests 96%, transform 3%, import 1%)\n\n",
+      "stderr": ""
+    }
+  },
+  "disclosure": "Raw original output digests and byte counts; displayed tails are bounded, redacted and path-normalized. No browser, model or live hosted check. npm installation lifecycle scripts disabled; no original repo files used beyond the committed local clone. Setup network allowed only for committed registry dependencies; checks OS-sandboxed offline except loopback. Before/after tracked-file status cannot detect transient reverted edits."
+}

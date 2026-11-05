@@ -91,3 +91,10 @@
     max-width: none;
   }
 }
+
+/* The stamps page: where its text comes from, above it. */
+.stamps-source {
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: var(--ink-3);
+}

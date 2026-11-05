@@ -1,0 +1,177 @@
+{
+  "version": 1,
+  "tool": "grid-weather",
+  "repository": {
+    "commit": "1f3a0f73696969a9f6aa3639d393ea570b0b05ed",
+    "tree": "708a3246aaf8a656fe4bb29b43d79616cef7fc5f"
+  },
+  "capturedAt": "2026-11-04T17:21:57.282Z",
+  "status": "passed",
+  "capture": {
+    "method": "fresh-local-clone-non-browser",
+    "source": "Personal/lab/grid-weather",
+    "network": "loopback-only",
+    "initialTrackedClean": true,
+    "sourceChangesDuringChecks": false,
+    "dependencies": {
+      "lockfile": "package-lock.json",
+      "sha256": "5fc2cc96ffb212a696f81c1022825782ffb401cb7c74829877cc2f730895eed2",
+      "registry": "https://registry.npmjs.org",
+      "policy": "npm-ci-ignore-scripts",
+      "cache": "project-local-discarded"
+    },
+    "runtime": {
+      "node": "v26.12.0",
+      "npm": "11.20.0",
+      "platform": "darwin",
+      "arch": "arm64"
+    },
+    "notes": [
+      "Capture policy v2: independent Git object inodes; reads limited to clone/cache/system SDKs; writes limited to this clone and its isolated cache. Setup is loopback-only through a registry allowlist proxy, closed before checks.",
+      "Cloned with git clone --local --no-hardlinks --dissociate; origin removed and global Git configuration disabled. Browser executables denied."
+    ]
+  },
+  "setup": [
+    {
+      "kind": "dependency-setup",
+      "argv": [
+        "npm",
+        "ci",
+        "--ignore-scripts",
+        "--strict-ssl=true",
+        "--registry=https://registry.npmjs.org",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-04T17:21:46.361Z",
+      "endedAt": "2026-11-04T17:21:52.580Z",
+      "stdout": {
+        "sha256": "d061fdcf53b23456aff056d7fc76d0d57a5ded5f45f0e2261e1b9f5be2eff0d5",
+        "bytes": 23
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "dependency-setup: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    }
+  ],
+  "checks": [
+    {
+      "kind": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-04T17:21:52.601Z",
+      "endedAt": "2026-11-04T17:21:53.291Z",
+      "stdout": {
+        "sha256": "039832d96c2941c15b0aac4ee982fddeaf650ea5b9c87a2ad61c17444941839c",
+        "bytes": 81
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "typecheck: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    },
+    {
+      "kind": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-04T17:21:53.300Z",
+      "endedAt": "2026-11-04T17:21:56.228Z",
+      "stdout": {
+        "sha256": "df24bf208a372cd3adf5e51ab342c5bae5a0a9a55f006036119ea0dc03e8322b",
+        "bytes": 140
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "lint: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    },
+    {
+      "kind": "unit-tests",
+      "argv": [
+        "node",
+        "--test",
+        "--test-concurrency=2",
+        "tests/advection.test.mjs",
+        "tests/area-weather.test.mjs",
+        "tests/core.test.mjs",
+        "tests/data.test.mjs",
+        "tests/disk-guard.test.mjs",
+        "tests/dom-contract.test.mjs",
+        "tests/experiment.test.mjs",
+        "tests/forecaster.test.mjs",
+        "tests/format.test.mjs",
+        "tests/geometry.test.mjs",
+        "tests/insights.test.mjs",
+        "tests/outlook.test.mjs",
+        "tests/playback.test.mjs",
+        "tests/presenter.test.mjs",
+        "tests/projection.test.mjs",
+        "tests/ridge.test.mjs",
+        "tests/v3-recording.test.mjs",
+        "tests/weather.test.mjs"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-04T17:21:56.326Z",
+      "endedAt": "2026-11-04T17:21:57.273Z",
+      "stdout": {
+        "sha256": "ef078352bef9f7046902c62e77e8e1293083be8f544c24dac0d10c57f75a8680",
+        "bytes": 5334
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "ℹ tests 54; ℹ pass 54; ℹ fail 0; ℹ cancelled 0; ℹ skipped 0",
+      "reason": null,
+      "timedOut": false
+    }
+  ],
+  "outputTails": {
+    "setup": [
+      {
+        "stdout": "\nadded 1 package in 6s\n",
+        "stderr": ""
+      }
+    ],
+    "typecheck": {
+      "stdout": "\n> grid-weather@3.0.0 typecheck\n> node node_modules/typescript/bin/tsc --noEmit\n\n",
+      "stderr": ""
+    },
+    "lint": {
+      "stdout": "\n> grid-weather@3.0.0 lint\n> node scripts/lint.mjs\n\nAST safety lint and JavaScript syntax checks passed. Unused code checked by TypeScript.\n",
+      "stderr": ""
+    },
+    "unit-tests": {
+      "stdout": "✔ midpoint tracer uses metres per second over projected kilometres, with no fake carbon flow (0.5395ms)\n✔ RK2 samples the midpoint velocity rather than using an Euler endpoint (0.168334ms)\n✔ area mean uses many equal-area interior cells rather than a centroid or vector magnitude (0.69825ms)\n✔ polygon holes do not contribute and incomplete weather coverage fails visibly (0.540375ms)\n✔ schema accepts genuine API response and preserves zero intensity (1.771292ms)\n✔ schema rejects null, invalid timestamps, missing regions, non-finite values and invalid mixes (1.179ms)\n✔ alignment sorts, deduplicates overlap in favour of newer source and rejects mismatched regions (0.313917ms)\n✔ interpolation blends half-hours, preserves endpoints and never bridges gaps or extrapolates (0.110583ms)\n✔ best two-hour window requires four contiguous full future intervals, earliest tie wins (0.124417ms)\n✔ colour scale clamps and has predictable low, middle, high anchors (0.073833ms)\n✔ genuine archive aligns all 145 half-hours and retains 14 regions (10.274417ms)\n✔ archive rejects missing half-hours, shortened forecasts and invalid calendar dates (31.176291ms)\n✔ API failure returns explicitly offline bundled data, never live success (22.161125ms)\n✔ malformed live data is rejected before explicit offline fallback (13.376291ms)\n✔ archive retains the validated GB aggregate separately from the 14 map regions (7.415542ms)\n✔ browser/download disk floor includes expected operation footprint (0.376333ms)\n✔ literal DOM accessors match the actual element type in the shipped page (2.057292ms)\n✔ validated experiments remain valid across the worker structured-clone boundary (11.712792ms)\n✔ held-out truth never enters scaling, tuning or predictions; published forecasts remain separate (6.581459ms)\n✔ recursive forecast uses its own first-day predictions and never future target values (2.467916ms)\n✔ constant time series gets an undefined correlation with its true sample count (2.024625ms)\n✔ UK clock and timezone labels agree in both winter and summer (0.410709ms)\n✔ repeated local times at the autumn change remain distinguishable in receipts (0.109834ms)\n✔ official geometry simplifies substantially, preserving 14 regions and all closed rings (15.020708ms)\n✔ simplification removes collinear vertices and preserves a corner (0.103458ms)\n✔ geometry parser rejects incorrect CRS, unknown region and open rings (23.268291ms)\n✔ regional extremes preserve input and resolve lowest ties by region id (0.607458ms)\n✔ window comparison uses current interpolated baseline, not the selected forecast frame (0.217ms)\n✔ zero baseline cannot invent a saving; worse windows have negative reductions (0.099416ms)\n✔ sparkline uses a shared scale, aligned endpoints, and separate moves across missing intervals (0.372083ms)\n✔ an absent region or empty forecast produces no invented line (0.112083ms)\n✔ the outlook includes the full last known half-hour, so a final two-hour band is not clipped (0.048083ms)\n✔ elapsed time drives a 36-second cycle, even when frames take several seconds (0.422ms)\n✔ speed, wraparound and zero elapsed time keep the same temporal contract (0.053166ms)\n✔ invalid playback bounds, speeds and elapsed time fail explicitly (0.104333ms)\n✔ tour opens with a temporal story and reaches the end of the available 48-hour forecast (2.596959ms)\n✔ every raw receipt matches its source; named regions are highlighted; means have four contiguous inputs (1.244375ms)\n✔ improvers and worseners compare with now, never the previous tour stop (0.711833ms)\n✔ GB crossing uses the actual aggregate, not an average of regional intensities (1.079375ms)\n✔ cleanest overnight window excludes daytime minima and never bridges missing intervals (0.523833ms)\n✔ wind, solar and gas stories state observed shares with both source intervals (0.32425ms)\n✔ empty, sparse and unchanged series never invent a change, band crossing or complete window (0.313666ms)\n✔ British National Grid converts the OS published Norwich control point to WGS84 (0.386875ms)\n✔ central meridian and northern grid points remain geographical and finite (0.091792ms)\n✔ standardized ridge recovers the analytical regularized slope with an unpenalized intercept (0.462833ms)\n✔ training-only scaling handles constant and collinear features without NaN (0.101292ms)\n✔ invalid shapes, non-finite values and unregularized/small samples fail explicitly (0.120167ms)\n✔ recorded calculation is produced by the same real model and every series has 48 forward hours (31.800833ms)\n✔ recorded results reject tampered counts, invalid forecast values and malformed models (1.473208ms)\n✔ real weather stories cite derived area means and exact NESO shares, and never extrapolate (45.064333ms)\n✔ meteorological wind is FROM north/west, never carbon transport (0.336125ms)\n✔ bilinear interpolation is bounded, preserves corners and rejects spatial/temporal extrapolation (0.134625ms)\n✔ Pearson correlation reports n, handles constant/short series and rejects invalid values (0.321667ms)\n✔ weather schema rejects gaps, wrong units/levels, null and oversized fields (0.939459ms)\nℹ tests 54\nℹ suites 0\nℹ pass 54\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 883.150167\n",
+      "stderr": ""
+    }
+  },
+  "disclosure": "Original-byte output digests/counts; displayed tails are bounded, redacted and path-normalized. No browser/model downloads or hosted checks. npm lifecycle scripts disabled. Before/after tracked status does not detect transient reverted edits. Network/isolation mode is stated separately for every capture."
+}

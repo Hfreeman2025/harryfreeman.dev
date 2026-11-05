@@ -1,0 +1,160 @@
+{
+  "version": 1,
+  "tool": "dreaming",
+  "repository": {
+    "commit": "070b67d4a201561b228730625bb304b8a87613a4",
+    "tree": "98842c24d89c218861aff25569bdbd5153132b11"
+  },
+  "capturedAt": "2026-11-04T17:25:39.227Z",
+  "status": "failed",
+  "capture": {
+    "method": "fresh-local-clone-non-browser",
+    "source": "Personal/oss/dreaming",
+    "network": "loopback-only",
+    "initialTrackedClean": true,
+    "sourceChangesDuringChecks": false,
+    "dependencies": {
+      "lockfile": "package-lock.json",
+      "sha256": "2bc4479b03bef6e80399d66a9bae2159259bbcc2709a62e0ded650af1e4f8cab",
+      "registry": "https://registry.npmjs.org",
+      "policy": "npm-ci-ignore-scripts",
+      "cache": "project-local-discarded"
+    },
+    "runtime": {
+      "node": "v26.12.0",
+      "npm": "11.20.0",
+      "platform": "darwin",
+      "arch": "arm64"
+    },
+    "notes": [
+      "Capture policy v2: independent Git object inodes; reads limited to clone/cache/system SDKs; writes limited to this clone and its isolated cache. Setup is loopback-only through a registry allowlist proxy, closed before checks.",
+      "Cloned with git clone --local --no-hardlinks --dissociate; origin removed and global Git configuration disabled. Browser executables denied."
+    ]
+  },
+  "setup": [
+    {
+      "kind": "dependency-setup",
+      "argv": [
+        "npm",
+        "ci",
+        "--ignore-scripts",
+        "--strict-ssl=true",
+        "--registry=https://registry.npmjs.org",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-04T17:24:43.784Z",
+      "endedAt": "2026-11-04T17:25:12.838Z",
+      "stdout": {
+        "sha256": "1d7819b8b41533b559a33c266ece692376daaa7d406132194982d709e37a2a17",
+        "bytes": 27
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "dependency-setup: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    }
+  ],
+  "checks": [
+    {
+      "kind": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-04T17:25:13.035Z",
+      "endedAt": "2026-11-04T17:25:15.032Z",
+      "stdout": {
+        "sha256": "16a1230f07fc17dadbb250b15c67b8f93a328f8b6fea8fb50ae240ff4a0390b3",
+        "bytes": 113
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "typecheck: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    },
+    {
+      "kind": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-04T17:25:15.041Z",
+      "endedAt": "2026-11-04T17:25:21.420Z",
+      "stdout": {
+        "sha256": "5622465f230f4d641ed1c56dcae393e13cecf5cd67434ed6bd57f28d1b48064c",
+        "bytes": 129
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "lint: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    },
+    {
+      "kind": "unit-tests",
+      "argv": [
+        "npm",
+        "test",
+        "--",
+        "--maxWorkers=2"
+      ],
+      "status": "failed",
+      "exitCode": 1,
+      "signal": null,
+      "startedAt": "2026-11-04T17:25:21.429Z",
+      "endedAt": "2026-11-04T17:25:39.136Z",
+      "stdout": {
+        "sha256": "12c07947de0dee5940bc0c166762d5f4b32bfb05e9989c08c670b8d34c154ae5",
+        "bytes": 3934
+      },
+      "stderr": {
+        "sha256": "27d241334e6b815d08385d965b47fbb446236d6fb1c05ba7bf651e79438433ba",
+        "bytes": 845
+      },
+      "resultLine": "Tests  1 failed | 455 passed | 1 skipped (457)",
+      "reason": "Observed exit 1: Tests  1 failed | 455 passed | 1 skipped (457)",
+      "timedOut": false
+    }
+  ],
+  "outputTails": {
+    "setup": [
+      {
+        "stdout": "\nadded 153 packages in 29s\n",
+        "stderr": ""
+      }
+    ],
+    "typecheck": {
+      "stdout": "\n> agent-dreaming@0.1.0 typecheck\n> tsc -p tsconfig.json --noEmit && tsc -p test/browser/tsconfig.json --noEmit\n\n",
+      "stderr": ""
+    },
+    "lint": {
+      "stdout": "\n> agent-dreaming@0.1.0 lint\n> eslint . && prettier --check .\n\nChecking formatting...\nAll matched files use Prettier code style!\n",
+      "stderr": ""
+    },
+    "unit-tests": {
+      "stdout": "\n> agent-dreaming@0.1.0 test\n> vitest run --maxWorkers=2\n\n\n RUN  v5.0.5 <clone>\n\n ✓ test/contradict.test.ts (23 tests | 1 skipped) 101ms\n ✓ test/apply.test.ts (21 tests) 242ms\n ✓ test/proposals.test.ts (37 tests) 23ms\n ✓ test/cli.test.ts (19 tests) 971ms\n   ✓ dreaming CLI (19)\n     ✓ with no command, shows what is waiting and the one next step 354ms\n ✓ test/review.test.ts (22 tests) 457ms\n ✓ test/transcripts.test.ts (23 tests) 39ms\n ✓ test/memory.test.ts (35 tests) 22ms\n ✓ test/schedule.test.ts (21 tests) 38ms\n ✓ test/agent.test.ts (29 tests) 7727ms\n   ✓ runProcess: limits on the agent process (14)\n     ✓ stops an agent that runs past the timeout 1003ms\n     ✓ escalates to SIGKILL when the agent ignores SIGTERM 3306ms\n     ✓ returns promptly when the agent exits but leaves a process holding its output, and stops that process 409ms\n     ✓ stops the agent's whole process group on timeout, not just the agent 1004ms\n     ✓ stops the agent when dreaming receives SIGINT 304ms\n     ✓ stops the agent when dreaming receives SIGTERM 303ms\n     ✓ stops the agent when dreaming receives SIGHUP 304ms\n     ✓ stops the agent when dreaming receives SIGQUIT 303ms\n     ✓ kills the agent's group if dreaming exits while the agent runs 503ms\n ✓ test/ui.test.ts (17 tests) 37ms\n ✓ test/eval.test.ts (35 tests) 11836ms\n   ✓ dreaming eval, end to end with a fake agent (14)\n     ✓ proves the hook detector first, then measures the memory through the suite's real checks 4217ms\n     ✓ flags a memory that breaks a task 1214ms\n     ✓ measures an update against the memory it replaces 395ms\n     ✓ stops at the first run that shows a hook, and says why 2319ms\n     ✓ catches a hook that ran without being reported, by its canary file 1048ms\n     ✓ keeps the finished runs when stopped with Ctrl-C 1584ms\n ✓ test/storage.test.ts (16 tests) 593ms\n   ✓ storage (16)\n     ✓ withLock (6)\n       ✓ waits for a reclaim in progress and clears a reclaim marker that was abandoned 392ms\n ✓ test/redact.test.ts (69 tests) 12ms\n ✓ test/review-screen.test.ts (15 tests) 342ms\n ✓ test/run.test.ts (9 tests) 1228ms\n   ✓ dreaming run (9)\n     ✓ files verified proposals in the inbox and advances the watermark 379ms\n ✓ test/review-insight.test.ts (4 tests) 55ms\n ✓ test/why.test.ts (8 tests) 235ms\n ❯ test/eval-cli.test.ts (7 tests | 1 failed) 1569ms\n   ❯ dreaming eval, check and models on the command line (7)\n     ✓ lists what is waiting and what has been measured 20ms\n     ✓ shows the plan and the exact isolated command on a dry run, calling no model 13ms\n     ✓ will not start real model calls without a terminal unless told to 13ms\n     × runs, saves the record, and then shows it in the list, a replay and the review 947ms\n     ✓ says plainly that a stopped eval has no verdict, and keeps it out of the review 289ms\n     ✓ prints the whole record and its summary as JSON for scripts 271ms\n     ✓ explains, rather than fails strangely, when the contradiction model is not installed 15ms\n ✓ test/eval-view.test.ts (5 tests) 74ms\n ✓ test/config.test.ts (18 tests) 21ms\n ✓ test/webhook.test.ts (6 tests) 221ms\n ✓ test/terminal.test.ts (7 tests) 7ms\n ✓ test/repository.test.ts (3 tests) 166ms\n ✓ test/run-failures.test.ts (8 tests) 1938ms\n   ✓ dreaming run: failures and notifications (8)\n     ✓ failures are explicit and leave the watermark alone (6)\n       ✓ stops an agent that exceeds the timeout 1046ms\n\n Test Files  1 failed | 23 passed (24)\n      Tests  1 failed | 455 passed | 1 skipped (457)\n   Start at  17:25:22\n   Duration  16.57s (tests 94%, import 4%, transform 2%)\n\n    Isolate  24 workers spawned · ~89ms startup each (spawn + environment, per file)\n             at least ~979ms faster with isolate: false — reuses workers across files instead of one per file\n\n",
+      "stderr": "\n⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯\n\n FAIL  test/eval-cli.test.ts > dreaming eval, check and models on the command line > runs, saves the record, and then shows it in the list, a replay and the review\nAssertionError: expected 1 to be +0 // Object.is equality\n\n- Expected\n+ Received\n\n- 0\n+ 1\n\n ❯ test/eval-cli.test.ts:93:22\n     91|   it(\"runs, saves the record, and then shows it in the list, a replay …\n     92|     const run = await cli([\"eval\", \"prefer-pnpm\", \"--yes\", \"--runs\", \"…\n     93|     expect(run.code).toBe(ExitCode.ok);\n       |                      ^\n     94|     expect(run.stdout).toContain(\"isolated: canary fired on SessionSta…\n     95|     expect(run.stdout).toMatch(/ \\d\\/6 {2}(with|without) +install-and-…\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯\n\n"
+    }
+  },
+  "disclosure": "Original-byte output digests/counts; displayed tails are bounded, redacted and path-normalized. No browser/model downloads or hosted checks. npm lifecycle scripts disabled. Before/after tracked status does not detect transient reverted edits. Network/isolation mode is stated separately for every capture."
+}

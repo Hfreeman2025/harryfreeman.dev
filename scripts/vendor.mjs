@@ -3,6 +3,7 @@
 // here is edited by hand; to update, rebuild in the source folder and run this again.
 //
 //   node scripts/vendor.mjs radio
+//   node scripts/vendor.mjs stamps
 
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -19,6 +20,18 @@ const PACKAGES = {
     build: 'npm run build:radio',
     files: ['listen-to-the-grid-radio.js', 'listen-to-the-grid-radio.d.ts', 'README.md', 'LICENSE'],
     folders: ['assets'],
+  },
+  stamps: {
+    repo: join(homedir(), 'Personal/oss/receipts'),
+    dir: 'exports/site-stamps',
+    build: 'the receipts signer (see its docs/site-stamps.md)',
+    files: ['verify-stamp.mjs', 'public-key.json', 'index.json', 'tampered.dsse.json', 'tamper-vector.json', 'README.md'],
+    folders: ['stamps', 'history', 'captures'],
+    /** Files from elsewhere in the repository, copied beside the packet: [from repo root, to]. */
+    extra: [
+      ['docs/site-stamps.md', 'site-stamps.md'],
+      ['LICENSE', 'LICENSE'],
+    ],
   },
 };
 
@@ -41,6 +54,7 @@ rmSync(to, { recursive: true, force: true });
 mkdirSync(to, { recursive: true });
 for (const f of pkg.files) cpSync(join(from, f), join(to, f));
 for (const d of pkg.folders) cpSync(join(from, d), join(to, d), { recursive: true });
+for (const [src, dest] of pkg.extra ?? []) cpSync(join(pkg.repo, src), join(to, dest));
 
 const walk = (dir) => readdirSync(dir).flatMap((f) => (statSync(join(dir, f)).isDirectory() ? walk(join(dir, f)) : [join(dir, f)]));
 const files = Object.fromEntries(

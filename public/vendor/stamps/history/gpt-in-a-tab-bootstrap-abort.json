@@ -1,0 +1,137 @@
+{
+  "version": 1,
+  "tool": "gpt-in-a-tab",
+  "repository": {
+    "commit": "193619ee720bf4a7d71da31fae9cf9c2d13a9e01",
+    "tree": "53baa36f5dc3815869ae95ea792c2c2d8c038c30"
+  },
+  "capturedAt": "2026-11-04T16:37:35.507Z",
+  "status": "failed",
+  "capture": {
+    "method": "fresh-local-clone-non-browser",
+    "source": "Personal/lab/gpt-in-a-tab",
+    "network": "loopback-only",
+    "initialTrackedClean": true,
+    "sourceChangesDuringChecks": false,
+    "dependencies": {
+      "lockfile": "package-lock.json",
+      "sha256": "e7fef2bd6f834658fb2858d9a188e9e9d5a5c984a314839aba1708f193f29647",
+      "registry": "https://registry.npmjs.org",
+      "policy": "npm-ci-ignore-scripts",
+      "cache": "project-local-discarded"
+    },
+    "runtime": {
+      "node": "v26.12.0",
+      "npm": "11.20.0",
+      "platform": "darwin",
+      "arch": "arm64"
+    }
+  },
+  "setup": [
+    {
+      "kind": "dependency-setup",
+      "argv": [
+        "npm",
+        "ci",
+        "--ignore-scripts",
+        "--registry=https://registry.npmjs.org",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "status": "failed",
+      "exitCode": null,
+      "signal": "SIGABRT",
+      "startedAt": "2026-11-04T16:37:35.185Z",
+      "endedAt": "2026-11-04T16:37:35.198Z",
+      "stdout": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "dependency-setup: observed exit null",
+      "reason": "Observed signal SIGABRT: dependency-setup: observed exit null",
+      "timedOut": false
+    }
+  ],
+  "checks": [
+    {
+      "kind": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "status": "not-run",
+      "exitCode": null,
+      "signal": null,
+      "startedAt": null,
+      "endedAt": null,
+      "stdout": null,
+      "stderr": null,
+      "resultLine": "Not run: Dependency/prerequisite setup did not pass; see signed setup result",
+      "reason": "Dependency/prerequisite setup did not pass; see signed setup result",
+      "timedOut": false
+    },
+    {
+      "kind": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "status": "not-run",
+      "exitCode": null,
+      "signal": null,
+      "startedAt": null,
+      "endedAt": null,
+      "stdout": null,
+      "stderr": null,
+      "resultLine": "Not run: Dependency/prerequisite setup did not pass; see signed setup result",
+      "reason": "Dependency/prerequisite setup did not pass; see signed setup result",
+      "timedOut": false
+    },
+    {
+      "kind": "unit-tests",
+      "argv": [
+        "npm",
+        "test",
+        "--",
+        "--maxWorkers=2"
+      ],
+      "status": "not-run",
+      "exitCode": null,
+      "signal": null,
+      "startedAt": null,
+      "endedAt": null,
+      "stdout": null,
+      "stderr": null,
+      "resultLine": "Not run: Dependency/prerequisite setup did not pass; see signed setup result",
+      "reason": "Dependency/prerequisite setup did not pass; see signed setup result",
+      "timedOut": false
+    }
+  ],
+  "outputTails": {
+    "setup": [
+      {
+        "stdout": "",
+        "stderr": ""
+      }
+    ],
+    "typecheck": {
+      "stdout": "",
+      "stderr": ""
+    },
+    "lint": {
+      "stdout": "",
+      "stderr": ""
+    },
+    "unit-tests": {
+      "stdout": "",
+      "stderr": ""
+    }
+  },
+  "disclosure": "Raw original output digests and byte counts; displayed tails are bounded, redacted and path-normalized. No browser, model or live hosted check. npm installation lifecycle scripts disabled; no original repo files used beyond the committed local clone. Setup network allowed only for committed registry dependencies; checks OS-sandboxed offline except loopback. Before/after tracked-file status cannot detect transient reverted edits."
+}

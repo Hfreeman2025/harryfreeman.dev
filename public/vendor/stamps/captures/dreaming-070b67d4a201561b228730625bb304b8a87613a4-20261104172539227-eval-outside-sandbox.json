@@ -1,0 +1,133 @@
+{
+  "version": 1,
+  "tool": "dreaming",
+  "repository": {
+    "commit": "070b67d4a201561b228730625bb304b8a87613a4",
+    "tree": "98842c24d89c218861aff25569bdbd5153132b11"
+  },
+  "capturedAt": "2026-11-04T17:25:42.375Z",
+  "status": "incomplete",
+  "capture": {
+    "method": "fresh-local-clone-non-browser",
+    "source": "Personal/oss/dreaming",
+    "network": "not-os-isolated",
+    "initialTrackedClean": true,
+    "sourceChangesDuringChecks": false,
+    "dependencies": {
+      "lockfile": "package-lock.json",
+      "sha256": "2bc4479b03bef6e80399d66a9bae2159259bbcc2709a62e0ded650af1e4f8cab",
+      "registry": "https://registry.npmjs.org",
+      "policy": "npm-ci-ignore-scripts",
+      "cache": "project-local-discarded"
+    },
+    "runtime": {
+      "node": "v26.12.0",
+      "npm": "11.20.0",
+      "platform": "darwin",
+      "arch": "arm64"
+    },
+    "notes": [
+      "Explicitly authorized supplemental eval-cli test OUTSIDE Seatbelt so /bin/ps can perform its real process audit. This command was NOT OS-network-isolated. Other checks were not rerun in this supplemental capture.",
+      "Linked full sandbox capture: captures/dreaming-070b67d4a201561b228730625bb304b8a87613a4-20261104172539227.json; the full sandbox suite result remains unchanged."
+    ]
+  },
+  "setup": [
+    {
+      "kind": "dependency-setup",
+      "argv": [
+        "npm",
+        "ci",
+        "--ignore-scripts",
+        "--strict-ssl=true",
+        "--registry=https://registry.npmjs.org",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-04T17:24:43.784Z",
+      "endedAt": "2026-11-04T17:25:12.838Z",
+      "stdout": {
+        "sha256": "1d7819b8b41533b559a33c266ece692376daaa7d406132194982d709e37a2a17",
+        "bytes": 27
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "dependency-setup: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    }
+  ],
+  "checks": [
+    {
+      "kind": "typecheck",
+      "argv": null,
+      "status": "not-run",
+      "exitCode": null,
+      "signal": null,
+      "startedAt": null,
+      "endedAt": null,
+      "stdout": null,
+      "stderr": null,
+      "resultLine": "Not run: Supplement only: full typecheck is in the linked sandbox capture",
+      "reason": "Supplement only: full typecheck is in the linked sandbox capture",
+      "timedOut": false
+    },
+    {
+      "kind": "lint",
+      "argv": null,
+      "status": "not-run",
+      "exitCode": null,
+      "signal": null,
+      "startedAt": null,
+      "endedAt": null,
+      "stdout": null,
+      "stderr": null,
+      "resultLine": "Not run: Supplement only: full lint is in the linked sandbox capture",
+      "reason": "Supplement only: full lint is in the linked sandbox capture",
+      "timedOut": false
+    },
+    {
+      "kind": "unit-tests",
+      "argv": [
+        "npm",
+        "test",
+        "--",
+        "test/eval-cli.test.ts",
+        "--maxWorkers=2"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-04T17:25:39.228Z",
+      "endedAt": "2026-11-04T17:25:42.374Z",
+      "stdout": {
+        "sha256": "c6f7ecbfd8e7f8d4e508472c0845feed8c154266923d8cceffd31201ff2ce806",
+        "bytes": 494
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "Tests  7 passed (7)",
+      "reason": null,
+      "timedOut": false
+    }
+  ],
+  "outputTails": {
+    "setup": [
+      {
+        "stdout": "\nadded 153 packages in 29s\n",
+        "stderr": ""
+      }
+    ],
+    "unit-tests": {
+      "stdout": "\n> agent-dreaming@0.1.0 test\n> vitest run test/eval-cli.test.ts --maxWorkers=2\n\n\n RUN  v5.0.5 <clone>\n\n ✓ test/eval-cli.test.ts (7 tests) 2366ms\n   ✓ dreaming eval, check and models on the command line (7)\n     ✓ runs, saves the record, and then shows it in the list, a replay and the review 1874ms\n\n Test Files  1 passed (1)\n      Tests  7 passed (7)\n   Start at  17:25:39\n   Duration  2.58s (tests 95%, import 3%, transform 1%)\n\n",
+      "stderr": ""
+    }
+  },
+  "disclosure": "Original-byte output digests/counts; displayed tails are bounded, redacted and path-normalized. No browser/model downloads or hosted checks. npm lifecycle scripts disabled. Before/after tracked status does not detect transient reverted edits. Network/isolation mode is stated separately for every capture."
+}

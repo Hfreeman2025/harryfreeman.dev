@@ -1,0 +1,155 @@
+{
+  "version": 1,
+  "tool": "listen-to-the-grid",
+  "repository": {
+    "commit": "b2d2d549811f702d5356c8993dca94c4bb311475",
+    "tree": "acdd9429d96e39e904d2310653fc88102ef0bf2a"
+  },
+  "capturedAt": "2026-11-04T16:43:17.196Z",
+  "status": "passed",
+  "capture": {
+    "method": "fresh-local-clone-non-browser",
+    "source": "Personal/lab/listen-to-the-grid",
+    "network": "loopback-only",
+    "initialTrackedClean": true,
+    "sourceChangesDuringChecks": false,
+    "dependencies": {
+      "lockfile": "package-lock.json",
+      "sha256": "a73ac0350b125537bd00da96bb2e45171170b2f8a7b77c714e8beb03931545d4",
+      "registry": "https://registry.npmjs.org",
+      "policy": "npm-ci-ignore-scripts",
+      "cache": "project-local-discarded"
+    },
+    "runtime": {
+      "node": "v26.12.0",
+      "npm": "11.20.0",
+      "platform": "darwin",
+      "arch": "arm64"
+    }
+  },
+  "setup": [
+    {
+      "kind": "dependency-setup",
+      "argv": [
+        "npm",
+        "ci",
+        "--ignore-scripts",
+        "--registry=https://registry.npmjs.org",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-04T16:43:09.710Z",
+      "endedAt": "2026-11-04T16:43:11.102Z",
+      "stdout": {
+        "sha256": "da89e7c19e4c57b3c70dfc5c39bfcee2e7ebb552c65c7cf3867c741d2f251f51",
+        "bytes": 26
+      },
+      "stderr": {
+        "sha256": "882076ede3a8982166553bb7d36896c689c0e4c283bba18720ac0bcfd4cf3284",
+        "bytes": 137
+      },
+      "resultLine": "dependency-setup: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    }
+  ],
+  "checks": [
+    {
+      "kind": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-04T16:43:11.260Z",
+      "endedAt": "2026-11-04T16:43:12.241Z",
+      "stdout": {
+        "sha256": "54818f2d572435b26e44c6dcc8c8b14cd5052f145a30f684060ec77dfd8d5f12",
+        "bytes": 54
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "typecheck: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    },
+    {
+      "kind": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-04T16:43:12.249Z",
+      "endedAt": "2026-11-04T16:43:14.775Z",
+      "stdout": {
+        "sha256": "ad9e5fd225f7187dd0e5950157c645fa7541c6c3a03ff5a2bb7c030070cb8f82",
+        "bytes": 45
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "lint: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    },
+    {
+      "kind": "unit-tests",
+      "argv": [
+        "npm",
+        "test",
+        "--",
+        "--maxWorkers=2"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-04T16:43:14.852Z",
+      "endedAt": "2026-11-04T16:43:17.187Z",
+      "stdout": {
+        "sha256": "4fe672a93c09c30a56e4306e80d5a84bf5b65bf9fbe3470fd4b964f4d20a0537",
+        "bytes": 1297
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "Tests  182 passed (182)",
+      "reason": null,
+      "timedOut": false
+    }
+  ],
+  "outputTails": {
+    "setup": [
+      {
+        "stdout": "\nadded 141 packages in 1s\n",
+        "stderr": "npm warn deprecated eslint@9.39.5: This version is no longer supported. Please see https://eslint.org/version-support for other options.\n"
+      }
+    ],
+    "typecheck": {
+      "stdout": "\n> listen-to-the-grid@1.0.0 typecheck\n> tsc --noEmit\n\n",
+      "stderr": ""
+    },
+    "lint": {
+      "stdout": "\n> listen-to-the-grid@1.0.0 lint\n> eslint .\n\n",
+      "stderr": ""
+    },
+    "unit-tests": {
+      "stdout": "\n> listen-to-the-grid@1.0.0 test\n> vitest run --maxWorkers=2\n\n\n RUN  v5.0.5 <clone>\n\n ✓ test/series.test.ts (19 tests) 4ms\n ✓ test/conductor.test.ts (12 tests) 17ms\n ✓ test/mapping.test.ts (17 tests) 3ms\n ✓ test/engrave.test.ts (5 tests) 9ms\n ✓ test/theory.test.ts (14 tests) 4ms\n ✓ test/schema.test.ts (11 tests) 4ms\n ✓ test/page.test.ts (7 tests) 6ms\n ✓ test/wav.test.ts (6 tests) 2ms\n ✓ test/pitch.test.ts (9 tests) 2ms\n ✓ test/format.test.ts (9 tests) 2ms\n ✓ test/regional.test.ts (6 tests) 3ms\n ✓ test/context.test.ts (7 tests) 11ms\n ✓ test/ossia.test.ts (7 tests) 16ms\n ✓ test/loudness.test.ts (11 tests) 321ms\n ✓ test/readout.test.ts (7 tests) 2ms\n ✓ test/rhythm.test.ts (9 tests) 2ms\n ✓ test/impulse.test.ts (7 tests) 34ms\n ✓ test/match.test.ts (7 tests) 205ms\n ✓ test/day.test.ts (4 tests) 7ms\n ✓ test/replay.test.ts (8 tests) 2ms\n\n Test Files  20 passed (20)\n      Tests  182 passed (182)\n   Start at  16:43:15\n   Duration  1.38s (tests 49%, import 33%, transform 15%, worker 2%)\n\n    Isolate  20 workers spawned · ~69ms startup each (spawn + environment, per file)\n             at least ~617ms faster with isolate: false — reuses workers across files instead of one per file\n\n",
+      "stderr": ""
+    }
+  },
+  "disclosure": "Raw original output digests and byte counts; displayed tails are bounded, redacted and path-normalized. No browser, model or live hosted check. npm installation lifecycle scripts disabled; no original repo files used beyond the committed local clone. Setup network allowed only for committed registry dependencies; checks OS-sandboxed offline except loopback. Before/after tracked-file status cannot detect transient reverted edits."
+}

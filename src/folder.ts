@@ -1,9 +1,10 @@
 // A tool's folder, the same in both renderings: what it is, the brief, the checks and how to open it
-// (cloned from its entry in the full list), the recorded loop, and its README as numbered source lines,
-// in which Reception marks the line an answer quoted.
+// (cloned from its entry in the full list), the recorded loop, its receipt stamp, and its README as
+// numbered source lines, in which Reception marks the line an answer quoted.
 
 import * as v from 'valibot';
 import type { PieceId } from './content/pieces';
+import { renderStamp } from './room/stamp';
 
 const Report = v.record(v.string(), v.looseObject({ recordedAt: v.optional(v.string()), url: v.optional(v.string()) }));
 let report: v.InferOutput<typeof Report> = {};
@@ -64,6 +65,7 @@ export function fillFolder(piece: PieceId): void {
   body.append(wrapper);
   const recorded = document.getElementById('card-recorded');
   if (recorded) recorded.textContent = recordedLine(piece);
+  renderStamp(piece);
   void showLines(piece);
 }
 

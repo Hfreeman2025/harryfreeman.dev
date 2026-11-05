@@ -1,0 +1,155 @@
+{
+  "version": 1,
+  "tool": "agent-race",
+  "repository": {
+    "commit": "647ea417af718e963b26ff2de44c707076c30780",
+    "tree": "4ed4dc9bf7783e3d831efc02d5c11bf58d243a32"
+  },
+  "capturedAt": "2026-11-04T16:48:10.250Z",
+  "status": "passed",
+  "capture": {
+    "method": "fresh-local-clone-non-browser",
+    "source": "Personal/lab/agent-race",
+    "network": "loopback-only",
+    "initialTrackedClean": true,
+    "sourceChangesDuringChecks": false,
+    "dependencies": {
+      "lockfile": "package-lock.json",
+      "sha256": "bf8c54bebf82a1429d24dafce131b24bafd55866e47136026f23a0e8733b2458",
+      "registry": "https://registry.npmjs.org",
+      "policy": "npm-ci-ignore-scripts",
+      "cache": "project-local-discarded"
+    },
+    "runtime": {
+      "node": "v26.12.0",
+      "npm": "11.20.0",
+      "platform": "darwin",
+      "arch": "arm64"
+    }
+  },
+  "setup": [
+    {
+      "kind": "dependency-setup",
+      "argv": [
+        "npm",
+        "ci",
+        "--ignore-scripts",
+        "--registry=https://registry.npmjs.org",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-04T16:48:00.704Z",
+      "endedAt": "2026-11-04T16:48:01.995Z",
+      "stdout": {
+        "sha256": "c25e7a84d10ebb6bad00078489f41cbaf230b1a769079bf97ea134724fc3222a",
+        "bytes": 28
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "dependency-setup: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    }
+  ],
+  "checks": [
+    {
+      "kind": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-04T16:48:02.307Z",
+      "endedAt": "2026-11-04T16:48:04.723Z",
+      "stdout": {
+        "sha256": "bccf1d5c1c5c2bbcd8bddf185b201d5407a66aaa7a8ffc0362ece76e8f7515fd",
+        "bytes": 46
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "typecheck: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    },
+    {
+      "kind": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-04T16:48:04.803Z",
+      "endedAt": "2026-11-04T16:48:05.942Z",
+      "stdout": {
+        "sha256": "4c7f131c2f620adccca58c43c80f51dcc868a96911b72c431cdcc7b155038358",
+        "bytes": 128
+      },
+      "stderr": {
+        "sha256": "750c932c5f50c3dc14a1110ae3d731a8c28b3877ca6392dd247c2f77ea429a25",
+        "bytes": 44
+      },
+      "resultLine": "lint: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    },
+    {
+      "kind": "unit-tests",
+      "argv": [
+        "npm",
+        "test",
+        "--",
+        "--maxWorkers=2"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-04T16:48:05.953Z",
+      "endedAt": "2026-11-04T16:48:10.240Z",
+      "stdout": {
+        "sha256": "baeaa0b5f88fb95014ced307c17e5c9e2b24affd93851523106bb6d3ac4775a6",
+        "bytes": 1463
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "Tests  74 passed (74)",
+      "reason": null,
+      "timedOut": false
+    }
+  ],
+  "outputTails": {
+    "setup": [
+      {
+        "stdout": "\nadded 51 packages in 896ms\n",
+        "stderr": ""
+      }
+    ],
+    "typecheck": {
+      "stdout": "\n> agent-race@0.1.0 typecheck\n> tsc --noEmit\n\n",
+      "stderr": ""
+    },
+    "lint": {
+      "stdout": "\n> agent-race@0.1.0 lint\n> biome check src web tests scripts index.html package.json tsconfig.json biome.json vitest.config.ts\n\n",
+      "stderr": "Checked 83 files in 28ms. No fixes applied.\n"
+    },
+    "unit-tests": {
+      "stdout": "\n> agent-race@0.1.0 test\n> vitest run --maxWorkers=2\n\n\n RUN  v4.1.12 <clone>\n\n ✓ tests/broadcast.test.ts (8 tests) 7ms\n ✓ tests/trace.test.ts (7 tests) 12ms\n ✓ tests/signatures.test.ts (5 tests) 7ms\n ✓ tests/attestation.test.ts (3 tests) 11ms\n ✓ tests/guards.test.ts (7 tests) 159ms\n ✓ tests/normalise.test.ts (9 tests) 28ms\n ✓ tests/recording.test.ts (7 tests) 17ms\n ✓ tests/trace-audit.test.ts (3 tests) 8ms\n ✓ tests/core.test.ts (12 tests) 11ms\n ✓ tests/challenges.test.ts (3 tests) 1337ms\n     ✓ unicode-slug: weak visible test passes, hidden tests reject bug and accept reference  452ms\n     ✓ date-window: weak visible test passes, hidden tests reject bug and accept reference  456ms\n     ✓ single-flight: weak visible test passes, hidden tests reject bug and accept reference  428ms\n ✓ tests/readiness.test.ts (2 tests) 7ms\n ✓ tests/diffs.test.ts (2 tests) 2ms\n ✓ tests/receipts.test.ts (2 tests) 1646ms\n   ✓ real receipts integration: unbacked → verified → stale → failed  1645ms\n ✓ tests/lines.test.ts (2 tests) 2ms\n ✓ tests/launch.test.ts (1 test) 2ms\n ✓ tests/cli.test.ts (1 test) 540ms\n   ✓ help or invalid smoke options never start provider-backed capability jobs  540ms\n\n Test Files  16 passed (16)\n      Tests  74 passed (74)\n   Start at  16:48:06\n   Duration  3.26s (transform 177ms, setup 0ms, import 733ms, tests 3.80s, environment 1ms)\n\n",
+      "stderr": ""
+    }
+  },
+  "disclosure": "Raw original output digests and byte counts; displayed tails are bounded, redacted and path-normalized. No browser, model or live hosted check. npm installation lifecycle scripts disabled; no original repo files used beyond the committed local clone. Setup network allowed only for committed registry dependencies; checks OS-sandboxed offline except loopback. Before/after tracked-file status cannot detect transient reverted edits."
+}
