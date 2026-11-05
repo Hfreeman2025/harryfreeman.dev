@@ -140,6 +140,12 @@ export function scanText(file: string, text: string, personalEmail: string): Fin
 
 // ---------- The headers ----------
 
+/**
+ * The only wildcard hosts the policy may name, by directive: Hugging Face serves model weights from
+ * CDN hosts under hf.co that depend on the visitor's region (reviewed by Harry's coordinator).
+ */
+export const WILDCARDS: Readonly<Record<string, readonly string[]>> = { 'connect-src': ['https://*.hf.co'] };
+
 export const REQUIRED_HEADERS: ReadonlyArray<readonly [name: string, value: RegExp]> = [
   ['Referrer-Policy', /^strict-origin-when-cross-origin$/],
   ['X-Content-Type-Options', /^nosniff$/],
@@ -171,6 +177,8 @@ export function checkHeaders(
       const loose = sources.filter((s) => ["'unsafe-inline'", "'unsafe-eval'", '*'].includes(s));
       if (loose.length) bad(`the CSP's ${name} allows ${loose.join(' ')}`);
       if (sources.includes("'unsafe-hashes'") && name !== 'style-src-attr') bad(`the CSP's ${name} allows 'unsafe-hashes'`);
+      for (const w of sources.filter((x) => x.includes('*') && x !== '*'))
+        if (!(WILDCARDS[name] ?? []).includes(w)) bad(`the CSP's ${name} allows the wildcard ${w}`);
       for (const s of sources) if (/^http:/.test(s)) bad(`the CSP's ${name} allows plain http (${s})`);
     }
     const scripts = d.get('script-src') ?? [];

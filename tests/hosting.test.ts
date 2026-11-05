@@ -251,6 +251,14 @@ describe('hosting: _headers and robots.txt', () => {
     expect(what(filled.replace("script-src 'self'", "script-src 'self' 'unsafe-hashes'"))).toContain(
       "the CSP's script-src allows 'unsafe-hashes'",
     );
+    const hf = filled.replaceAll("frame-ancestors 'none'", "connect-src 'self' https://*.hf.co; frame-ancestors 'none'");
+    expect(what(hf)).toEqual([]);
+    expect(what(hf.replace('https://*.hf.co', 'https://*.example.org'))).toContain(
+      "the CSP's connect-src allows the wildcard https://*.example.org",
+    );
+    expect(what(filled.replace("script-src 'self'", "script-src 'self' https://*.hf.co"))).toContain(
+      "the CSP's script-src allows the wildcard https://*.hf.co",
+    );
     const terminal = filled.split('\n').findIndex((l) => l.startsWith('/terminal'));
     const lines = filled.split('\n');
     lines[terminal + 2] = `${lines[terminal + 2]} https://example.org`;

@@ -2,12 +2,12 @@
   "browser": "chromium",
   "mode": "enforce",
   "origin": "https://harryfreeman.dev",
-  "at": "2026-11-05T21:12:04.596Z",
+  "at": "2026-11-05T21:44:38.595Z",
   "results": [
     {
       "station": "door: knock, the voice answers, walk in to the desk",
       "ok": true,
-      "ms": 8481,
+      "ms": 8560,
       "violations": 0,
       "detail": {
         "voice": true
@@ -16,7 +16,7 @@
     {
       "station": "desk: the dive into the office and back, the notebook, the grid note, the mic",
       "ok": true,
-      "ms": 8746,
+      "ms": 8829,
       "violations": 0,
       "detail": {
         "grid": "175 gCO₂/kWh, moderate"
@@ -25,7 +25,7 @@
     {
       "station": "card: a card pulled, its loop on the screen, the recording line under it, its stamp checked",
       "ok": true,
-      "ms": 2923,
+      "ms": 2913,
       "violations": 0,
       "detail": {
         "loop": "/loops/gpt-in-a-tab.webm",
@@ -36,7 +36,7 @@
     {
       "station": "Reception: a question of your own, answered by meaning search with the model from Hugging Face",
       "ok": true,
-      "ms": 10694,
+      "ms": 17457,
       "violations": 0,
       "detail": {
         "mode": "hybrid",
@@ -56,14 +56,14 @@
             }
           ],
           "notes": [],
-          "loadMs": 7478.900000095367
+          "loadMs": 14220
         }
       }
     },
     {
       "station": "radio: Listen to the Grid plays (device-free) and stops",
       "ok": true,
-      "ms": 5897,
+      "ms": 5895,
       "violations": 0,
       "detail": {
         "state": "playing"
@@ -72,7 +72,7 @@
     {
       "station": "flat office on a phone: a folder, its recording line and stamp, Reception by keyword",
       "ok": true,
-      "ms": 3685,
+      "ms": 3677,
       "violations": 0,
       "detail": {
         "answered": true
@@ -81,7 +81,7 @@
     {
       "station": "pages: the CV, what a stamp proves, both recorded terminal sessions, and a missing page",
       "ok": true,
-      "ms": 8060,
+      "ms": 8063,
       "violations": 0,
       "detail": {
         "missing": 404

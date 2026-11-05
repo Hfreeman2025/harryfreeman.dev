@@ -2,12 +2,12 @@
   "browser": "firefox",
   "mode": "enforce",
   "origin": "https://harryfreeman.dev",
-  "at": "2026-11-05T21:12:58.227Z",
+  "at": "2026-11-05T21:45:31.310Z",
   "results": [
     {
       "station": "door: knock, the voice answers, walk in to the desk",
       "ok": true,
-      "ms": 8996,
+      "ms": 8930,
       "violations": 0,
       "detail": {
         "voice": true
@@ -16,7 +16,7 @@
     {
       "station": "desk: the dive into the office and back, the notebook, the grid note, the mic",
       "ok": true,
-      "ms": 8723,
+      "ms": 9192,
       "violations": 0,
       "detail": {
         "grid": "175 gCO₂/kWh, moderate"
@@ -25,7 +25,7 @@
     {
       "station": "card: a card pulled, its loop on the screen, the recording line under it, its stamp checked",
       "ok": true,
-      "ms": 2906,
+      "ms": 3024,
       "violations": 0,
       "detail": {
         "loop": "/loops/gpt-in-a-tab.webm",
@@ -36,7 +36,7 @@
     {
       "station": "Reception: a question of your own, answered by meaning search with the model from Hugging Face",
       "ok": true,
-      "ms": 13069,
+      "ms": 11471,
       "violations": 0,
       "detail": {
         "mode": "hybrid",
@@ -56,14 +56,14 @@
             }
           ],
           "notes": [],
-          "loadMs": 9800
+          "loadMs": 8207
         }
       }
     },
     {
       "station": "radio: Listen to the Grid plays (device-free) and stops",
       "ok": true,
-      "ms": 6861,
+      "ms": 7126,
       "violations": 0,
       "detail": {
         "state": "playing"
@@ -72,7 +72,7 @@
     {
       "station": "flat office on a phone: a folder, its recording line and stamp, Reception by keyword",
       "ok": true,
-      "ms": 2710,
+      "ms": 2810,
       "violations": 0,
       "detail": {
         "answered": true
@@ -81,7 +81,7 @@
     {
       "station": "pages: the CV, what a stamp proves, both recorded terminal sessions, and a missing page",
       "ok": true,
-      "ms": 8191,
+      "ms": 8120,
       "violations": 0,
       "detail": {
         "missing": 404
@@ -93,7 +93,7 @@
       "document": 16,
       "script": 78,
       "stylesheet": 12,
-      "image": 46,
+      "image": 47,
       "font": 69,
       "fetch": 175,
       "media": 9
@@ -126,19 +126,8 @@
     {
       "station": "Reception: a question of your own, answered by meaning search with the model from Hugging Face",
       "type": "warning",
-      "text": "[JavaScript Warning: \"WebGPU is disabled by blocklist.\" {file: \"blob:https://harryfreeman.dev/a725e155-9e95-4a5b-bd29-4f8ec71a1b83\" line: 1}]"
-    },
-    {
-      "station": "flat office on a phone: a folder, its recording line and stamp, Reception by keyword",
-      "type": "error",
-      "text": "[JavaScript Error: \"downloadable font: download failed (font-family: \"IBM Plex Sans\" style:normal weight:600..700 width:100 src index:0): status=2152398850 source: https://harryfreeman.dev/fonts/plex/ibm-plex-sans-latin-600-normal.woff2\"]"
+      "text": "[JavaScript Warning: \"WebGPU is disabled by blocklist.\" {file: \"blob:https://harryfreeman.dev/54d0bfad-ce6c-4be0-842f-6fcc5410dd55\" line: 1}]"
     }
   ],
-  "failedRequests": [
-    {
-      "station": "flat office on a phone: a folder, its recording line and stamp, Reception by keyword",
-      "url": "https://harryfreeman.dev/fonts/plex/ibm-plex-sans-latin-600-normal.woff2",
-      "error": "NS_BINDING_ABORTED"
-    }
-  ]
+  "failedRequests": []
 }

@@ -315,10 +315,9 @@ display would pace. WebKit and Firefox do not report layout shift; it is measure
 - The timeline's times are inferred from file times; three hand-ins come from pane DONE lines.
 - Meaning search is heavy (about 50 MB on first use, mostly ONNX Runtime's WebAssembly).
 - Not deployed yet. The hosted build, its headers, the gate and the deploy script are ready (Hosting).
-- **Hugging Face's weights host is pinned as measured** (`us.aws.cdn.hf.co`, where `huggingface.co`
-  redirects the model). If Hugging Face moves the file to another host, the policy blocks it and
-  Reception answers by keywords only until the host is added; `https://*.hf.co` would be the looser
-  choice.
+- **Hugging Face's CDN hosts are allowed as `https://*.hf.co`.** If Hugging Face moved the weights off
+  `hf.co`, the policy would block them and Reception would answer by keywords only until the host was
+  added.
 - **The local checks are not Cloudflare.** wrangler's Pages emulation serves the headers, the redirects
   and the 404 as Pages does, but not byte ranges; check the live site (Hosting, Attach the domain).
 - Not tested with a real screen reader, or in real Safari: Harry will try it.
@@ -371,9 +370,10 @@ allows exactly what was measured on every station (below):
   pages: the flat cabinet's eight custom properties (`style="--i:0"` and so on), one by one, never
   `'unsafe-inline'`.
 - `img-src`, `font-src` and `media-src 'self'`: stills and textures, Plex and Caveat, the loops.
-- `connect-src 'self' https://api.carbonintensity.org.uk https://huggingface.co https://us.aws.cdn.hf.co`:
-  the record, stamps, casts and voice; the grid; the model, and the host Hugging Face redirects its
-  weights to.
+- `connect-src 'self' https://api.carbonintensity.org.uk https://huggingface.co https://*.hf.co`: the
+  record, stamps, casts and voice; the grid; the model, and the CDN hosts Hugging Face redirects its
+  weights to. Measured from London it was `us.aws.cdn.hf.co`; the host depends on the visitor's region, so
+  every host under `hf.co` is allowed, the policy's only wildcard (the gate refuses any other).
 - `worker-src 'self' blob:`: ask-the-record's model worker is a `blob:`, and it imports the runtime from
   this site, which Firefox checks against `worker-src`.
 - `base-uri`, `form-action`, `frame-ancestors` and `object-src 'none'`.
