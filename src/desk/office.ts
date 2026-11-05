@@ -54,10 +54,15 @@ export const ZONES = [
   { text: 'RECEPTION', x: RECEPTION.x, z: ROOM.z1 - 0.38, width: 2.0, colour: INK },
 ] as const;
 
-/** Where a builder stands when their card is pulled: beside the desk, so their monitor stays in view. */
+/**
+ * Where a builder stands when their card is pulled: out of the chair and to the left of the desk's front,
+ * so the camera leaning in to their screen has it clear, with the builder at the edge of the picture. Their
+ * chair rolls aside to the right (CHAIR_ASIDE), out of the picture.
+ */
 export function standAt(d: DeskPlan): [number, number] {
-  return [d.x + DESK.width / 2 + 0.38, d.z + 0.5];
+  return [d.x - 0.76, d.z + 0.5];
 }
+const CHAIR_ASIDE = { x: 0.95, z: 0.35, turn: -0.7 } as const;
 
 export function pathFor(piece: PieceId): Point[] {
   const d = deskFor(piece);
@@ -355,6 +360,7 @@ export async function buildOffice(scene: Scene, model: Model, replay: Replay, no
     return o;
   };
   const wheelchairDesk = DESKS[WHEELCHAIR_DESK]?.piece;
+  const chairs = new Map<PieceId, { chair: Object3D; at: Vector3; turn: number }>();
   for (const d of DESKS) {
     scene.add(
       recolour(fitBox(furniture('desk'), d.x, d.z, { x: DESK.width, y: DESK.height, z: DESK.depth }, Math.PI), {
@@ -362,13 +368,14 @@ export async function buildOffice(scene: Scene, model: Model, replay: Replay, no
         metal: SLATE,
       }),
     );
-    if (d.piece !== wheelchairDesk)
-      scene.add(
-        recolour(fitBox(furniture('chairDesk'), d.seat[0], d.seat[1] + 0.05, { x: 0.5, y: 0.9, z: 0.5 }, Math.PI), {
-          carpet: INK,
-          metalMedium: SLATE,
-        }),
-      );
+    if (d.piece !== wheelchairDesk) {
+      const chair = recolour(fitBox(furniture('chairDesk'), d.seat[0], d.seat[1] + 0.05, { x: 0.5, y: 0.9, z: 0.5 }, Math.PI), {
+        carpet: INK,
+        metalMedium: SLATE,
+      });
+      chairs.set(d.piece, { chair, at: chair.position.clone(), turn: chair.rotation.y });
+      scene.add(chair);
+    }
     const plant = recolour(furniture('plantSmall2'), {});
     plant.scale.setScalar(1.7);
     plant.position.set(d.x - 0.62, DESK.height, d.z - 0.15);
@@ -416,6 +423,7 @@ export async function buildOffice(scene: Scene, model: Model, replay: Replay, no
     fitBox(w, d.seat[0], d.seat[1], { x: 0.62, y: 0.62, z: 0.7 }, Math.PI);
     castShadows(w);
     scene.add(w);
+    chairs.set(d.piece, { chair: w, at: w.position.clone(), turn: w.rotation.y });
   }
   const reviewer = person(reviewerGltf, 1.65);
   reviewer.root.position.set(REVIEW.reviewer[0], 0, REVIEW.reviewer[1] - 0.1);
@@ -482,13 +490,15 @@ export async function buildOffice(scene: Scene, model: Model, replay: Replay, no
         if (standing?.piece === piece) {
           // Up from the desk, turned to the room; a wave for the first few seconds.
           const waving = standing.wave && clock - standing.since < 2.8;
+          const [sx, sz] = standAt(d);
           if (wheel) {
-            seat(p, d.seat[0], d.seat[1], true);
+            // Rolled aside to the same spot, turned to the room.
+            seat(p, sx, sz, true);
+            p.root.rotation.y = 0.3;
             play(p, waving ? 'wheelchairTyping' : 'wheelchair', 0);
           } else {
-            const [sx, sz] = standAt(d);
             p.root.position.set(sx, 0, sz);
-            p.root.rotation.y = -0.55;
+            p.root.rotation.y = 0.3;
             play(p, waving ? 'cheer' : 'idle', 0);
           }
         } else {
@@ -496,6 +506,18 @@ export async function buildOffice(scene: Scene, model: Model, replay: Replay, no
           play(p, seatedClip(phase, wheel), i * 0.37);
         }
         p.mixer.update(dt);
+        const seatOf = chairs.get(piece);
+        if (seatOf) {
+          const up = standing?.piece === piece;
+          if (wheel) {
+            const [sx, sz] = standAt(d);
+            seatOf.chair.position.set(up ? sx : seatOf.at.x, seatOf.at.y, up ? sz : seatOf.at.z);
+            seatOf.chair.rotation.y = up ? 0.3 : seatOf.turn;
+          } else {
+            seatOf.chair.position.set(seatOf.at.x + (up ? CHAIR_ASIDE.x : 0), seatOf.at.y, seatOf.at.z + (up ? CHAIR_ASIDE.z : 0));
+            seatOf.chair.rotation.y = seatOf.turn + (up ? CHAIR_ASIDE.turn : 0);
+          }
+        }
         const gem = gems.get(piece);
         if (gem) {
           const colour =

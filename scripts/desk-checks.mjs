@@ -22,6 +22,43 @@ const cardTitle = async (page) => (await page.locator('#card-title').textContent
 const hit = (a, b) => a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
 const angle = (page) => page.evaluate(() => window.deskDebug.cameraAngle());
 
+/**
+ * At a desk: the camera square to the screen, the tool's loop laid exactly over the screen, big enough to
+ * read, the Open line under the bezel, and no second copy of the loop in the card.
+ */
+async function onScreen(page, piece, expect) {
+  await page.locator('#desk-screen').waitFor({ state: 'visible', timeout: 5000 });
+  const at = await page.evaluate(() => {
+    const video = document.getElementById('desk-loop');
+    return {
+      ...window.deskDebug.deskShot(),
+      overlay: document.getElementById('desk-screen').getBoundingClientRect().toJSON(),
+      under: document.getElementById('desk-under').getBoundingClientRect().toJSON(),
+      card: document.getElementById('card').getBoundingClientRect().toJSON(),
+      src: video.currentSrc || video.getAttribute('src') || '',
+      poster: video.poster,
+      paused: video.paused,
+      cardVideo: { src: document.querySelector('#card .folder-card__video')?.getAttribute('src') ?? null },
+    };
+  });
+  const cardVideoShown = await page.locator('#card .folder-card__video').isVisible();
+  expect(at.facing < 3, `the camera is ${at.facing.toFixed(1)}° off square to the screen`);
+  for (const k of ['x', 'y', 'width', 'height'])
+    expect(
+      Math.abs(at.overlay[k] - at.screen[k]) < 2,
+      `the loop is not on the screen: ${k} ${at.overlay[k].toFixed(1)} vs ${at.screen[k].toFixed(1)}`,
+    );
+  expect(at.overlay.width >= 360, `the screen is only ${at.overlay.width.toFixed(0)}px wide`);
+  expect(at.overlay.x + at.overlay.width <= at.card.x, 'the screen is under the card');
+  expect(at.src.includes(`/loops/${piece}.`) && at.poster.includes(`/loops/${piece}.webp`), `the screen plays ${at.src}`);
+  expect(
+    at.under.y >= at.overlay.y + at.overlay.height && at.under.y - (at.overlay.y + at.overlay.height) < 60,
+    'Open is not under the bezel',
+  );
+  expect(!cardVideoShown && !at.cardVideo.src, 'the card still carries a copy of the loop');
+  return at;
+}
+
 /** Goes to Reception from the desk, with the record loaded and its input ready. */
 async function toReception(page) {
   await page.focus('[data-action="reception"][data-at="door"]');
@@ -50,7 +87,7 @@ export async function deskChecks({ check, expect, BASE, shot }) {
 
   await check('desk: the HTML carries the desk’s objects, the name tags and every card before any script', {}, async () => {
     const html = await (await fetch(`${BASE}/`)).text();
-    expect((html.match(/data-desk-target=/g) ?? []).length === 34, `desk targets: ${(html.match(/data-desk-target=/g) ?? []).length}`);
+    expect((html.match(/data-desk-target=/g) ?? []).length === 35, `desk targets: ${(html.match(/data-desk-target=/g) ?? []).length}`);
     for (const action of ['office', 'cabinet', 'notebook', 'reception', 'stamp', 'sign'])
       expect(html.includes(`data-action="${action}"`), `no ${action}`);
     expect(html.includes('id="notebook-panel"') && html.includes('id="printout"'), 'no notebook panel or printout');
@@ -156,17 +193,17 @@ export async function deskChecks({ check, expect, BASE, shot }) {
       await cardOpen(page);
       await waitStation(page, 'desk:gridtop');
       expect((await cardTitle(page)) === 'gridtop', `card ${await cardTitle(page)}`);
-      // It lands on the builder's monitor: the screen the subject, clear of the card, the builder beside it.
-      const framed = await page.evaluate(() => ({
-        ...window.deskDebug.deskShot(),
-        card: document.getElementById('card').getBoundingClientRect().toJSON(),
-      }));
-      expect(framed.screen.width > 70 && framed.screen.width < 260, `the screen is ${framed.screen.width.toFixed(0)}px wide`);
-      expect(framed.screen.x > 0 && framed.screen.x + framed.screen.width < framed.card.x, 'the screen is under the card');
-      expect(framed.builder.x >= framed.screen.x + framed.screen.width - 6, 'the builder stands in front of the screen');
+      // It leans in square to the builder's monitor, and the tool's loop plays on that screen.
+      const loop = await onScreen(page, 'gridtop', expect);
+      expect(!loop.paused, 'the loop is not playing on the screen');
       expect((await page.evaluate(() => window.deskDebug.standing()?.piece)) === 'gridtop', 'the builder did not stand');
-      expect((await page.locator('#card .folder-card__video').getAttribute('src'))?.includes('/loops/gridtop.'), 'the card has no loop');
-      expect((await page.locator('#card .open').count()) === 1, 'no Open link on the card');
+      // The live tool opens from the screen, by keyboard too: Shift+Tab from the card reaches it.
+      expect((await page.locator('#desk-under .open').textContent())?.trim() === 'Open gridtop', 'no Open under the screen');
+      expect(await page.locator('#desk-under .open').isVisible(), 'Open under the screen is not visible');
+      await page.focus('#card-title');
+      await page.keyboard.press('Shift+Tab');
+      expect((await page.evaluate(() => document.activeElement?.textContent?.trim())) === 'Open gridtop', 'Shift+Tab did not reach Open');
+      await page.focus('#card-title');
       await page.waitForTimeout(500);
       await shot(page, 'desk-card');
       await page.keyboard.press('Escape');
@@ -326,6 +363,9 @@ export async function deskChecks({ check, expect, BASE, shot }) {
       await page.click('[data-action="desk:gridtop"][data-at="office"]');
       await cardOpen(page);
       expect((await page.evaluate(() => window.deskDebug.standing()?.wave)) === false, 'a builder waved');
+      // A cut straight to square-on, the loop held still on its poster.
+      const loop = await onScreen(page, 'gridtop', expect);
+      expect(loop.paused, 'the loop plays with reduced motion');
       expect(problems.length === 0, problems.join(' | '));
     },
   );

@@ -40,9 +40,11 @@ The things on the desk are the site's parts (`src/desk/`):
   levelling out late into a low three-quarter view across the office, at the monitors, each playing its
   tool's recorded loop. The tilt-shift that makes the desk read as a miniature pulls to sharp on the way
   down. Esc, scrolling up or the visible button rises back out.
-- **The index-card box** is the archive. Pull a card and its builder stands beside their desk while the
-  camera lands on their monitor, the screen the subject; the card shows the folder. In that view the
-  model's near wall and the giant things on the desk step aside, so nothing stands in front.
+- **The index-card box** is the archive. Pull a card and its builder gets up from their screen while the
+  camera leans in square to it, as if looking over their shoulder: the tool's recorded loop plays on that
+  screen (a crisp video laid exactly over it once the camera has squared up; the screen's texture during
+  the move), with **Open** under the bezel. The card beside it keeps the details, the stamp and the
+  README lines. Whatever stands in front of the screen is cut away.
 - **The notebook** is the briefs: a page a round (BRIEF, V2, V3), each line one of the tools' curated
   asks from `src/content/pieces.ts`, never the raw brief files. Turning to a round replays it.
 - **The stamp and ink pad** are the receipt stamps. The card's stamp runs the real `verifyStamp`; the
@@ -193,8 +195,9 @@ the check.
 - **Browser checks (52 per browser, all passing in Chromium, WebKit and Firefox on 5 November):**
   - the desk (`scripts/desk-checks.mjs`): it opens at real scale in tilt-shift with the credit on the
     note and zero layout shift; the swoop starts high and lands low (under 30°), still high part-way;
-    Esc, the button and the wheel rise out; a card pull by keyboard reaches its desk, the monitor
-    framed clear of the card with the builder beside it; no name tag covers a screen, another tag or a
+    Esc, the button and the wheel rise out; a card pull by keyboard reaches its desk square-on (within 3°),
+    the loop playing exactly over the screen at a readable size, Open under the bezel and reachable by
+    Shift+Tab, and no second copy of the loop in the card; no name tag covers a screen, another tag or a
     painted zone name, and every screen is in view; the notebook's V3 page replays V3; typing at
     Reception presses one key per character and an answer prints its quotes before the desk opens with
     the line marked; a refusal prints a refusal; reduced motion cuts and nobody waves;

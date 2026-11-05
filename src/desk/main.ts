@@ -9,7 +9,7 @@
 
 import { DRAWERS, drawerOf } from '../content/drawers';
 import { isPieceId, PIECES, type PieceId } from '../content/pieces';
-import { fillFolder, loopSource, scrollToMark, trapTab } from '../folder';
+import { fillFolder, loopSource, scrollToMark } from '../folder';
 import type { RoomLight, SignText } from '../room/grid';
 import { popovers } from '../room/popover';
 import type { Timeline } from '../timeline/schema';
@@ -36,13 +36,31 @@ const BACK: Record<string, string> = {
   reception: 'Back to the desk',
 };
 
+/** Tab and Shift+Tab go round the screen's Open line and the card, as one place. */
+function cycleTab(places: readonly HTMLElement[], event: KeyboardEvent): void {
+  if (event.key !== 'Tab') return;
+  const focusable = places
+    .flatMap((place) => [...place.querySelectorAll<HTMLElement>('a[href], button, summary, [tabindex="-1"], [tabindex="0"]')])
+    .filter((el) => el.offsetParent !== null && !el.closest('[hidden], [inert]'));
+  const at = focusable.indexOf(document.activeElement as HTMLElement);
+  if (at === -1) return;
+  event.preventDefault();
+  focusable[(at + (event.shiftKey ? -1 : 1) + focusable.length) % focusable.length]?.focus();
+}
+
 export async function startDesk(timeline: Timeline): Promise<DeskControl> {
   const hall = document.getElementById('hall');
   const stage = document.querySelector<HTMLElement>('.room__stage');
   const card = document.getElementById('card');
-  const video = card?.querySelector<HTMLVideoElement>('.folder-card__video') ?? null;
+  // The loop plays on the builder's own screen (#desk-loop), not in the card.
+  const video = document.querySelector<HTMLVideoElement>('#desk-loop');
+  const screen = document.getElementById('desk-screen');
+  const under = document.getElementById('desk-under');
   const labelsRoot = document.querySelector<HTMLElement>('.desk__labels');
-  if (!hall || !stage || !card || !labelsRoot) throw new Error('the desk’s markup is missing');
+  if (!hall || !stage || !card || !labelsRoot || !screen || !under) throw new Error('the desk’s markup is missing');
+  // When the loop was recorded belongs with the loop, under the screen.
+  const recorded = document.getElementById('card-recorded');
+  if (recorded) under.append(recorded);
   const reduced = root.dataset.motion === 'reduce';
   const params = new URLSearchParams(location.search);
   const at = Number(params.get('t'));
@@ -100,8 +118,11 @@ export async function startDesk(timeline: Timeline): Promise<DeskControl> {
     card.setAttribute('aria-modal', 'false');
     if (back) back.textContent = cameFrom === 'office' ? 'Back to the office' : 'Back to the cabinet';
     if (toReception) toReception.hidden = cameFrom !== 'reception';
+    // The live tool opens from its screen: its Open line moves from the card to under the bezel.
+    under?.querySelector('.work__open')?.remove();
+    const open = card.querySelector('#card-actions .work__open');
+    if (open) under?.prepend(open);
     if (video) {
-      // The card shows the tool's own loop.
       video.poster = `/loops/${piece}.webp`;
       video.src = loopSource(video, piece);
       if (!reduced) void video.play().catch(() => undefined);
@@ -114,6 +135,7 @@ export async function startDesk(timeline: Timeline): Promise<DeskControl> {
     card.dataset.open = 'false';
     video?.pause();
     video?.removeAttribute('src');
+    under?.querySelector('.work__open')?.remove();
     if (openPiece) engine.stand(null, false);
     openPiece = null;
   }
@@ -277,7 +299,7 @@ export async function startDesk(timeline: Timeline): Promise<DeskControl> {
       void run(stepBack);
       return;
     }
-    if (card && !card.hidden) trapTab(card, event);
+    if (card && !card.hidden) cycleTab([screen, card], event);
   });
   // Scrolling up over the scene rises a step, as Esc does; scrolling down over the desk dives in.
   let wheelAt = 0;

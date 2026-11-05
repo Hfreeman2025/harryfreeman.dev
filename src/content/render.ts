@@ -158,6 +158,11 @@ export function renderDeskLabels(): string {
   ]);
   const controls = [...door, ...office, ...filed].map((html) => html.replace(/^<(a|button) /, '<$1 hidden tabindex="0" '));
   const credit =
-    '<p class="dtag dtag--credit" id="desk-credit" hidden data-desk-target="credit" data-at="door" data-place="tag">Data: Carbon Intensity API, © NESO, CC BY 4.0</p>';
+    '<p class="dtag dtag--credit" id="desk-credit" hidden data-desk-target="credit" data-at="door" data-place="tag">Data: Carbon Intensity API, © NESO, CC BY 4.0</p>' +
+    // Leaning in to a builder's monitor: the tool's recorded loop, crisp, laid exactly over the screen, and
+    // under the bezel how to open the live tool and when the loop was recorded.
+    '<div class="desk__screen" id="desk-screen" hidden data-desk-target="screen" data-at="desk" data-place="screen">' +
+    '<video class="desk__loop" id="desk-loop" muted loop playsinline preload="none" aria-hidden="true"></video>' +
+    '<div class="desk__under" id="desk-under"></div></div>';
   return [...controls, credit].join('\n');
 }

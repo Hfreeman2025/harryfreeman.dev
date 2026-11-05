@@ -32,7 +32,7 @@ import { drawerOf } from '../content/drawers';
 import { isPieceId, PIECE_IDS, PIECES, type PieceId } from '../content/pieces';
 import { NEUTRAL_LIGHT, type RoomLight, type SignText, signFor } from '../room/grid';
 import { Crew } from '../scene/crew';
-import { BASE, CABINET, DESK, DESKS, deskFor, RECEPTION, ROOM, SCREEN, WALL } from '../scene/layout';
+import { BASE, CABINET, DESKS, deskFor, RECEPTION, ROOM, SCREEN, WALL } from '../scene/layout';
 import { atlasRect, buildModel } from '../scene/model';
 import { fitView, fromAngles, type View } from '../scene/style';
 import type { Timeline } from '../timeline/schema';
@@ -95,10 +95,11 @@ const PLACES = {
  */
 const OFFICE_ANGLE = { elevation: 24, azimuth: -38 } as const;
 /**
- * A card pull lands on its builder's monitor, from the same side, so the builder stands clear of it; for
- * the back row, from higher, over the front row's heads.
+ * A card pull leans in square to the builder's monitor, as if looking at their screen: the camera at the
+ * screen's height, looking straight along its normal, and whatever stands more than this far in front of
+ * the screen (the front row, for a back-row desk) cut away by the near plane.
  */
-const DESK_ANGLE = { elevation: 17, back: 27, azimuth: -38 } as const;
+const LEAN_IN = { ahead: 1.4 } as const;
 
 /**
  * How sharp each station is: tilt-shift strength, and where its band of focus sits. `cut` is whether the
@@ -359,24 +360,14 @@ export async function mountDesk({
         { top: 0.94, bottom: -0.92, side: 0.48 },
       );
     }
-    // A card lands on its builder's monitor: the screen is the subject, the builder standing beside the
-    // desk, the neighbours' desks at the edges.
+    // A card leans in square to its builder's monitor: the screen fills the space beside the card, with
+    // room under the bezel for Open; the builder stands at the frame's edge. The screen faces +z, so the
+    // camera looks straight down -z; the sideways slide keeps the view perpendicular.
     const d = deskFor(s.slice(5) as PieceId);
     const [sx, sy, sz] = d.screen;
-    const [bx, bz] = standAt(d);
-    const points = [
-      v3(sx - 2.3, sy + SCREEN.height / 2 + 0.5, sz),
-      v3(sx + 2.6, sy + SCREEN.height / 2 + 0.5, sz),
-      v3(sx - 2.3, 0, d.z + DESK.depth / 2),
-      v3(bx, 0, bz),
-      v3(bx, 1.75, bz),
-      v3(sx + 2.6, 0, d.seat[1] + 0.6),
-    ];
-    return framed(fromAngles(d.row === 0 ? DESK_ANGLE.back : DESK_ANGLE.elevation, DESK_ANGLE.azimuth), 15, aspect, points, -0.42, {
-      top: 0.84,
-      bottom: -0.84,
-      side: 0.5,
-    });
+    const half = SCREEN.width / 2 + 0.1;
+    const points = [v3(sx - half, sy + SCREEN.height / 2 + 0.12, sz), v3(sx + half, sy - SCREEN.height / 2 - 0.75, sz)];
+    return framed(new Vector3(0, 0, 1), 15, aspect, points, -0.45, { top: 0.9, bottom: -0.9, side: 0.47 });
   };
 
   let station: Station = 'door';
@@ -453,6 +444,14 @@ export async function mountDesk({
       return quad(scene, RECEPTION.x - 0.85, RECEPTION.z - 0.12, RECEPTION.x - 0.35, RECEPTION.z + 0.12, RECEPTION.height + 0.2);
     return [];
   };
+  /** The current desk's screen, its four corners in the room. */
+  function screenCorners(): Vector3[] {
+    if (!station.startsWith('desk:')) return [];
+    const [x, y, z] = deskFor(station.slice(5) as PieceId).screen;
+    const w = SCREEN.width / 2;
+    const hh = SCREEN.height / 2;
+    return [v3(x - w, y - hh, z), v3(x + w, y - hh, z), v3(x + w, y + hh, z), v3(x - w, y + hh, z)];
+  }
   function shownAt(el: HTMLElement): boolean {
     if ((el.dataset.at ?? 'door') !== standing()) return false;
     const key = el.dataset.deskTarget ?? '';
@@ -553,8 +552,8 @@ export async function mountDesk({
       const key = el.dataset.deskTarget ?? '';
       const place = el.dataset.place ?? 'tag';
       const show = shownAt(el) && !glide;
-      if (place === 'cover') {
-        const corners = show ? coverOf(key).map((c) => c.clone().project(camera)) : [];
+      if (place === 'cover' || place === 'screen') {
+        const corners = show ? (place === 'screen' ? screenCorners() : coverOf(key)).map((c) => c.clone().project(camera)) : [];
         const onScreen = corners.length > 0 && corners.every((c) => c.z < 1);
         if (el.hidden === onScreen) el.hidden = !onScreen;
         if (!onScreen) continue;
@@ -621,7 +620,10 @@ export async function mountDesk({
 
   function applyCamera(): void {
     const reach = current.pos.distanceTo(current.look);
-    const near = Math.max(0.1, reach * 0.4 - 12);
+    // Leaning in to a screen, the near plane cuts away what stands between: the look point is on the
+    // screen's plane, so nothing more than LEAN_IN.ahead in front of it is drawn.
+    const open = Math.max(0.1, reach * 0.4 - 12);
+    const near = open + (Math.max(open, reach - LEAN_IN.ahead) - open) * focusNow.cut;
     const clear = focusNow.cut > 0.5;
     if (clear !== cleared) {
       cleared = clear;
@@ -946,6 +948,8 @@ export async function mountDesk({
             boxRect(v3(sx - SCREEN.width / 2, sy - SCREEN.height / 2, sz), v3(sx + SCREEN.width / 2, sy + SCREEN.height / 2, sz), w, h),
           ),
           builder: page(boxRect(v3(bx - 0.22, 0.1, bz - 0.15), v3(bx + 0.22, 1.5, bz + 0.15), w, h)),
+          // How square the camera is to the screen: the angle between where it looks and the screen's normal.
+          facing: (Math.acos(Math.min(1, Math.max(-1, -camera.getWorldDirection(new Vector3()).z))) * 180) / Math.PI,
         };
       },
       /** The painted zone names' boxes on screen, so a check can see nothing covers them. */
