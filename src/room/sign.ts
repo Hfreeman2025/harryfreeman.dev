@@ -1,12 +1,12 @@
 // The grid sign, in both renderings: the current half-hour's carbon intensity, its time and its
-// source, or "grid data unavailable". The 3D room's light follows it. A reading is shown only while it
+// source, or "grid data unavailable". The 3D room prints it on the sign in the scene, and its light follows it. A reading is shown only while it
 // is current; when it expires without a fresh one, the sign says unavailable and the light goes neutral.
 
-import { expiresAt, fetchReading, type GridReading, lightFor, NEUTRAL_LIGHT, type RoomLight, signFor } from './grid';
+import { expiresAt, fetchReading, type GridReading, lightFor, NEUTRAL_LIGHT, type RoomLight, type SignText, signFor } from './grid';
 
 const RETRY_MS = 5 * 60_000;
 
-export function startGridSign(onLight: (light: RoomLight) => void): void {
+export function startGridSign(on: { light: (light: RoomLight) => void; sign: (text: SignText) => void }): void {
   const sign = document.getElementById('grid-sign');
   if (!sign) return;
   const set = (id: string, text: string) => {
@@ -22,7 +22,8 @@ export function startGridSign(onLight: (light: RoomLight) => void): void {
     set('grid-value', text.headline);
     set('grid-detail', text.detail);
     set('grid-light', text.light);
-    onLight(reading ? lightFor(reading) : NEUTRAL_LIGHT);
+    on.sign(text);
+    on.light(reading ? lightFor(reading) : NEUTRAL_LIGHT);
   };
 
   const read = async (): Promise<void> => {

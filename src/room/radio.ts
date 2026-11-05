@@ -58,6 +58,7 @@ export function setupRadio(): void {
     button.setAttribute('aria-pressed', String(on));
     control.dataset.state = state.status;
     stateText.textContent = describe(state);
+    document.dispatchEvent(new CustomEvent('radio:state', { detail: { on: state.status === 'playing' } }));
   };
 
   // Fetching the module makes no sound and opens nothing; the radio only starts on a press.

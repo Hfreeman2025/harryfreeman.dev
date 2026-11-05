@@ -1,0 +1,352 @@
+{
+  "base": "http://127.0.0.1:4400",
+  "at": "2026-11-05T10:15:55.492Z",
+  "runs": 3,
+  "browsers": {
+    "chromium": {
+      "desktop": {
+        "firstContentfulPaintMs": 40,
+        "sceneReadyMs": 102,
+        "kbAtSceneReady": 556,
+        "largestContentfulPaintMs": 72,
+        "layoutShift": [
+          0,
+          0,
+          0
+        ],
+        "framesAtTheDoor": [
+          {
+            "frames": 300,
+            "median": 16.7,
+            "p95": 16.8,
+            "max": 16.8,
+            "over20ms": 0
+          },
+          {
+            "frames": 300,
+            "median": 16.7,
+            "p95": 16.7,
+            "max": 16.8,
+            "over20ms": 0
+          },
+          {
+            "frames": 300,
+            "median": 16.7,
+            "p95": 16.7,
+            "max": 16.8,
+            "over20ms": 0
+          }
+        ],
+        "framesWalkingToTheCabinet": [
+          {
+            "frames": 84,
+            "median": 16.7,
+            "p95": 16.7,
+            "max": 16.8,
+            "over20ms": 0
+          },
+          {
+            "frames": 84,
+            "median": 16.7,
+            "p95": 16.7,
+            "max": 16.8,
+            "over20ms": 0
+          },
+          {
+            "frames": 84,
+            "median": 16.7,
+            "p95": 16.8,
+            "max": 16.8,
+            "over20ms": 0
+          }
+        ],
+        "framesOpeningADrawer": [
+          {
+            "frames": 54,
+            "median": 16.7,
+            "p95": 16.8,
+            "max": 16.8,
+            "over20ms": 0
+          },
+          {
+            "frames": 54,
+            "median": 16.7,
+            "p95": 16.8,
+            "max": 16.8,
+            "over20ms": 0
+          },
+          {
+            "frames": 54,
+            "median": 16.7,
+            "p95": 16.8,
+            "max": 16.8,
+            "over20ms": 0
+          }
+        ],
+        "framesTurningToADesk": [
+          {
+            "frames": 114,
+            "median": 16.7,
+            "p95": 16.7,
+            "max": 16.8,
+            "over20ms": 0
+          },
+          {
+            "frames": 114,
+            "median": 16.7,
+            "p95": 16.8,
+            "max": 16.8,
+            "over20ms": 0
+          },
+          {
+            "frames": 114,
+            "median": 16.7,
+            "p95": 16.8,
+            "max": 16.8,
+            "over20ms": 0
+          }
+        ]
+      },
+      "phone": {
+        "firstContentfulPaintMs": 52,
+        "largestContentfulPaintMs": 52,
+        "kbTransferred": 160,
+        "layoutShift": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    "webkit": {
+      "desktop": {
+        "firstContentfulPaintMs": 33,
+        "sceneReadyMs": 136,
+        "kbAtSceneReady": 412,
+        "largestContentfulPaintMs": 96,
+        "layoutShift": [
+          null,
+          null,
+          null
+        ],
+        "framesAtTheDoor": [
+          {
+            "frames": 824,
+            "median": 6,
+            "p95": 7,
+            "max": 17,
+            "over20ms": 0
+          },
+          {
+            "frames": 825,
+            "median": 6,
+            "p95": 7,
+            "max": 9,
+            "over20ms": 0
+          },
+          {
+            "frames": 825,
+            "median": 6,
+            "p95": 7,
+            "max": 8,
+            "over20ms": 0
+          }
+        ],
+        "framesWalkingToTheCabinet": [
+          {
+            "frames": 232,
+            "median": 6,
+            "p95": 7,
+            "max": 19,
+            "over20ms": 0
+          },
+          {
+            "frames": 233,
+            "median": 6,
+            "p95": 7,
+            "max": 9,
+            "over20ms": 0
+          },
+          {
+            "frames": 233,
+            "median": 6,
+            "p95": 7,
+            "max": 8,
+            "over20ms": 0
+          }
+        ],
+        "framesOpeningADrawer": [
+          {
+            "frames": 151,
+            "median": 6,
+            "p95": 7,
+            "max": 8,
+            "over20ms": 0
+          },
+          {
+            "frames": 150,
+            "median": 6,
+            "p95": 7,
+            "max": 7,
+            "over20ms": 0
+          },
+          {
+            "frames": 150,
+            "median": 6,
+            "p95": 7,
+            "max": 8,
+            "over20ms": 0
+          }
+        ],
+        "framesTurningToADesk": [
+          {
+            "frames": 313,
+            "median": 6,
+            "p95": 7,
+            "max": 29,
+            "over20ms": 1
+          },
+          {
+            "frames": 311,
+            "median": 6,
+            "p95": 7,
+            "max": 32,
+            "over20ms": 1
+          },
+          {
+            "frames": 313,
+            "median": 6,
+            "p95": 7,
+            "max": 20,
+            "over20ms": 0
+          }
+        ]
+      },
+      "phone": {
+        "firstContentfulPaintMs": 38,
+        "largestContentfulPaintMs": 38,
+        "kbTransferred": 159,
+        "layoutShift": [
+          null,
+          null,
+          null
+        ]
+      }
+    },
+    "firefox": {
+      "desktop": {
+        "firstContentfulPaintMs": 36,
+        "sceneReadyMs": 128,
+        "kbAtSceneReady": 544,
+        "largestContentfulPaintMs": 43,
+        "layoutShift": [
+          null,
+          null,
+          null
+        ],
+        "framesAtTheDoor": [
+          {
+            "frames": 825,
+            "median": 6.06,
+            "p95": 6.5,
+            "max": 6.82,
+            "over20ms": 0
+          },
+          {
+            "frames": 825,
+            "median": 6.06,
+            "p95": 6.6,
+            "max": 6.82,
+            "over20ms": 0
+          },
+          {
+            "frames": 825,
+            "median": 6.06,
+            "p95": 6.44,
+            "max": 6.82,
+            "over20ms": 0
+          }
+        ],
+        "framesWalkingToTheCabinet": [
+          {
+            "frames": 230,
+            "median": 6.06,
+            "p95": 6.58,
+            "max": 11.78,
+            "over20ms": 0
+          },
+          {
+            "frames": 230,
+            "median": 6.06,
+            "p95": 6.68,
+            "max": 6.82,
+            "over20ms": 0
+          },
+          {
+            "frames": 231,
+            "median": 6.06,
+            "p95": 6.28,
+            "max": 6.82,
+            "over20ms": 0
+          }
+        ],
+        "framesOpeningADrawer": [
+          {
+            "frames": 149,
+            "median": 6.06,
+            "p95": 6.7,
+            "max": 6.82,
+            "over20ms": 0
+          },
+          {
+            "frames": 149,
+            "median": 6.06,
+            "p95": 6.68,
+            "max": 6.8,
+            "over20ms": 0
+          },
+          {
+            "frames": 149,
+            "median": 6.06,
+            "p95": 6.58,
+            "max": 6.8,
+            "over20ms": 0
+          }
+        ],
+        "framesTurningToADesk": [
+          {
+            "frames": 311,
+            "median": 6.06,
+            "p95": 6.62,
+            "max": 12.12,
+            "over20ms": 0
+          },
+          {
+            "frames": 311,
+            "median": 6.06,
+            "p95": 6.44,
+            "max": 18.14,
+            "over20ms": 0
+          },
+          {
+            "frames": 311,
+            "median": 6.06,
+            "p95": 6.66,
+            "max": 18.12,
+            "over20ms": 0
+          }
+        ]
+      },
+      "phone": {
+        "firstContentfulPaintMs": 36,
+        "largestContentfulPaintMs": 36,
+        "kbTransferred": 160,
+        "layoutShift": [
+          null,
+          null,
+          null
+        ]
+      }
+    }
+  }
+}

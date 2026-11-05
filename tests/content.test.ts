@@ -66,15 +66,25 @@ describe('render', () => {
   it('renders every object in the room as a real link or button, hidden until the room places it', () => {
     const labels = renderRoomLabels();
     for (const id of PIECE_IDS) {
-      expect(labels).toContain(`data-target="desk:${id}" data-at="door"`);
+      expect(labels).toContain(`data-target="desk:${id}" data-at="door" data-place="corner" data-reveal="hover"`);
       expect(labels).toContain(`href="#folder-${id}" data-target="folder:${id}" data-at="cabinet" data-place="centre"`);
     }
     for (const d of DRAWERS)
       expect(labels).toContain(`data-target="drawer:${d.id}" data-at="cabinet" data-place="cover" aria-expanded="false"`);
-    for (const target of ['cabinet', 'reception', 'brief', 'reviewer', 'board']) expect(labels).toContain(`data-target="${target}"`);
+    for (const target of ['cabinet', 'reception', 'brief', 'reviewer', 'board', 'sign', 'radio', 'credit'])
+      expect(labels).toContain(`data-target="${target}"`);
     const tags = labels.match(/<(a|button) [^>]*>/g) ?? [];
-    expect(tags.length).toBe(2 + 10 + 3 + 4 + 10);
+    expect(tags.length).toBe(4 + 10 + 3 + 4 + 10);
     for (const tag of tags) expect(tag).toMatch(/^<(a|button) hidden tabindex="0" /);
+  });
+
+  it('names only the cabinet and Reception at rest, with the grid credit always shown', () => {
+    const labels = renderRoomLabels();
+    const atRest = (labels.match(/<(a|button|p) [^>]*data-at="door"[^>]*>/g) ?? []).filter(
+      (t) => !t.includes('data-reveal="hover"') && !t.includes('data-place="cover"'),
+    );
+    expect(atRest.map((t) => /data-target="([^"]+)"/.exec(t)?.[1])).toEqual(['cabinet', 'reception', 'credit']);
+    expect(labels).toContain('Data: Carbon Intensity API, © NESO, CC BY 4.0');
   });
 
   it('files each drawer’s folders straight after it, so Tab goes from a drawer into its folders', () => {

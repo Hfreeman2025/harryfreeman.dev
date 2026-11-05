@@ -9,7 +9,7 @@ import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { deflateSync } from 'node:zlib';
-import { BASE, type Box, LAMP, ROOM, staticBoxes } from '../src/scene/layout';
+import { BASE, type Box, KEY, LAMP, ROOM, staticBoxes } from '../src/scene/layout';
 import { BOUNCE, GROUND, lampCone, PALETTE } from '../src/scene/light';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -71,10 +71,6 @@ class Grid {
   }
 }
 
-const lampPos: V = [...LAMP.position];
-const target: V = [...LAMP.target];
-const toTarget = norm(sub(target, lampPos));
-
 function sub(a: V, b: V): V {
   return [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
 }
@@ -83,56 +79,73 @@ function norm(a: V): V {
   return [a[0] / l, a[1] / l, a[2] / l];
 }
 
-// Disc light samples, stratified, in the plane facing the target.
+interface Lamp {
+  readonly position: V;
+  readonly axis: V;
+  readonly cone: number;
+  readonly edge: number;
+  /** Stratified samples over the lamp's disc, in the plane facing its target. */
+  readonly points: V[];
+  /** Irradiance at the target from the unoccluded lamp, so 1.0 means "full lamp". */
+  readonly reference: number;
+  readonly strength: number;
+}
+
 const LIGHT_SAMPLES = 16;
-const lightPoints: V[] = (() => {
-  const up: V = Math.abs(toTarget[1]) > 0.9 ? [1, 0, 0] : [0, 1, 0];
-  const u = norm([
-    up[1] * toTarget[2] - up[2] * toTarget[1],
-    up[2] * toTarget[0] - up[0] * toTarget[2],
-    up[0] * toTarget[1] - up[1] * toTarget[0],
-  ]);
-  const w: V = [toTarget[1] * u[2] - toTarget[2] * u[1], toTarget[2] * u[0] - toTarget[0] * u[2], toTarget[0] * u[1] - toTarget[1] * u[0]];
+function makeLamp(
+  def: { position: readonly number[]; target: readonly number[]; radius: number; cone: number; edge: number },
+  strength: number,
+): Lamp {
+  const position: V = [def.position[0] ?? 0, def.position[1] ?? 0, def.position[2] ?? 0];
+  const target: V = [def.target[0] ?? 0, def.target[1] ?? 0, def.target[2] ?? 0];
+  const axis = norm(sub(target, position));
+  const up: V = Math.abs(axis[1]) > 0.9 ? [1, 0, 0] : [0, 1, 0];
+  const u = norm([up[1] * axis[2] - up[2] * axis[1], up[2] * axis[0] - up[0] * axis[2], up[0] * axis[1] - up[1] * axis[0]]);
+  const w: V = [axis[1] * u[2] - axis[2] * u[1], axis[2] * u[0] - axis[0] * u[2], axis[0] * u[1] - axis[1] * u[0]];
   const points: V[] = [];
   const n = Math.sqrt(LIGHT_SAMPLES);
   for (let i = 0; i < n; i++)
     for (let j = 0; j < n; j++) {
-      const r = LAMP.radius * Math.sqrt((i + 0.5) / n);
+      const r = def.radius * Math.sqrt((i + 0.5) / n);
       const a = (2 * Math.PI * (j + 0.5 + i * 0.37)) / n;
       points.push([
-        lampPos[0] + u[0] * r * Math.cos(a) + w[0] * r * Math.sin(a),
-        lampPos[1] + u[1] * r * Math.cos(a) + w[1] * r * Math.sin(a),
-        lampPos[2] + u[2] * r * Math.cos(a) + w[2] * r * Math.sin(a),
+        position[0] + u[0] * r * Math.cos(a) + w[0] * r * Math.sin(a),
+        position[1] + u[1] * r * Math.cos(a) + w[1] * r * Math.sin(a),
+        position[2] + u[2] * r * Math.cos(a) + w[2] * r * Math.sin(a),
       ]);
     }
-  return points;
-})();
+  const d = sub(position, target);
+  const reference = norm(d)[1] / (d[0] * d[0] + d[1] * d[1] + d[2] * d[2]);
+  return { position, axis, cone: def.cone, edge: def.edge, points, reference, strength };
+}
 
-// Irradiance at the target from an unoccluded lamp, so that 1.0 means "full lamp".
-const reference = (() => {
-  const d = sub(lampPos, target);
-  const dist2 = d[0] * d[0] + d[1] * d[1] + d[2] * d[2];
-  return norm(d)[1] / dist2;
-})();
+/** The work lamp over the model, and the soft key light on the cabinet. */
+const LAMPS = [makeLamp(LAMP, 1), makeLamp(KEY, KEY.strength)];
 
-/** Direct light (0..~1.2) at a point on a horizontal surface at height y. */
+/** Direct light (0..~1.5) at a point on a horizontal surface, from every lamp. */
 function direct(p: V, near: Box[]): number {
-  let sum = 0;
-  for (const l of lightPoints) {
-    const d = sub(l, p);
-    const dist = Math.hypot(d[0], d[1], d[2]);
-    const dir: V = [d[0] / dist, d[1] / dist, d[2] / dist];
-    let blocked = false;
-    for (const b of near) {
-      if (hits(b, p, dir, dist)) {
-        blocked = true;
-        break;
+  let total = 0;
+  for (const lamp of LAMPS) {
+    const fromLamp = norm(sub(p, lamp.position));
+    const shade = lampCone(fromLamp, lamp.axis, lamp.cone, lamp.edge);
+    if (shade === 0) continue;
+    let sum = 0;
+    for (const l of lamp.points) {
+      const d = sub(l, p);
+      const dist = Math.hypot(d[0], d[1], d[2]);
+      const dir: V = [d[0] / dist, d[1] / dist, d[2] / dist];
+      let blocked = false;
+      for (const b of near) {
+        if (hits(b, p, dir, dist)) {
+          blocked = true;
+          break;
+        }
       }
+      if (!blocked) sum += dir[1] / (dist * dist);
     }
-    if (!blocked) sum += dir[1] / (dist * dist);
+    total += (sum / lamp.points.length / lamp.reference) * shade * lamp.strength;
   }
-  const fromLamp = norm(sub(p, lampPos));
-  return (sum / lightPoints.length / reference) * lampCone(fromLamp, toTarget);
+  return total;
 }
 
 const AO_SAMPLES = 20;
@@ -288,7 +301,7 @@ function bakeFloor(): void {
   console.log(`floor ${w}×${h}`);
 }
 
-// --- the cutting mat and workbench around the model ----------------------------------------------
+// --- the paper the model sits on ----------------------------------------------------------------
 function bakeGround(): void {
   const base: Box = { min: [BASE.x0, -BASE.thickness, BASE.z0], max: [BASE.x1, 0, BASE.z1], material: 'card' };
   const walls = staticBoxes().slice(0, 5);
@@ -309,40 +322,24 @@ function bakeGround(): void {
   }
   const lightB = blur(light, w, h, 2);
   const aoB = blur(ao, w, h, 1);
-  const bench = fromHex(PALETTE.bench);
-  const mat = fromHex(PALETTE.mat);
-  const matLine = fromHex(PALETTE.matLine);
-  const room = fromHex(PALETTE.room);
+  const paper = fromHex(PALETTE.paper);
+  const surround = fromHex(PALETTE.surround);
   const rgb = new Uint8Array(w * h * 3);
   for (let j = 0; j < h; j++) {
     for (let i = 0; i < w; i++) {
       const x = GROUND.x0 + ((i + 0.5) / w) * (GROUND.x1 - GROUND.x0);
       const z = GROUND.z0 + ((j + 0.5) / h) * (GROUND.z1 - GROUND.z0);
-      const onMat = x > GROUND.mat.x0 && x < GROUND.mat.x1 && z > GROUND.mat.z0 && z < GROUND.mat.z1;
-      let albedo: V = bench;
-      if (!onMat) {
-        // Timber grain along x.
-        const grain = 0.9 + 0.12 * Math.sin(z * 9 + Math.sin(x * 0.7) * 2.5) * Math.sin(z * 2.1 + 1.3);
-        albedo = [bench[0] * grain, bench[1] * grain, bench[2] * grain];
-      } else {
-        // A self-healing mat: a fine grid every 0.5 m (1 cm at 1:50), stronger every 2.5 m.
-        const gx = Math.abs(((x - GROUND.mat.x0) / 0.5) % 1);
-        const gz = Math.abs(((z - GROUND.mat.z0) / 0.5) % 1);
-        const fine = Math.min(gx, 1 - gx, gz, 1 - gz) < 0.03;
-        const bx = Math.abs(((x - GROUND.mat.x0) / 2.5) % 1);
-        const bz = Math.abs(((z - GROUND.mat.z0) / 2.5) % 1);
-        const bold = Math.min(bx, 1 - bx, bz, 1 - bz) < 0.012;
-        albedo = bold ? [matLine[0] * 0.7, matLine[1] * 0.7, matLine[2] * 0.7] : fine ? [mat[0] * 1.25, mat[1] * 1.25, mat[2] * 1.25] : mat;
-      }
+      // A sheet of drawing paper: a faint, even tooth, nothing printed on it.
+      const tooth = 0.985 + 0.015 * Math.sin(x * 37.1 + Math.sin(z * 23.7) * 3) * Math.sin(z * 41.3);
       const k = j * w + i;
-      const occ = 0.4 + 0.6 * aoB[k]!;
+      const occ = 0.35 + 0.65 * aoB[k]!;
       const e = lightB[k]! * (0.6 + 0.4 * occ);
-      // Fade into the dark room, so the workbench has no visible edge.
+      // Under the lamp the paper is warm and bright; away from it, the soft daylight of the page.
       const edge = Math.min(x - GROUND.x0, GROUND.x1 - x, z - GROUND.z0, GROUND.z1 - z);
-      const fade = Math.min(1, Math.max(0, edge / 6));
+      const fade = Math.min(1, Math.max(0, edge / 7));
       for (let c = 0; c < 3; c++) {
-        const lit = albedo[c]! * (lampColour[c]! * e + ambientColour[c]! * occ * 0.6);
-        rgb[k * 3 + c] = toSrgb(room[c]! + (lit - room[c]!) * fade * fade);
+        const lit = paper[c]! * tooth * (0.55 * lampColour[c]! * e + 1.05 * occ);
+        rgb[k * 3 + c] = toSrgb(surround[c]! + (lit - surround[c]!) * fade);
       }
     }
   }

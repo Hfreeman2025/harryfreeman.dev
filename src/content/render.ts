@@ -33,25 +33,33 @@ export function recordLine(timeline: Timeline, piece: Piece): { builder: string;
 }
 
 /**
- * The labels over the room: real buttons and links, placed over what they name by the engine.
- * `data-target` says what each names, `data-at` where you must stand to see it.
+ * The tags over the room: real buttons and links, placed by the engine on what they name, like the
+ * printed tags on an architect's model. `data-target` says what each names, `data-at` where you must
+ * stand to see it, `data-place` how it sits (a tag hanging from an edge, a name on a folder's tab, or a
+ * button laid over a drawer, the sign or the radio). At rest only the cabinet and Reception are
+ * named; a desk's tag shows on hover and focus (`data-reveal`), and the directory board is the
+ * always-visible index.
  */
 export function renderRoomLabels(): string {
+  const tag = (target: string, html: string, extra = '') =>
+    `<button type="button" class="tag tag--place" data-target="${target}" data-at="door" data-place="tag"${extra}>${html}</button>`;
   const objects = [
-    `<button type="button" class="obj obj--place" data-target="cabinet" data-at="door"><span class="obj__name">Filing cabinet</span><span class="obj__note">ten tools in four drawers</span></button>`,
-    `<button type="button" class="obj obj--place" data-target="reception" data-at="door"><span class="obj__name">Reception</span><span class="obj__note">ask about Harry or any tool</span></button>`,
+    tag('cabinet', '<span class="tag__name">Filing cabinet</span><span class="tag__note">ten tools in four drawers</span>'),
+    tag('reception', '<span class="tag__name">Reception</span><span class="tag__note">ask about Harry or any tool</span>'),
+    `<button type="button" class="obj obj--cover" data-target="sign" data-at="door" data-place="cover" aria-expanded="false" aria-controls="grid-sign" aria-describedby="grid-credit"><span class="obj__name">The grid sign: the current carbon intensity of Great Britain’s grid</span></button>`,
+    `<button type="button" class="obj obj--cover" data-target="radio" data-at="door" data-place="cover" aria-expanded="false" aria-controls="radio"><span class="obj__name">The radio: Listen to the Grid</span></button>`,
   ];
   const desks = PIECES.map(
     (p) =>
-      `<a class="desk-label" href="#folder-${p.id}" data-target="desk:${p.id}" data-at="door" data-piece="${p.id}"><span class="desk-label__name">${esc(p.title)}</span><span class="desk-label__state" aria-hidden="true"></span></a>`,
+      `<a class="tag tag--desk" href="#folder-${p.id}" data-target="desk:${p.id}" data-at="door" data-place="corner" data-reveal="hover" data-piece="${p.id}">${esc(p.title)}</a>`,
   );
   const furniture = [
-    ['brief', '#brief', 'The brief'],
+    ['brief', '#brief', 'The briefs'],
     ['reviewer', '#brief', 'The reviewer'],
     ['board', '#files', 'Accepted'],
   ].map(
     ([key, href, name]) =>
-      `<a class="desk-label desk-label--room" href="${href}" data-target="${key}" data-at="door"><span class="desk-label__name">${name}</span></a>`,
+      `<a class="tag tag--desk" href="${href}" data-target="${key}" data-at="door" data-place="tag" data-reveal="hover">${name}</a>`,
   );
   // Each drawer, then the folders in it, so Tab goes from a drawer into its folders.
   const filed = DRAWERS.flatMap((d) => [
@@ -61,9 +69,13 @@ export function renderRoomLabels(): string {
         `<a class="obj obj--folder" href="#folder-${id}" data-target="folder:${id}" data-at="cabinet" data-place="centre" data-piece="${id}"><span class="obj__name">${esc(pieceById(id).title)}</span></a>`,
     ),
   ]);
+  // The grid's credit, always shown beside the sign and the radio.
+  const credit =
+    '<p class="tag tag--credit" id="grid-credit" hidden data-target="credit" data-at="door" data-place="over">Data: Carbon Intensity API, © NESO, CC BY 4.0</p>';
   // Hidden until the engine places them, so nothing shows or takes focus before the room is up. An
   // explicit tabindex puts them in Safari's Tab order too, which by default skips links and buttons.
-  return [...objects, ...desks, ...furniture, ...filed].map((html) => html.replace(/^<(a|button) /, '<$1 hidden tabindex="0" ')).join('\n');
+  const controls = [...objects, ...desks, ...furniture, ...filed].map((html) => html.replace(/^<(a|button) /, '<$1 hidden tabindex="0" '));
+  return [...controls, credit].join('\n');
 }
 
 function crossLink(piece: Piece): string {

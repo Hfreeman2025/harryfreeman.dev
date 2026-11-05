@@ -7,7 +7,7 @@ import { setupAsk } from './ask';
 import { isPieceId, type PieceId } from './content/pieces';
 import { loadLines, showLines } from './folder';
 import { type OfficeControl, startOffice } from './office/main';
-import { NEUTRAL_LIGHT, type RoomLight } from './room/grid';
+import { NEUTRAL_LIGHT, type RoomLight, type SignText } from './room/grid';
 import type { RoomControl } from './room/main';
 import { setupRadio } from './room/radio';
 import { startGridSign } from './room/sign';
@@ -16,6 +16,7 @@ import { parseTimeline } from './timeline/schema';
 const root = document.documentElement;
 let control: OfficeControl | RoomControl | null = null;
 let light: RoomLight = NEUTRAL_LIGHT;
+let sign: SignText | null = null;
 let mark: Range | null = null;
 
 function say(text: string): void {
@@ -47,11 +48,17 @@ setupAsk({
   onSource: (piece) => control?.source(piece),
 });
 
-startGridSign((next) => {
-  light = next;
-  // Whether the room's light follows a reading or stays neutral, for the checks and the stills.
-  root.dataset.light = next === NEUTRAL_LIGHT ? 'neutral' : 'grid';
-  if (control && 'setLight' in control) control.setLight(next);
+startGridSign({
+  light(next) {
+    light = next;
+    // Whether the room's light follows a reading or stays neutral, for the checks and the stills.
+    root.dataset.light = next === NEUTRAL_LIGHT ? 'neutral' : 'grid';
+    if (control && 'setLight' in control) control.setLight(next);
+  },
+  sign(text) {
+    sign = text;
+    if (control && 'setSign' in control) control.setSign(text);
+  },
 });
 setupRadio();
 
@@ -62,6 +69,7 @@ async function startRoomMode(): Promise<void> {
     const [{ startRoom }] = await Promise.all([import('./room/main'), import('./scene/engine')]);
     const room = await startRoom(timeline);
     room.setLight(light);
+    if (sign) room.setSign(sign);
     control = room;
     root.dataset.stage = 'live';
     performance.mark('scene-ready');

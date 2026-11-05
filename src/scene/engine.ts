@@ -1,6 +1,7 @@
-// The room, rendered: renderer and camera, the lamp (which follows the grid), the cabinet, the
-// radio's lamp, the crew replaying the build, labels placed over what they name, and pointer picking.
-// What happens when something is chosen is the controller's business (room/controller.ts).
+// The room, rendered: an architect's study model on a sheet of paper. Renderer and camera, the lamp
+// and the cabinet's key light (both following the grid), the cabinet, the grid sign printed in the
+// scene, the radio, the crew, the tags placed over what they name, and pointer picking. What happens
+// when something is chosen is the controller's business (room/main.ts).
 
 import {
   Box3,
@@ -12,6 +13,7 @@ import {
   MeshBasicMaterial,
   NoToneMapping,
   PerspectiveCamera,
+  PlaneGeometry,
   Raycaster,
   Scene,
   SpotLight,
@@ -24,12 +26,12 @@ import {
   WebGLRenderer,
 } from 'three';
 import { drawerOf } from '../content/drawers';
-import { isPieceId, PIECE_IDS, PIECES, type PieceId } from '../content/pieces';
-import { NEUTRAL_LIGHT, type RoomLight } from '../room/grid';
+import { isPieceId, PIECES, type PieceId } from '../content/pieces';
+import { NEUTRAL_LIGHT, type RoomLight, type SignText, signFor } from '../room/grid';
 import type { Timeline } from '../timeline/schema';
 import { Cabinet } from './cabinet';
 import { Crew } from './crew';
-import { BOARD, BRIEF, CABINET, DESKS, deskFor, LAMP, RADIO, RECEPTION, REVIEW, ROOM, SCREEN, SHELF, SIGN, WALL } from './layout';
+import { BOARD, BRIEF, CABINET, DESK, DESKS, deskFor, KEY, LAMP, RADIO, RECEPTION, REVIEW, ROOM, SCREEN, SHELF, SIGN } from './layout';
 import { BOUNCE, PALETTE } from './light';
 import { atlasRect, buildModel } from './model';
 
@@ -45,7 +47,10 @@ export interface RoomEngine {
   answering(pieces: readonly PieceId[]): void;
   setLight(light: RoomLight, animate: boolean): void;
   setRadio(on: boolean): void;
+  setSign(text: SignText): void;
   monitorRect(piece: PieceId): DOMRect;
+  /** The monitor's corners on screen (top-left, top-right, bottom-right, bottom-left), in page pixels. */
+  monitorQuad(piece: PieceId): [[number, number], [number, number], [number, number], [number, number]];
   togglePause(): boolean;
   onPick(fn: (target: string) => void): void;
 }
@@ -68,9 +73,12 @@ interface View {
 }
 
 const FOV = 24;
-const DOOR_ELEVATION = (31 * Math.PI) / 180;
-const DOOR_TARGET = new Vector3(0, 0.35, 0.55);
 const TAN = Math.tan(((FOV / 2) * Math.PI) / 180);
+/**
+ * The view from the door: low and a little to the right of the doorway, as you would look into a
+ * model on a table, so the cabinet is near and large in the left third and the room runs back.
+ */
+const DOOR = { fov: 40, elevation: 17, azimuth: 5, target: new Vector3(0.5, 0.8, -0.4) };
 
 const smooth = (t: number) => {
   const c = Math.max(0, Math.min(1, t));
@@ -120,11 +128,15 @@ export async function mountRoom({
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.outputColorSpace = SRGBColorSpace;
   renderer.toneMapping = NoToneMapping;
-  renderer.setClearColor(PALETTE.room);
+  renderer.setClearColor(PALETTE.surround);
   stage.append(renderer.domElement);
   renderer.domElement.setAttribute('aria-hidden', 'true');
 
-  await document.fonts.load('600 22px "IBM Plex Sans Condensed"').catch(() => undefined);
+  await Promise.all(
+    ['600 22px "IBM Plex Sans Condensed"', '500 22px "IBM Plex Sans Condensed"', '600 22px "IBM Plex Mono"'].map((f) =>
+      document.fonts.load(f).catch(() => undefined),
+    ),
+  );
   const [floor, ground, poster] = await Promise.all([
     loadTexture('/bake/floor.webp'),
     loadTexture('/bake/ground.webp'),
@@ -133,23 +145,29 @@ export async function mountRoom({
   if (!floor || !ground) throw new Error('the baked lighting did not load');
 
   const scene = new Scene();
-  scene.background = new Color(PALETTE.room);
+  scene.background = new Color(PALETTE.surround);
   const model = buildModel(floor, ground, poster ?? colourAtlas());
   scene.add(model.group);
   const cabinet = new Cabinet();
   scene.add(cabinet.group);
 
-  // The lamp, live for everything that is not baked, matched to the bake's units; the grid tints it.
-  const lamp = new Vector3(...LAMP.position);
-  const aim = new Vector3(...LAMP.target);
-  const toAim = aim.clone().sub(lamp);
-  const baseSpot = (Math.PI * toAim.lengthSq()) / -toAim.clone().normalize().y;
-  const spot = new SpotLight(PALETTE.lamp, baseSpot, 0, LAMP.cone + LAMP.edge, (LAMP.edge / (LAMP.cone + LAMP.edge)) * 2, 2);
-  spot.position.copy(lamp);
-  spot.target.position.copy(aim);
-  const fill = new HemisphereLight(PALETTE.lamp, PALETTE.bench, BOUNCE * Math.PI);
+  // The lamps, live for everything that is not baked, matched to the bake's units: the work lamp over
+  // the model and the soft key light on the cabinet. The grid tints both, and the baked floor with them.
+  const spotOf = (def: typeof LAMP | typeof KEY, strength: number) => {
+    const from = new Vector3(...def.position);
+    const aim = new Vector3(...def.target);
+    const to = aim.clone().sub(from);
+    const intensity = ((Math.PI * to.lengthSq()) / -to.clone().normalize().y) * strength;
+    const light = new SpotLight(PALETTE.lamp, intensity, 0, def.cone + def.edge, (def.edge / (def.cone + def.edge)) * 2, 2);
+    light.position.copy(from);
+    light.target.position.copy(aim);
+    scene.add(light, light.target);
+    return { light, intensity };
+  };
+  const lamps = [spotOf(LAMP, 1), spotOf(KEY, KEY.strength)];
+  const fill = new HemisphereLight(PALETTE.lamp, PALETTE.paper, BOUNCE * Math.PI);
   const baseFill = fill.intensity;
-  scene.add(spot, spot.target, fill);
+  scene.add(fill);
   const lampColour = new Color(PALETTE.lamp);
   let light = { ...NEUTRAL_LIGHT, colour: [...NEUTRAL_LIGHT.colour] as [number, number, number] };
   let lightTarget: RoomLight = NEUTRAL_LIGHT;
@@ -157,52 +175,124 @@ export async function mountRoom({
     const [r, g, b] = light.colour;
     const [nr, ng, nb] = NEUTRAL_LIGHT.colour;
     const tint = new Color(r / nr, g / ng, b / nb).multiplyScalar(light.level / NEUTRAL_LIGHT.level);
-    spot.color.copy(lampColour).multiply(tint);
+    for (const { light: l, intensity } of lamps) {
+      l.color.copy(lampColour).multiply(tint);
+      l.intensity = intensity;
+    }
     fill.color.copy(lampColour).multiply(tint);
-    spot.intensity = baseSpot;
     fill.intensity = baseFill;
     for (const m of model.baked) m.color.copy(tint);
   };
 
-  // The radio's on/off lamp, on its front.
-  const radioLamp = new Mesh(new CircleGeometry(0.03, 16), new MeshBasicMaterial({ color: '#3b3f3a', toneMapped: false }));
-  radioLamp.position.set(RADIO.x + RADIO.width / 2 - 0.08, SHELF.y + RADIO.height - 0.08, ROOM.z0 + 0.04 + RADIO.depth + 0.003);
-  const grille = new Mesh(new CircleGeometry(0.11, 24), new MeshBasicMaterial({ color: '#2a1c18' }));
-  grille.position.set(RADIO.x - 0.1, SHELF.y + RADIO.height / 2, ROOM.z0 + 0.04 + RADIO.depth + 0.002);
+  // The radio on its shelf: a grille, and a small lamp that is green while it plays.
+  const radioFront = ROOM.z0 + 0.04 + RADIO.depth;
+  const radioLamp = new Mesh(new CircleGeometry(0.025, 16), new MeshBasicMaterial({ color: '#4a4740', toneMapped: false }));
+  radioLamp.position.set(RADIO.x + RADIO.width / 2 - 0.07, SHELF.y + RADIO.height - 0.07, radioFront + 0.003);
+  const grille = new Mesh(new CircleGeometry(0.1, 24), new MeshBasicMaterial({ color: '#4a4136' }));
+  grille.position.set(RADIO.x - 0.09, SHELF.y + RADIO.height / 2, radioFront + 0.002);
   scene.add(radioLamp, grille);
+
+  // The grid sign, printed: the reading set in Plex on the board on the back wall.
+  const signCanvas = document.createElement('canvas');
+  signCanvas.width = 1024;
+  signCanvas.height = Math.round((1024 * SIGN.height) / SIGN.width);
+  const signTexture = new CanvasTexture(signCanvas);
+  signTexture.colorSpace = SRGBColorSpace;
+  signTexture.anisotropy = 8;
+  const signFace = new Mesh(
+    new PlaneGeometry(SIGN.width - 0.05, SIGN.height - 0.05),
+    new MeshBasicMaterial({ map: signTexture, toneMapped: false }),
+  );
+  signFace.position.set(SIGN.x, SIGN.y, ROOM.z0 + 0.027);
+  scene.add(signFace);
+  const drawSign = (text: SignText) => {
+    const ctx = signCanvas.getContext('2d');
+    if (!ctx) return;
+    const w = signCanvas.width;
+    const h = signCanvas.height;
+    const fitText = (str: string, font: (px: number) => string, px: number, max: number) => {
+      let size = px;
+      ctx.font = font(size);
+      while (size > 12 && ctx.measureText(str).width > max) ctx.font = font(--size);
+      return size;
+    };
+    ctx.fillStyle = '#f7f4ee';
+    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = '#1d5a44';
+    ctx.fillRect(0, 0, w, 96);
+    ctx.fillStyle = '#ffffff';
+    ctx.textBaseline = 'alphabetic';
+    ctx.font = '600 60px "IBM Plex Sans Condensed", "Arial Narrow", sans-serif';
+    ctx.fillText('The grid, now', 44, 70);
+    ctx.fillStyle = '#1e2225';
+    if (text.state === 'live') {
+      const [value = '', band = ''] = text.headline.split(', ');
+      const number = value.replace(' gCO₂/kWh', '');
+      const size = fitText(number, (px) => `600 ${px}px "IBM Plex Mono", ui-monospace, monospace`, 190, w * 0.48);
+      ctx.fillText(number, 44, 96 + 40 + size * 0.78);
+      const numberWidth = ctx.measureText(number).width;
+      ctx.font = '500 58px "IBM Plex Sans Condensed", "Arial Narrow", sans-serif';
+      ctx.fillText('gCO₂/kWh', 44 + numberWidth + 24, 96 + 40 + size * 0.42);
+      ctx.font = '600 58px "IBM Plex Sans Condensed", "Arial Narrow", sans-serif';
+      ctx.fillText(band, 44 + numberWidth + 24, 96 + 40 + size * 0.78);
+    } else {
+      fitText(text.headline, (px) => `600 ${px}px "IBM Plex Sans Condensed", "Arial Narrow", sans-serif`, 104, w - 88);
+      ctx.fillText(text.headline, 44, 96 + 150);
+    }
+    ctx.fillStyle = '#464c51';
+    fitText(text.detail, (px) => `500 ${px}px "IBM Plex Sans Condensed", "Arial Narrow", sans-serif`, 42, w - 88);
+    ctx.fillText(text.detail, 44, h - 92);
+    ctx.fillStyle = '#62686d';
+    fitText(`Source: ${text.source}`, (px) => `500 ${px}px "IBM Plex Sans Condensed", "Arial Narrow", sans-serif`, 36, w - 88);
+    ctx.fillText(`Source: ${text.source}`, 44, h - 38);
+    signTexture.needsUpdate = true;
+  };
+  // Until the first reading arrives (and in stills, which never wait for one).
+  drawSign(signFor(null));
 
   // Labels: real links and buttons placed over what they name.
   const labelEls = [...labels.querySelectorAll<HTMLElement>('[data-target]')];
-  const deskLabel = (piece: PieceId) => labelEls.find((el) => el.dataset.target === `desk:${piece}`);
-  const crew = new Crew({ scene, model, timeline, startAt, labelFor: deskLabel });
+  // With reduced motion nothing travels: the replay holds at its end, each desk showing its state.
+  const crew = new Crew({ scene, model, timeline, startAt });
+  if (reduced) crew.s = Math.max(0, crew.replay.duration - 0.01);
 
   const camera = new PerspectiveCamera(FOV, 1, 0.1, 200);
-  const corners: Vector3[] = [];
-  for (const x of [ROOM.x0 - 0.2, ROOM.x1 + 0.2]) corners.push(new Vector3(x, 0, ROOM.z1 + 0.2), new Vector3(x, WALL.back + 0.3, ROOM.z0));
+  // What the view from the door must hold: the back wall's top corners, the cabinet and Reception
+  // whole, and every desk. The room's front corners may fall outside: the front wall is low and bare.
+  const keep: Vector3[] = [
+    new Vector3(SIGN.x - SIGN.width / 2 - 0.2, SIGN.y + SIGN.height / 2 + 0.15, ROOM.z0),
+    new Vector3(BOARD.x + BOARD.width / 2 + 0.2, BOARD.bottom + BOARD.height + 0.15, ROOM.z0),
+    new Vector3(CABINET.x - CABINET.width / 2 - 0.15, 0, CABINET.z + CABINET.depth / 2 + 0.25),
+    new Vector3(CABINET.x - CABINET.width / 2 - 0.15, CABINET.height + 0.25, CABINET.z - CABINET.depth / 2),
+    new Vector3(RECEPTION.x + RECEPTION.width / 2 + 0.15, 0, RECEPTION.z + RECEPTION.depth / 2 + 0.2),
+    ...DESKS.flatMap((d) => [new Vector3(d.x - 0.3, DESK.height, d.z), new Vector3(d.x + 0.3, DESK.height, d.z)]),
+  ];
 
   function doorView(aspect: number): View {
-    const dir = new Vector3(0, Math.sin(DOOR_ELEVATION), Math.cos(DOOR_ELEVATION));
+    const el = (DOOR.elevation * Math.PI) / 180;
+    const az = (DOOR.azimuth * Math.PI) / 180;
+    const dir = new Vector3(Math.sin(az) * Math.cos(el), Math.sin(el), Math.cos(az) * Math.cos(el));
     camera.aspect = aspect;
-    camera.fov = FOV;
+    camera.fov = DOOR.fov;
     camera.updateProjectionMatrix();
-    let lo = 6;
+    let lo = 4;
     let hi = 120;
     const p = new Vector3();
     for (let i = 0; i < 40; i++) {
       const mid = (lo + hi) / 2;
-      camera.position.copy(DOOR_TARGET).addScaledVector(dir, mid);
-      camera.lookAt(DOOR_TARGET);
+      camera.position.copy(DOOR.target).addScaledVector(dir, mid);
+      camera.lookAt(DOOR.target);
       camera.updateMatrixWorld();
-      const fits = corners.every((c) => {
+      const fits = keep.every((c) => {
         p.copy(c).project(camera);
-        // A band is kept clear above the back wall for the sign's and the radio's cards.
-        return Math.abs(p.x) <= 0.96 && p.y <= 0.62 && p.y >= -0.84;
+        // Clear of the room's own controls: the caption below and a margin above.
+        return Math.abs(p.x) <= 0.97 && p.y <= 0.9 && p.y >= -0.72;
       });
       if (fits) hi = mid;
       else lo = mid;
     }
     // The next frame puts back the lens of wherever the camera is (applyCamera).
-    return { pos: DOOR_TARGET.clone().addScaledVector(dir, hi), look: DOOR_TARGET.clone(), fov: FOV };
+    return { pos: DOOR.target.clone().addScaledVector(dir, hi), look: DOOR.target.clone(), fov: DOOR.fov };
   }
   const fitDistance = (height: number) => height / 2 / TAN;
   function viewOf(s: Station): View {
@@ -233,17 +323,20 @@ export async function mountRoom({
     const h = Math.max(1, stage.clientHeight);
     const free = Math.max(w * 0.4, w - (Math.min(560, 0.46 * w) + 48));
     const px = Math.min(free * 0.84, (h * 0.6 * SCREEN.width) / SCREEN.height);
+    // High enough to look over the seated builder's head (1.39 m) at the whole screen.
     const d = 2.3;
-    const tanHalf = (SCREEN.width * h) / (2 * d * px);
+    const rise = 0.92;
+    const range = Math.hypot(d, rise);
+    const tanHalf = (SCREEN.width * h) / (2 * range * px);
     const ndc = free / w - 1;
-    const dx = -ndc * d * tanHalf * (w / h);
+    const dx = -ndc * range * tanHalf * (w / h);
     const look = screen.clone().add(new Vector3(dx, 0, 0));
-    return { pos: new Vector3(look.x, screen.y + 0.42, screen.z + d), look, fov: (2 * Math.atan(tanHalf) * 180) / Math.PI };
+    return { pos: new Vector3(look.x, screen.y + rise, screen.z + d), look, fov: (2 * Math.atan(tanHalf) * 180) / Math.PI };
   }
 
   let door = doorView(1);
   let station: Station = 'door';
-  const current = { pos: door.pos.clone(), look: door.look.clone(), fov: FOV };
+  const current = { pos: door.pos.clone(), look: door.look.clone(), fov: DOOR.fov };
   let glide: { from: View; to: View; start: number; ms: number; done: () => void } | null = null;
   let labelsDirty = true;
 
@@ -263,23 +356,34 @@ export async function mountRoom({
   }
   new ResizeObserver(resize).observe(stage);
 
+  // Where each tag sits: printed on the counter's front, the floor before the cabinet, a table's edge,
+  // the wall under the board or above the sign; never at monitor height. Desks choose their own spot.
   const anchorOf = (target: string): Vector3 | null => {
-    const [kind, id] = target.split(':');
-    if (kind === 'desk' && id && isPieceId(id)) {
-      const d = deskFor(id);
-      return new Vector3(d.x, SCREEN.bottom + SCREEN.height + 0.08, d.screen[2]);
-    }
-    if (kind === 'reception') return new Vector3(RECEPTION.x, RECEPTION.height + 0.1, RECEPTION.z);
-    if (kind === 'radio') return new Vector3(RADIO.x, SHELF.y + RADIO.height, ROOM.z0 + 0.15);
-    if (kind === 'sign') return new Vector3(SIGN.x, SIGN.y + SIGN.height / 2, ROOM.z0 + 0.03);
-    // On the wall just above the three briefs, below the band the sign and the radio hang in.
-    if (kind === 'brief') return new Vector3(BRIEF.table.x, BRIEF.sheetY + BRIEF.sheetSize[1] / 2 + 0.1, ROOM.z0);
-    if (kind === 'reviewer') return new Vector3(REVIEW.reviewer[0], 1.75, REVIEW.reviewer[1]);
-    if (kind === 'board') return new Vector3(BOARD.x, BOARD.bottom + BOARD.height + 0.12, BOARD.z);
+    const [kind] = target.split(':');
+    if (kind === 'cabinet') return new Vector3(CABINET.x, 0, CABINET.z + CABINET.depth / 2 + 0.1);
+    if (kind === 'reception') return new Vector3(RECEPTION.x, RECEPTION.height - 0.06, RECEPTION.z + RECEPTION.depth / 2 + 0.035);
+    // On the wall just above the sign, clear of the monitors below it.
+    if (kind === 'credit') return new Vector3(SIGN.x, SIGN.y + SIGN.height / 2 + 0.03, ROOM.z0 + 0.03);
+    if (kind === 'brief') return new Vector3(BRIEF.table.x, BRIEF.table.height, BRIEF.table.z + BRIEF.table.depth / 2 + 0.005);
+    if (kind === 'reviewer') return new Vector3(REVIEW.table.x, REVIEW.table.height, REVIEW.table.z + REVIEW.table.depth / 2 + 0.005);
+    if (kind === 'board') return new Vector3(BOARD.x, BOARD.bottom - 0.03, BOARD.z + 0.02);
     return cabinet.anchor(target);
   };
+  /** The corners of what a covering button lies over: a drawer's front, the sign, the radio. */
+  const coverOf = (target: string): Vector3[] => {
+    if (target.startsWith('drawer:')) return cabinet.frontCorners(target.slice(7));
+    const box = (x0: number, y0: number, x1: number, y1: number, z: number) => [
+      new Vector3(x0, y0, z),
+      new Vector3(x1, y0, z),
+      new Vector3(x1, y1, z),
+      new Vector3(x0, y1, z),
+    ];
+    if (target === 'sign')
+      return box(SIGN.x - SIGN.width / 2, SIGN.y - SIGN.height / 2, SIGN.x + SIGN.width / 2, SIGN.y + SIGN.height / 2, ROOM.z0 + 0.03);
+    if (target === 'radio') return box(RADIO.x - RADIO.width / 2, SHELF.y, RADIO.x + RADIO.width / 2, SHELF.y + RADIO.height, radioFront);
+    return [];
+  };
   const projected = new Vector3();
-  const widths = new Map<HTMLElement, number>();
   const standing = (): string => (station.startsWith('desk:') ? 'desk' : station);
   function shownAt(el: HTMLElement): boolean {
     if ((el.dataset.at ?? 'door') !== standing()) return false;
@@ -290,69 +394,100 @@ export async function mountRoom({
     }
     return true;
   }
+  /** Every monitor's box on the stage, so a desk's tag can keep clear of all of them. */
+  function monitorBoxes(w: number, h: number): Array<{ x0: number; y0: number; x1: number; y1: number }> {
+    return DESKS.map((d) => {
+      const xs: number[] = [];
+      const ys: number[] = [];
+      for (const [dx, dy] of [
+        [-1, -1],
+        [1, -1],
+        [1, 1],
+        [-1, 1],
+      ] as const) {
+        projected
+          .set(d.screen[0] + (dx * (SCREEN.width + 0.05)) / 2, d.screen[1] + (dy * (SCREEN.height + 0.05)) / 2, d.screen[2])
+          .project(camera);
+        xs.push((projected.x * 0.5 + 0.5) * w);
+        ys.push((-projected.y * 0.5 + 0.5) * h);
+      }
+      return { x0: Math.min(...xs), y0: Math.min(...ys), x1: Math.max(...xs), y1: Math.max(...ys) };
+    });
+  }
+  /**
+   * Where a desk's tag may go, in order: its outer front corners reading outward, the middle of its
+   * front edge, the floor before its chair. The first that covers no monitor wins.
+   */
+  function deskSpots(piece: PieceId): Array<{ at: Vector3; align: 'left' | 'right' | 'centre' }> {
+    const d = deskFor(piece);
+    const front = d.z + DESK.depth / 2 + 0.005;
+    return [
+      { at: new Vector3(d.x + DESK.width / 2 - 0.06, DESK.height, front), align: 'left' },
+      { at: new Vector3(d.x - DESK.width / 2 + 0.06, DESK.height, front), align: 'right' },
+      { at: new Vector3(d.x + 0.42, DESK.height, front), align: 'centre' },
+      { at: new Vector3(d.x, 0, d.seat[1] + 0.32), align: 'centre' },
+    ];
+  }
   function placeLabels(): void {
     const w = stage.clientWidth;
     const h = stage.clientHeight;
-    const at = new Map<HTMLElement, { x: number; y: number }>();
+    let monitors: ReturnType<typeof monitorBoxes> | null = null;
     for (const el of labelEls) {
-      const a = shownAt(el) && !glide ? anchorOf(el.dataset.target ?? '') : null;
-      if (a) projected.copy(a).project(camera);
-      const onScreen = a !== null && projected.z < 1 && Math.abs(projected.x) < 1.02 && Math.abs(projected.y) < 1.02;
-      if (el.hidden === onScreen) el.hidden = !onScreen;
-      if (onScreen) at.set(el, { x: (projected.x * 0.5 + 0.5) * w, y: (-projected.y * 0.5 + 0.5) * h });
-    }
-    // When neighbouring desks are closer on screen than their labels are wide, every other label in
-    // the row stands on a longer leader, as labels do on a crowded map.
-    const staggered = new Set<HTMLElement>();
-    for (const row of [PIECE_IDS.slice(0, 5), PIECE_IDS.slice(5)]) {
-      const els = row.map(deskLabel).filter((el): el is HTMLElement => el !== undefined && at.has(el));
-      let crowded = false;
-      for (let i = 1; i < els.length; i++) {
-        const a = els[i - 1];
-        const b = els[i];
-        if (!a || !b) continue;
-        for (const el of [a, b]) if (!widths.has(el)) widths.set(el, el.offsetWidth);
-        const gap = Math.abs((at.get(b)?.x ?? 0) - (at.get(a)?.x ?? 0));
-        if (gap < ((widths.get(a) ?? 0) + (widths.get(b) ?? 0)) / 2 + 8) crowded = true;
-      }
-      if (crowded) for (const [i, el] of els.entries()) if (i % 2 === 1) staggered.add(el);
-    }
-    const top = new Vector3();
-    for (const [el, { x, y }] of at) {
-      const place = el.dataset.place ?? 'above';
+      const target = el.dataset.target ?? '';
+      const place = el.dataset.place ?? 'tag';
+      const show = shownAt(el) && !glide;
       if (place === 'cover') {
-        // A drawer's button lies over its front, so the 3D label is the one you read.
-        const corners = cabinet.frontCorners((el.dataset.target ?? '').slice(7)).map((c) => c.project(camera));
+        const corners = show ? coverOf(target).map((c) => c.project(camera)) : [];
+        const onScreen = corners.length > 0 && corners.every((c) => c.z < 1);
+        if (el.hidden === onScreen) el.hidden = !onScreen;
+        if (!onScreen) continue;
         const xs = corners.map((c) => (c.x * 0.5 + 0.5) * w);
         const ys = corners.map((c) => (-c.y * 0.5 + 0.5) * h);
         const left = Math.min(...xs);
-        const topY = Math.min(...ys);
+        const top = Math.min(...ys);
         el.style.width = `${(Math.max(...xs) - left).toFixed(1)}px`;
-        el.style.height = `${(Math.max(...ys) - topY).toFixed(1)}px`;
-        el.style.transform = `translate(${left.toFixed(1)}px, ${topY.toFixed(1)}px)`;
+        el.style.height = `${(Math.max(...ys) - top).toFixed(1)}px`;
+        el.style.transform = `translate(${left.toFixed(1)}px, ${top.toFixed(1)}px)`;
         continue;
       }
-      if (place === 'wall') {
-        // The sign and the radio hang their cards above the back wall, on a line down to the thing itself.
-        const a = anchorOf(el.dataset.target ?? '');
-        if (!a) continue;
-        top.set(a.x, WALL.back + 0.08, ROOM.z0).project(camera);
-        const ty = (-top.y * 0.5 + 0.5) * h;
-        el.style.setProperty('--leader', `${Math.max(6, y - ty).toFixed(1)}px`);
-        el.style.transform = `translate(${x.toFixed(1)}px, ${ty.toFixed(1)}px) translate(-50%, -100%)`;
+      if (place === 'corner') {
+        const piece = target.slice(5);
+        if (!show || !isPieceId(piece)) {
+          if (!el.hidden) el.hidden = true;
+          continue;
+        }
+        monitors ??= monitorBoxes(w, h);
+        const tw = el.offsetWidth || 90;
+        const th = el.offsetHeight || 18;
+        let chosen: { x: number; y: number; align: string } | null = null;
+        for (const spot of deskSpots(piece)) {
+          projected.copy(spot.at).project(camera);
+          if (projected.z >= 1) continue;
+          const x = (projected.x * 0.5 + 0.5) * w;
+          const y = (-projected.y * 0.5 + 0.5) * h + 2;
+          const x0 = spot.align === 'left' ? x : spot.align === 'right' ? x - tw : x - tw / 2;
+          const clear = monitors.every((m) => x0 + tw < m.x0 - 2 || x0 > m.x1 + 2 || y + th < m.y0 - 2 || y > m.y1 + 2);
+          chosen ??= { x: x0, y, align: spot.align };
+          if (clear) {
+            chosen = { x: x0, y, align: spot.align };
+            break;
+          }
+        }
+        if (el.hidden !== !chosen) el.hidden = !chosen;
+        if (chosen) el.style.transform = `translate(${chosen.x.toFixed(1)}px, ${chosen.y.toFixed(1)}px)`;
         continue;
       }
-      const leader =
-        place !== 'above'
-          ? 0
-          : el.classList.contains('desk-label') && !el.classList.contains('desk-label--room')
-            ? staggered.has(el)
-              ? 42
-              : 16
-            : 10;
-      el.style.setProperty('--leader', `${leader}px`);
-      const shift = place === 'centre' ? 'translate(-50%, -50%)' : place === 'right' ? 'translate(0, -50%)' : 'translate(-50%, -100%)';
-      el.style.transform = `translate(${x.toFixed(1)}px, ${(y - leader).toFixed(1)}px) ${shift}`;
+      const a = show ? anchorOf(target) : null;
+      if (a) projected.copy(a).project(camera);
+      const onScreen = a !== null && projected.z < 1 && Math.abs(projected.x) < 1.02 && Math.abs(projected.y) < 1.02;
+      if (el.hidden === onScreen) el.hidden = !onScreen;
+      if (!onScreen) continue;
+      const x = (projected.x * 0.5 + 0.5) * w;
+      const y = (-projected.y * 0.5 + 0.5) * h;
+      // A tag hangs from its anchor, its top edge on the edge it is printed on; a folder's name sits on its tab.
+      const shift =
+        place === 'centre' ? 'translate(-50%, -50%)' : place === 'over' ? 'translate(-50%, calc(-100% - 2px))' : 'translate(-50%, 2px)';
+      el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) ${shift}`;
     }
     labelsDirty = false;
   }
@@ -382,8 +517,8 @@ export async function mountRoom({
     for (let i = 0; i < 3; i++) light.colour[i] = (light.colour[i] ?? 1) + ((lightTarget.colour[i] ?? 1) - (light.colour[i] ?? 1)) * k;
     light.level += (lightTarget.level - light.level) * k;
     applyLight();
-    // At a desk the camera stands among the builders; anyone right in front of it steps aside.
-    crew.near = station.startsWith('desk:') && !glide ? { x: current.pos.x, z: current.pos.z, r: 1.7 } : null;
+    // At a desk the camera takes the builder's place, so that builder steps out of the picture.
+    crew.away = station.startsWith('desk:') && !glide ? (station.slice(5) as PieceId) : null;
     if (glide) {
       const t = Math.min(1, (now - glide.start) / glide.ms);
       current.pos.lerpVectors(glide.from.pos, glide.to.pos, easeInOut(t));
@@ -467,10 +602,26 @@ export async function mountRoom({
       at: 'door',
     },
     {
-      target: 'radio',
+      target: 'reviewer',
       box: new Box3(
-        new Vector3(RADIO.x - RADIO.width / 2, SHELF.y, ROOM.z0),
-        new Vector3(RADIO.x + RADIO.width / 2, SHELF.y + RADIO.height, ROOM.z0 + 0.3),
+        new Vector3(REVIEW.table.x - REVIEW.table.width / 2, 0, REVIEW.table.z - REVIEW.table.depth / 2),
+        new Vector3(REVIEW.table.x + REVIEW.table.width / 2, 1.8, REVIEW.reviewer[1] + 0.25),
+      ),
+      at: 'door',
+    },
+    {
+      target: 'brief',
+      box: new Box3(
+        new Vector3(-1.4, 0, ROOM.z0),
+        new Vector3(1.4, BRIEF.sheetY + BRIEF.sheetSize[1] / 2, BRIEF.table.z + BRIEF.table.depth / 2),
+      ),
+      at: 'door',
+    },
+    {
+      target: 'board',
+      box: new Box3(
+        new Vector3(BOARD.x - BOARD.width / 2, BOARD.bottom, ROOM.z0),
+        new Vector3(BOARD.x + BOARD.width / 2, BOARD.bottom + BOARD.height, ROOM.z0 + 0.1),
       ),
       at: 'door',
     },
@@ -506,15 +657,17 @@ export async function mountRoom({
   }
   const pickHandlers: Array<(target: string) => void> = [];
   const canvas = renderer.domElement;
+  /** What a click on the model opens; the brief, the reviewer and the board only name themselves. */
+  const opens = (target: string | null) => target !== null && !['brief', 'reviewer', 'board'].includes(target);
   canvas.addEventListener('pointermove', (event) => {
     const target = pick(event);
     api.hover(target);
-    canvas.style.cursor = target ? 'pointer' : '';
+    canvas.style.cursor = opens(target) ? 'pointer' : '';
   });
   canvas.addEventListener('pointerleave', () => api.hover(null));
   canvas.addEventListener('click', (event) => {
     const target = pick(event);
-    if (target) for (const fn of pickHandlers) fn(target);
+    if (target && opens(target)) for (const fn of pickHandlers) fn(target);
   });
 
   const api: RoomEngine = {
@@ -569,7 +722,19 @@ export async function mountRoom({
       }
     },
     setRadio(on) {
-      radioLamp.material.color.set(on ? '#5fd38a' : '#3b3f3a');
+      radioLamp.material.color.set(on ? '#5fd38a' : '#4a4740');
+    },
+    setSign(text) {
+      drawSign(text);
+    },
+    monitorQuad(piece) {
+      const d = deskFor(piece);
+      const rect = renderer.domElement.getBoundingClientRect();
+      const corner = (dx: number, dy: number): [number, number] => {
+        projected.set(d.screen[0] + (dx * SCREEN.width) / 2, d.screen[1] + (dy * SCREEN.height) / 2, d.screen[2] + 0.013).project(camera);
+        return [rect.left + (projected.x * 0.5 + 0.5) * rect.width, rect.top + (-projected.y * 0.5 + 0.5) * rect.height];
+      };
+      return [corner(-1, 1), corner(1, 1), corner(1, -1), corner(-1, -1)];
     },
     monitorRect(piece) {
       const d = deskFor(piece);

@@ -65,41 +65,39 @@ export function deskFor(piece: PieceId): DeskPlan {
   return desk;
 }
 
-/** The review table at the front, the reviewer behind it (facing -z), hand-overs in front of it. */
+/** The review table at the front; the reviewer stands behind it, facing the room (-z). */
 export const REVIEW = {
-  table: { x: 0, z: 3.05, width: 2.2, depth: 0.9 },
-  reviewer: [0, 3.8] as const,
-  /** Where a builder stands to hand work over (slot 0), then the queue behind. */
-  slots: [
-    [0, 2.3],
-    [-0.75, 2.05],
-    [-1.45, 2.05],
-    [-2.15, 2.05],
-    [0.75, 2.05],
-    [1.45, 2.05],
-    [-2.85, 2.05],
-    [2.15, 2.05],
-    [-1.6, 2.75],
-    [-2.3, 2.75],
-  ] as const,
+  table: { x: 0, z: 3.05, width: 2.2, depth: 0.9, height: 0.76 },
+  reviewer: [0, 3.72] as const,
 } as const;
 
-/** The accepted board: a pinboard on legs to the right of the review table, facing the room's front. */
 /** The accepted board: a cork board on the back wall, right of the briefs. */
 export const BOARD = { x: 4.1, z: ROOM.z0 + 0.03, width: 2.0, height: 0.95, bottom: 1.05 } as const;
 
-/** The filing cabinet stands just inside the door on the left, facing the door. */
-export const CABINET = { x: -4.7, z: 3.25, width: 1.0, height: 1.42, depth: 0.7, drawers: 4, plinth: 0.08 } as const;
+/**
+ * The filing cabinet, the room's hero: a lateral file just inside the door on the left, facing it,
+ * with room in front for its drawers to come out short of the front wall.
+ */
+export const CABINET = { x: -2.5, z: 3.5, width: 1.4, height: 1.75, depth: 0.8, drawers: 4, plinth: 0.08 } as const;
 
 /** Reception: a counter just inside the door on the right. */
-export const RECEPTION = { x: 4.6, z: 3.35, width: 2.1, depth: 0.72, height: 1.02 } as const;
+export const RECEPTION = { x: 3.7, z: 3.45, width: 2.1, depth: 0.72, height: 1.02 } as const;
 
-/** A shelf on the back wall with the radio on it, left of the briefs. */
-export const SHELF = { x: -2.2, y: 1.22, width: 0.95, depth: 0.3 } as const;
-export const RADIO = { x: -2.2, width: 0.56, height: 0.34, depth: 0.22 } as const;
+/** The grid sign: a printed board on the back wall, left; the radio on a shelf beside it. */
+export const SIGN = { x: -4.45, y: 1.78, width: 1.9, height: 1.05 } as const;
+export const SHELF = { x: -2.55, y: 1.35, width: 0.9, depth: 0.3 } as const;
+export const RADIO = { x: -2.55, width: 0.52, height: 0.32, depth: 0.22 } as const;
 
-/** The grid sign: a plate on the back wall, far left. */
-export const SIGN = { x: -5.8, y: 1.9, width: 1.1, height: 0.62 } as const;
+/** A soft key light on the cabinet, so the eye lands there first. Baked into the floor like the lamp. */
+export const KEY = {
+  position: [CABINET.x + 1.7, 5.4, CABINET.z + 3.6] as Vec3,
+  target: [CABINET.x, 0.6, CABINET.z] as Vec3,
+  radius: 0.9,
+  cone: 0.24,
+  edge: 0.3,
+  /** Its strength, as a share of the lamp's at its own target. */
+  strength: 0.55,
+} as const;
 
 /** The brief: a drafting table against the back wall with the three briefs pinned above it. */
 export const BRIEF = {
@@ -172,12 +170,6 @@ export function staticBoxes(): Box[] {
     box([r.x - r.width / 2, 0, r.z - r.depth / 2 + 0.05], [r.x - r.width / 2 + 0.05, 0.71, r.z + r.depth / 2 - 0.05], 'wood'),
     box([r.x + r.width / 2 - 0.05, 0, r.z - r.depth / 2 + 0.05], [r.x + r.width / 2, 0.71, r.z + r.depth / 2 - 0.05], 'wood'),
   );
-  const [rx, rz] = REVIEW.reviewer;
-  boxes.push(
-    box([rx - 0.24, 0.42, rz - 0.22], [rx + 0.24, 0.47, rz + 0.22], 'grey'),
-    box([rx - 0.03, 0, rz - 0.03], [rx + 0.03, 0.42, rz + 0.03], 'grey'),
-    box([rx - 0.22, 0.47, rz + 0.2], [rx + 0.22, 0.74, rz + 0.25], 'grey'),
-  );
 
   const b = BOARD;
   boxes.push(box([b.x - b.width / 2, b.bottom, ROOM.z0], [b.x + b.width / 2, b.bottom + b.height, ROOM.z0 + 0.04], 'cork'));
@@ -216,20 +208,4 @@ export function staticBoxes(): Box[] {
     box([bt.x + bt.width / 2 - 0.1, 0, bt.z - 0.05], [bt.x + bt.width / 2 - 0.05, bt.height - 0.05, bt.z + 0.05], 'dark'),
   );
   return boxes;
-}
-
-/** Walking routes: from a seat, out into the aisle behind the row, along it, down a gap between desks, to a slot. */
-export function routeToReview(piece: PieceId, slot: readonly [number, number]): Array<readonly [number, number]> {
-  const d = deskFor(piece);
-  const aisleZ = d.z + 1.32;
-  // The gap between desks nearest the centre: desks are 2.6 apart, so gaps sit at ±1.3 and ±3.9.
-  const gapX = d.x === 0 ? 1.3 : d.x > 0 ? d.x - 1.3 : d.x + 1.3;
-  const points: Array<readonly [number, number]> = [d.seat, [d.x, aisleZ]];
-  if (d.row === 0) {
-    points.push([gapX, aisleZ], [gapX, 1.75]);
-  } else {
-    points.push([gapX === 0 ? 0 : gapX, aisleZ]);
-  }
-  points.push([slot[0], Math.max(1.75, slot[1] - 0.25)], slot);
-  return points;
 }

@@ -6,11 +6,12 @@
 // the door.
 
 import { DRAWERS, drawerOf } from '../content/drawers';
-import { isPieceId, type PieceId } from '../content/pieces';
+import { isPieceId, PIECE_IDS, type PieceId } from '../content/pieces';
 import { fillFolder, loopSource, scrollToMark, trapTab } from '../folder';
 import type { RoomEngine, Station } from '../scene/engine';
 import type { Timeline } from '../timeline/schema';
-import type { RoomLight } from './grid';
+import type { RoomLight, SignText } from './grid';
+import { quadTransform } from './quad';
 
 export interface RoomControl {
   /** A Reception answer quoted these tools' READMEs (empty for the CV or a refusal). */
@@ -18,11 +19,14 @@ export interface RoomControl {
   /** A quote's source link was followed. */
   source(piece: PieceId): void;
   setLight(light: RoomLight): void;
+  setSign(text: SignText): void;
   /** Pull a tool's folder from wherever you stand (directory rows, deep links). */
   pull(piece: PieceId): void;
 }
 
 const root = document.documentElement;
+/** The screen video's own box, before it is mapped onto the monitor (16:10, as the monitors are). */
+const SCREEN_BOX = { w: 640, h: 400 } as const;
 const nextFrame = () => new Promise<void>((r) => requestAnimationFrame(() => r()));
 
 export async function startRoom(timeline: Timeline): Promise<RoomControl> {
@@ -79,14 +83,14 @@ export async function startRoom(timeline: Timeline): Promise<RoomControl> {
   const toReception = document.getElementById('card-reception');
   if (back) back.textContent = 'Back to the cabinet';
 
+  /** The loop sits exactly on the monitor as the camera sees it, from a little above. */
   function placeScreen(): void {
-    if (!openPiece || !hall) return;
-    const r = engine.monitorRect(openPiece);
+    if (!openPiece || !hall || !screen) return;
     const h = hall.getBoundingClientRect();
-    screen?.style.setProperty('left', `${(r.left - h.left).toFixed(1)}px`);
-    screen?.style.setProperty('top', `${(r.top - h.top).toFixed(1)}px`);
-    screen?.style.setProperty('width', `${r.width.toFixed(1)}px`);
-    screen?.style.setProperty('height', `${r.height.toFixed(1)}px`);
+    const corners = engine.monitorQuad(openPiece).map(([x, y]) => [x - h.left, y - h.top] as const);
+    const [a, b, c, d] = corners;
+    if (!a || !b || !c || !d) return;
+    screen.style.transform = quadTransform(SCREEN_BOX.w, SCREEN_BOX.h, [a, b, c, d]);
   }
   new ResizeObserver(() => placeScreen()).observe(stage);
 
@@ -259,6 +263,92 @@ export async function startRoom(timeline: Timeline): Promise<RoomControl> {
     if (card && !card.hidden) trapTab(card, event);
   });
 
+  // ---------- The sign's and the radio's cards ----------
+  // Each opens beside its object on hover or focus, stays open when clicked, and always fits inside
+  // the part of the room that is on screen. Esc closes it and returns to the object.
+  /** One card at a time: opening one closes the others. */
+  const closers = new Map<string, () => void>();
+  for (const [target, cardId] of [
+    ['sign', 'grid-sign'],
+    ['radio', 'radio'],
+  ] as const) {
+    const trigger = label(target);
+    const pop = document.getElementById(cardId);
+    if (!trigger || !pop) continue;
+    let pinned = false;
+    let closing: ReturnType<typeof setTimeout> | undefined;
+    const place = () => {
+      const t = trigger.getBoundingClientRect();
+      const hr = hall.getBoundingClientRect();
+      const view = {
+        top: Math.max(hr.top, 0),
+        bottom: Math.min(hr.bottom, window.innerHeight),
+        left: Math.max(hr.left, 0),
+        right: Math.min(hr.right, window.innerWidth),
+      };
+      const w = pop.offsetWidth;
+      const h = pop.offsetHeight;
+      const margin = 12;
+      let x = t.left + t.width / 2 - w / 2;
+      let y = t.bottom + 10;
+      if (y + h > view.bottom - margin) y = t.top - h - 10;
+      x = Math.min(Math.max(x, view.left + margin), view.right - w - margin);
+      y = Math.min(Math.max(y, view.top + margin), view.bottom - h - margin);
+      pop.style.transform = `translate(${(x - hr.left).toFixed(1)}px, ${(y - hr.top).toFixed(1)}px)`;
+    };
+    const open = () => {
+      clearTimeout(closing);
+      for (const [other, closeOther] of closers) if (other !== target) closeOther();
+      pop.dataset.open = 'true';
+      trigger.setAttribute('aria-expanded', 'true');
+      place();
+    };
+    const close = () => {
+      clearTimeout(closing);
+      pinned = false;
+      delete pop.dataset.open;
+      trigger.setAttribute('aria-expanded', 'false');
+    };
+    closers.set(target, close);
+    const later = () => {
+      clearTimeout(closing);
+      closing = setTimeout(() => {
+        if (!pinned && !pop.contains(document.activeElement) && document.activeElement !== trigger) close();
+      }, 220);
+    };
+    trigger.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && pop.dataset.open) close();
+    });
+    trigger.addEventListener('pointerenter', open);
+    trigger.addEventListener('pointerleave', later);
+    pop.addEventListener('pointerenter', open);
+    pop.addEventListener('pointerleave', later);
+    trigger.addEventListener('focus', open);
+    trigger.addEventListener('blur', later);
+    pop.addEventListener('focusout', later);
+    trigger.addEventListener('click', (event) => {
+      event.preventDefault();
+      pinned = !pinned || pop.dataset.open !== 'true';
+      if (!pinned) return close();
+      open();
+      // Into the card: the radio's switch, or the sign's reading for a screen reader.
+      (pop.querySelector<HTMLElement>('button') ?? pop).focus();
+    });
+    pop.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape') return;
+      event.stopPropagation();
+      close();
+      trigger.focus();
+    });
+    new ResizeObserver(() => pop.dataset.open && place()).observe(pop);
+  }
+  document.addEventListener('radio:state', (event) => engine.setRadio((event as CustomEvent<{ on: boolean }>).detail.on));
+
+  // For the checks: where each monitor is on screen (?debug only).
+  if (params.has('debug')) {
+    Object.assign(window, { roomDebug: { monitorRects: () => PIECE_IDS.map((p) => engine.monitorRect(p).toJSON()) } });
+  }
+
   const toggle = document.getElementById('replay-toggle');
   toggle?.addEventListener('click', () => {
     const paused = engine.togglePause();
@@ -283,6 +373,9 @@ export async function startRoom(timeline: Timeline): Promise<RoomControl> {
     },
     setLight(light) {
       engine.setLight(light, !reduced);
+    },
+    setSign(text) {
+      engine.setSign(text);
     },
     pull(piece) {
       void run(() => toDesk(piece));

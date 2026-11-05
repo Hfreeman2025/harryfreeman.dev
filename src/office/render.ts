@@ -138,11 +138,10 @@ export function renderPlan(): string {
   <text class="plan-room" x="${SHELF.x}" y="${ROOM.z0 + 0.8}" text-anchor="middle">Radio</text>
   ${DESKS.map((d) => deskPlan(d.piece)).join('\n')}
   <rect class="plan-review" x="${r(rt.x - rt.width / 2)}" y="${r(rt.z - rt.depth / 2)}" width="${rt.width}" height="${rt.depth}"/>
-  <circle class="plan-desk__chair" cx="${REVIEW.reviewer[0]}" cy="${REVIEW.reviewer[1]}" r="0.24"/>
   <text class="plan-room" x="${r(rt.x + rt.width / 2 + 0.2)}" y="${r(rt.z + 0.1)}">Review table</text>
   <a class="plan-place" href="#archive"><rect class="plan-cabinet" x="${r(c.x - c.width / 2)}" y="${r(c.z - c.depth / 2)}" width="${c.width}" height="${c.depth}"/><path class="plan-drawers" d="${drawers}"/><text class="plan-room" x="${c.x}" y="${r(c.z + c.depth / 2 + 0.5)}" text-anchor="middle">Filing cabinet</text></a>
   <a class="plan-place" href="#ask"><rect class="plan-reception" x="${r(rc.x - rc.width / 2)}" y="${r(rc.z - rc.depth / 2)}" width="${rc.width}" height="${rc.depth}"/><text class="plan-room" x="${rc.x}" y="${r(rc.z + rc.depth / 2 + 0.5)}" text-anchor="middle">Reception</text></a>
   <g class="plan-here" transform="translate(0 ${r(ROOM.z1 + 0.62)})"><circle r="0.2"/><text x="0.34" y="0.1">You are here, at the door</text></g>
-  <g class="plan-figures" id="plan-figures" aria-hidden="true">${DESKS.map((d) => `<circle class="plan-figure" data-piece="${d.piece}" cx="${d.seat[0]}" cy="${d.seat[1]}" r="0.17"/><rect class="plan-sheet" data-sheet="${d.piece}" x="-0.11" y="-0.14" width="0.22" height="0.28" visibility="hidden"/>`).join('')}<circle class="plan-figure plan-figure--reviewer" cx="${REVIEW.reviewer[0]}" cy="${REVIEW.reviewer[1]}" r="0.17"/></g>
+  <g class="plan-figures" id="plan-figures" aria-hidden="true">${DESKS.map((d) => `<circle class="plan-figure" data-piece="${d.piece}" cx="${d.seat[0]}" cy="${d.seat[1]}" r="0.17"/>`).join('')}<circle class="plan-figure plan-figure--reviewer" cx="${REVIEW.reviewer[0]}" cy="${REVIEW.reviewer[1]}" r="0.17"/>${DESKS.map((d) => `<rect class="plan-sheet" data-sheet="${d.piece}" x="-0.13" y="-0.17" width="0.26" height="0.34" visibility="hidden"/>`).join('')}</g>
 </svg>`;
 }

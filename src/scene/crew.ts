@@ -1,28 +1,48 @@
-// The people in the room and what follows them: a builder at each desk and the reviewer, replaying
-// the build timeline; the screens that light when work starts; the accepted board; the brief in
-// force; the lamp pools for hover and answers; and the caption under the room.
+// The people in the room and the work between them. A builder sits at each desk and the reviewer
+// stands at the review table; nobody walks. The replay moves the work instead (work.ts): each tool's
+// sheet goes from its desk to the table and back red, or on to the board green. Screens light when
+// work starts, the brief in force glows, lamp pools mark hover and answers, and the caption follows.
 
-import { Mesh, MeshLambertMaterial, PlaneGeometry, type Scene } from 'three';
+import { CanvasTexture, Color, DoubleSide, Mesh, MeshBasicMaterial, MeshLambertMaterial, PlaneGeometry, type Scene } from 'three';
 import { PIECE_IDS, type PieceId } from '../content/pieces';
 import { captionAt } from '../timeline/caption';
-import { type Phase, Replay } from '../timeline/replay';
+import { type Phase, Replay, WALK_BACK } from '../timeline/replay';
 import type { Timeline } from '../timeline/schema';
-import { along, approachAngle, Figure, makeRoute, type Route } from './figures';
-import { DESKS, deskFor, REVIEW, routeToReview } from './layout';
+import { DESKS, REVIEW } from './layout';
+import { PALETTE } from './light';
 import type { Model } from './model';
-
-const smooth = (t: number) => {
-  const c = Math.max(0, Math.min(1, t));
-  return c * c * (3 - 2 * c);
-};
+import { builderPose, type Figure, pose, reviewerPose, seatedFigure, standingFigure } from './people';
+import { sheetPose, type Tint } from './work';
 
 export interface CrewOptions {
   readonly scene: Scene;
   readonly model: Model;
   readonly timeline: Timeline;
   readonly startAt: number;
-  /** Desk labels, to flash when work is sent back or accepted. */
-  readonly labelFor: (piece: PieceId) => HTMLElement | undefined;
+}
+
+const TINTS: Record<Tint, Color> = {
+  paper: new Color('#faf8f3'),
+  returned: new Color(PALETTE.returned),
+  accepted: new Color(PALETTE.accepted),
+};
+
+/** A soft shadow where a figure meets the floor, as a model photographed under a soft lamp shows. */
+function contactTexture(): CanvasTexture {
+  const size = 64;
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  if (ctx) {
+    const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+    g.addColorStop(0, 'rgba(0,0,0,0.55)');
+    g.addColorStop(0.6, 'rgba(0,0,0,0.18)');
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, size, size);
+  }
+  return new CanvasTexture(canvas);
 }
 
 export class Crew {
@@ -30,14 +50,11 @@ export class Crew {
   s: number;
   hovered: PieceId | null = null;
   readonly answering = new Set<PieceId>();
-  /** Where the camera stands close (at a desk): figures within reach of it step out of the picture. */
-  near: { x: number; z: number; r: number } | null = null;
+  /** The desk the camera stands at: its builder steps out of the picture. */
+  away: PieceId | null = null;
   readonly #builders = new Map<PieceId, Figure>();
-  readonly #routes = new Map<PieceId, Route>();
-  readonly #reviewer = new Figure();
-  readonly #tableSheet: Mesh;
-  readonly #lastPhase = new Map<PieceId, Phase['kind']>();
-  readonly #flashUntil = new Map<PieceId, number>();
+  readonly #reviewer: Figure;
+  readonly #sheets = new Map<PieceId, Mesh<PlaneGeometry, MeshLambertMaterial>>();
   readonly #screenLevel = new Map<PieceId, number>(PIECE_IDS.map((p) => [p, 0.07]));
   readonly #poolLevel = new Map<PieceId, number>(PIECE_IDS.map((p) => [p, 0]));
   readonly #o: CrewOptions;
@@ -47,100 +64,64 @@ export class Crew {
     this.#o = o;
     this.replay = new Replay(o.timeline);
     this.s = o.startAt;
+    const contact = contactTexture();
+    const shadow = (x: number, z: number, w: number, d: number) => {
+      const mesh = new Mesh(
+        new PlaneGeometry(w, d),
+        new MeshBasicMaterial({ map: contact, transparent: true, depthWrite: false, opacity: 0.5 }),
+      );
+      mesh.rotation.x = -Math.PI / 2;
+      mesh.position.set(x, 0.003, z);
+      mesh.renderOrder = 1;
+      o.scene.add(mesh);
+    };
     for (const d of DESKS) {
-      const figure = new Figure();
-      figure.x = d.seat[0];
-      figure.z = d.seat[1];
-      figure.facing = Math.PI;
+      const figure = seatedFigure();
+      figure.group.position.set(d.seat[0], 0, d.seat[1]);
       o.scene.add(figure.group);
       this.#builders.set(d.piece, figure);
-      this.#routes.set(d.piece, makeRoute(routeToReview(d.piece, REVIEW.slots[0])));
+      shadow(d.seat[0], d.seat[1] - 0.42, 0.42, 0.3);
+      const sheet = new Mesh(new PlaneGeometry(0.26, 0.34), new MeshLambertMaterial({ color: TINTS.paper.clone(), side: DoubleSide }));
+      sheet.visible = false;
+      o.scene.add(sheet);
+      this.#sheets.set(d.piece, sheet);
     }
-    this.#reviewer.x = REVIEW.reviewer[0];
-    this.#reviewer.z = REVIEW.reviewer[1];
-    this.#reviewer.facing = Math.PI;
+    this.#reviewer = standingFigure();
+    this.#reviewer.group.position.set(REVIEW.reviewer[0], 0, REVIEW.reviewer[1]);
     o.scene.add(this.#reviewer.group);
-    this.#tableSheet = new Mesh(new PlaneGeometry(0.27, 0.36), new MeshLambertMaterial({ color: '#f7f3ea' }));
-    this.#tableSheet.rotation.x = -Math.PI / 2;
-    this.#tableSheet.position.set(REVIEW.table.x - 0.1, 0.765, REVIEW.table.z - 0.05);
-    this.#tableSheet.visible = false;
-    o.scene.add(this.#tableSheet);
+    shadow(REVIEW.reviewer[0], REVIEW.reviewer[1] - 0.02, 0.6, 0.42);
   }
 
   update(dt: number, t: number): void {
-    const { model, labelFor } = this.#o;
+    const { model } = this.#o;
     const s = this.s;
     const k = 1 - Math.exp(-dt * 7);
     const phases = new Map<PieceId, Phase>(PIECE_IDS.map((p) => [p, this.replay.phase(p, s)]));
-    const queue = [...phases.entries()]
-      .filter(([, ph]) => ph.kind === 'at-review')
-      .sort((a, b) => (a[1].kind === 'at-review' && b[1].kind === 'at-review' ? a[1].due - b[1].due : 0))
-      .map(([p]) => p);
     let reviewing = false;
 
     for (const piece of PIECE_IDS) {
-      const figure = this.#builders.get(piece);
-      const route = this.#routes.get(piece);
       const phase = phases.get(piece);
-      if (!figure || !route || !phase) continue;
-      const d = deskFor(piece);
+      const figure = this.#builders.get(piece);
+      if (!phase || !figure) continue;
       const i = PIECE_IDS.indexOf(piece);
-      let seated = 1;
-      let lean = 0;
-      let bob = 0;
-      let carrying = false;
-      let marked = false;
-      const answering = this.answering.has(piece);
-      figure.answer += ((answering ? 1 : 0) - figure.answer) * k;
+      if (phase.kind === 'at-review' && phase.reviewing) reviewing = true;
 
-      switch (phase.kind) {
-        case 'idle':
-        case 'done':
-        case 'building': {
-          figure.x += (d.seat[0] - figure.x) * k;
-          figure.z += (d.seat[1] - figure.z) * k;
-          figure.facing = approachAngle(figure.facing, answering ? 0 : Math.PI, k);
-          seated = 1 - figure.answer;
-          lean = phase.kind === 'building' ? 0.1 + Math.sin(t * 2.1 + i) * 0.025 : phase.kind === 'done' ? -0.05 : 0;
-          break;
-        }
-        case 'to-review': {
-          const at = along(route, phase.progress);
-          figure.x = at.x;
-          figure.z = at.z;
-          figure.facing = at.facing;
-          seated = 1 - smooth(phase.progress / 0.14);
-          bob = Math.abs(Math.sin(phase.progress * route.total * 3.2)) * 0.035;
-          carrying = true;
-          break;
-        }
-        case 'at-review': {
-          const slot = REVIEW.slots[Math.min(queue.indexOf(piece), REVIEW.slots.length - 1)] ?? REVIEW.slots[0];
-          figure.x += (slot[0] - figure.x) * k;
-          figure.z += (slot[1] - figure.z) * k;
-          figure.facing = approachAngle(figure.facing, 0, k);
-          seated = 0;
-          carrying = !phase.reviewing;
-          if (phase.reviewing) reviewing = true;
-          break;
-        }
-        case 'back': {
-          const at = along(route, phase.progress, true);
-          figure.x = at.x;
-          figure.z = at.z;
-          figure.facing = at.facing;
-          seated = smooth((phase.progress - 0.86) / 0.14);
-          bob = Math.abs(Math.sin(phase.progress * route.total * 3.2)) * 0.035;
-          carrying = phase.outcome === 'returned';
-          marked = carrying;
-          break;
+      // At most the builder at work turns a little, now and then, and looks down at the desk.
+      const b = builderPose(phase.kind === 'building', t, i);
+      pose(figure, b.turn, b.lean, b.nod);
+      figure.group.visible = this.away !== piece;
+
+      const sheet = this.#sheets.get(piece);
+      if (sheet) {
+        const p = sheetPose(piece, phase);
+        sheet.visible = p.visible;
+        if (p.visible) {
+          sheet.position.set(p.x, p.y, p.z);
+          // Flat on a desk or the table; turning upright as it reaches the board.
+          sheet.rotation.set(-Math.PI / 2 + (Math.PI / 2) * p.upright, 0, (1 - p.upright) * (0.12 + (i % 3) * 0.05));
+          sheet.material.color.copy(TINTS[p.tint]);
         }
       }
-      figure.group.visible = this.near === null || Math.hypot(figure.x - this.near.x, figure.z - this.near.z) > this.near.r;
-      figure.seated = seated;
-      figure.sheet.visible = carrying;
-      figure.mark.visible = marked;
-      figure.pose(seated, lean, bob);
 
       // Screens: dark until the work starts, lit from then on.
       const target = phase.kind === 'idle' ? 0.07 : 1;
@@ -148,41 +129,19 @@ export class Crew {
       this.#screenLevel.set(piece, level);
       model.screens.meshes.get(piece)?.material.color.setScalar(level);
 
-      const sheet = model.boardSheets.get(piece);
-      if (sheet) sheet.visible = this.replay.beats.some((b) => b.piece === piece && b.kind === 'accepted' && b.scene <= s);
+      // The board shows a tool once its accepted sheet has arrived there.
+      const board = model.boardSheets.get(piece);
+      if (board) board.visible = this.replay.beats.some((b) => b.piece === piece && b.kind === 'accepted' && b.scene + WALK_BACK <= s);
 
-      const poolTarget = answering ? 0.85 : this.hovered === piece ? 0.5 : 0;
+      const poolTarget = this.answering.has(piece) ? 0.85 : this.hovered === piece ? 0.5 : 0;
       const pool = (this.#poolLevel.get(piece) ?? 0) + (poolTarget - (this.#poolLevel.get(piece) ?? 0)) * k;
       this.#poolLevel.set(piece, pool);
       const poolMesh = model.pools.get(piece);
-      if (poolMesh) poolMesh.material.opacity = pool * 0.55;
-
-      // A moment of red pencil on the desk's label when work is sent back, amber when accepted.
-      if (this.#lastPhase.get(piece) !== phase.kind) {
-        this.#lastPhase.set(piece, phase.kind);
-        const label = labelFor(piece);
-        if (label && phase.kind === 'back') {
-          label.dataset.flash = phase.outcome;
-          label.dataset.state = phase.outcome;
-          const state = label.querySelector('.desk-label__state');
-          if (state)
-            state.textContent = phase.outcome === 'returned' ? `sent back, round ${phase.round}` : `accepted, round ${phase.round}`;
-          this.#flashUntil.set(piece, t + 2.6);
-        }
-      }
-      const until = this.#flashUntil.get(piece);
-      if (until !== undefined && t > until) {
-        this.#flashUntil.delete(piece);
-        const label = labelFor(piece);
-        if (label) {
-          delete label.dataset.flash;
-          label.dataset.state = '';
-        }
-      }
+      if (poolMesh) poolMesh.material.opacity = pool * 0.5;
     }
 
-    this.#reviewer.pose(1, reviewing ? 0.22 : 0.02, 0);
-    this.#tableSheet.visible = reviewing;
+    const r = reviewerPose(reviewing);
+    pose(this.#reviewer, r.turn, r.lean, r.nod);
 
     let currentBrief: string | undefined;
     let briefAt = Number.NEGATIVE_INFINITY;

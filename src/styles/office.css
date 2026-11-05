@@ -610,20 +610,18 @@ ask-the-record::part(refusal) {
 .plan-figure--reviewer {
   fill: var(--sign);
 }
-.plan-figure[data-flash="returned"] {
-  fill: var(--red);
-}
-.plan-figure[data-flash="accepted"] {
-  fill: var(--green);
-}
 .plan-sheet {
-  fill: #fff;
+  fill: #faf8f3;
   stroke: var(--ink);
-  stroke-width: 0.02;
+  stroke-width: 0.03;
 }
-.plan-sheet[data-marked="true"] {
+.plan-sheet[data-tint="returned"] {
+  fill: #e38a74;
   stroke: var(--red);
-  stroke-width: 0.04;
+}
+.plan-sheet[data-tint="accepted"] {
+  fill: #8fc79a;
+  stroke: var(--green);
 }
 .p-dark,
 .p-fill {

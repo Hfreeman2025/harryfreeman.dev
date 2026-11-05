@@ -1,6 +1,6 @@
 // Photographs the room with the page's own renderer, for the poster shown before the scene is ready,
-// the social image and the PNG favicon. The grid API is mocked to fail, so the stills carry the
-// neutral light, never a reading that would go stale. Needs the dev or preview server on 4400.
+// the social image and the PNG favicon. The grid API is mocked never to answer, so the stills show the
+// sign reading the grid and the neutral light, never a reading that would go stale. Needs the dev or preview server on 4400.
 //   node scripts/stills.mjs
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, rmSync } from 'node:fs';
@@ -22,7 +22,7 @@ const browser = await launch('chromium');
 async function open(url, width, height, scale) {
   const context = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: scale });
   await context.addInitScript(silenceLiveAudio);
-  await context.route(/^https:\/\/api\.carbonintensity\.org\.uk\//, gridMock('fail'));
+  await context.route(/^https:\/\/api\.carbonintensity\.org\.uk\//, gridMock('hang'));
   const page = await context.newPage();
   await page.goto(url, { waitUntil: 'load' });
   await page.waitForFunction(() => document.documentElement.dataset.stage === 'live', null, { timeout: 20000 });

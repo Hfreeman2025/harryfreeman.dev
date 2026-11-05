@@ -3,6 +3,7 @@
    seen from the door, and everything in it is placed over the model by the engine. */
 
 :root {
+  --surround: #ebe7e0;
   --room: #15120e;
   --card: #ece6da;
   --card-ink: #1b1712;
@@ -227,7 +228,7 @@ html[data-mode="room"] .board__row--3d {
   }
 }
 
-/* ---------- The room ---------- */
+/* ---------- The room: an architect's study model on a sheet of paper ---------- */
 html[data-mode="room"] .lobby {
   grid-template-columns: minmax(320px, 390px) minmax(0, 1fr);
   gap: 0;
@@ -245,7 +246,7 @@ html[data-mode="room"] .hall {
   height: 100svh;
   min-height: 620px;
   overflow: hidden;
-  background: var(--room);
+  background: var(--surround);
   color: var(--ink);
 }
 html[data-mode="room"] .archive,
@@ -291,9 +292,7 @@ html[data-stage="live"] .room__stage {
   inset: 0;
   pointer-events: none;
 }
-.room__labels > *,
-html[data-mode="room"] .grid-sign,
-html[data-mode="room"] .radio {
+.room__labels > * {
   position: absolute;
   left: 0;
   top: 0;
@@ -301,57 +300,79 @@ html[data-mode="room"] .radio {
   pointer-events: auto;
   will-change: transform;
 }
-html[data-mode="room"]:not([data-stage="live"]) .grid-sign,
-html[data-mode="room"]:not([data-stage="live"]) .radio {
-  visibility: hidden;
-}
-html[data-mode="room"] :focus-visible {
-  outline-color: var(--amber);
-}
 
-/* Labels: cards on short leaders, over what they name. */
-.desk-label,
-.obj {
-  display: grid;
-  padding: 2px 8px 3px;
-  background: var(--card);
-  color: var(--card-ink);
-  font: 500 14px / 1.3 var(--cond);
+/* Tags: printed on the model, small and plain, as an architect's model is labelled. */
+.tag {
+  display: block;
+  margin: 0;
+  padding: 1px 5px 2px;
+  background: #fbf9f4;
+  color: #2a2620;
+  border: 1px solid rgb(42 38 32 / 0.28);
+  border-radius: 1px;
+  font: 500 12px / 1.25 var(--cond);
   text-align: left;
   text-decoration: none;
   white-space: nowrap;
-  border: 0;
-  border-radius: 2px;
-  box-shadow: 0 1px 0 rgb(0 0 0 / 0.35);
   cursor: pointer;
-  transition: background-color 160ms ease;
+  transition:
+    opacity 140ms ease,
+    background-color 140ms ease;
 }
-.desk-label::after,
-.obj--place::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 100%;
-  width: 1px;
-  height: var(--leader, 16px);
-  background: rgb(236 230 218 / 0.75);
+.tag--place {
+  padding: 2px 7px 3px;
+  font-size: 13.5px;
 }
-.obj__name {
+.tag__name {
+  display: block;
   font-weight: 600;
 }
-.obj__note {
-  font-size: 12.5px;
-  color: #5e5546;
+.tag__note {
+  display: block;
+  font-size: 11.5px;
+  color: #6b645a;
 }
-/* A drawer's button lies over its front: the 3D card holder is the label you read. */
-.obj--drawer {
+.tag--credit {
+  padding: 1px 5px;
+  background: rgb(251 249 244 / 0.92);
+  color: #4d4840;
+  font-size: 11px;
+  cursor: default;
+}
+/* A desk's tag shows when you point at the desk or reach it by keyboard, and while it answers. */
+.tag[data-reveal="hover"]:not(:focus-visible):not([data-hot="true"]):not([data-answering="true"]) {
+  opacity: 0;
+  pointer-events: none;
+}
+.tag:hover,
+.tag[data-hot="true"],
+.tag:focus-visible {
+  background: #fff3d6;
+  border-color: #b8862e;
+}
+.tag[data-answering="true"] {
+  background: #fde9b8;
+  border-color: #b8862e;
+}
+html[data-mode="room"] :focus-visible {
+  outline: 2px solid #b8862e;
+  outline-offset: 2px;
+}
+
+/* Buttons laid over a drawer's front, the sign or the radio: the object itself is what you read. */
+.obj {
+  display: block;
   padding: 0;
   background: transparent;
-  box-shadow: none;
+  border: 0;
   border-radius: 3px;
+  color: inherit;
+  cursor: pointer;
+  text-decoration: none;
 }
 .obj--drawer .obj__name,
-.obj--drawer .obj__note {
+.obj--drawer .obj__note,
+.obj--cover .obj__name {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -359,18 +380,20 @@ html[data-mode="room"] :focus-visible {
   clip-path: inset(50%);
   white-space: nowrap;
 }
-.obj.obj--drawer:hover,
-.obj.obj--drawer[data-hot="true"] {
-  background: rgb(242 181 68 / 0.14);
-  outline: 2px solid rgb(242 181 68 / 0.7);
+.obj--drawer:hover,
+.obj--drawer[data-hot="true"],
+.obj--cover:hover,
+.obj--cover[aria-expanded="true"] {
+  background: rgb(233 173 69 / 0.12);
+  outline: 2px solid rgb(184 134 46 / 0.7);
 }
-.obj.obj--drawer:focus-visible {
-  background: rgb(242 181 68 / 0.14);
-  outline: 3px solid var(--amber);
-  outline-offset: 2px;
+.obj--drawer:focus-visible,
+.obj--cover:focus-visible {
+  background: rgb(233 173 69 / 0.12);
 }
-.obj.obj--drawer[aria-expanded="true"] {
+.obj--drawer[aria-expanded="true"] {
   background: transparent;
+  outline: 0;
 }
 /* A folder's name, printed on its tab. */
 .obj--folder {
@@ -378,108 +401,44 @@ html[data-mode="room"] :focus-visible {
   background: #efd8a6;
   color: #3b2f17;
   border: 1px solid #b99857;
-  box-shadow: none;
-  font-size: 13px;
+  border-radius: 1px;
+  font: 600 13px / 1.25 var(--cond);
+  white-space: nowrap;
 }
-.obj--folder .obj__name {
-  font-weight: 600;
-}
-.desk-label__state {
-  display: none;
-  font-size: 12px;
-  color: #5e5546;
-}
-.desk-label[data-state]:not([data-state=""]) .desk-label__state {
-  display: block;
-}
-.desk-label[data-flash="returned"] {
-  background: var(--vermilion);
-}
-.desk-label[data-flash="accepted"],
-.desk-label:hover,
-.desk-label[data-hot="true"],
-.obj:hover,
-.obj[data-hot="true"],
-.desk-label:focus-visible,
-.obj:focus-visible,
-.obj[aria-expanded="true"] {
-  background: var(--amber);
-}
-.desk-label[data-answering="true"],
-.obj[data-answering="true"] {
-  background: var(--amber);
-  box-shadow: 0 0 0 3px rgb(242 181 68 / 0.35);
-}
-.desk-label--room {
-  background: var(--room);
-  color: var(--ink-on-dark, #f1ebe1);
-  border: 1px solid rgb(241 235 225 / 0.45);
-  box-shadow: none;
-}
-.desk-label--room:hover,
-.desk-label--room:focus-visible {
-  background: var(--room);
-  color: var(--amber);
-  border-color: var(--amber);
+.obj--folder:hover,
+.obj--folder:focus-visible {
+  background: #f6e3b8;
 }
 
-/* The sign and the radio, in the room: cards above the back wall, on lines down to the plate and the
-   radio on its shelf. */
-html[data-mode="room"] .grid-sign {
-  width: 196px;
-  padding: 7px 10px 8px;
-  font-size: 11.5px;
-  line-height: 1.35;
-  border-top-width: 4px;
-  box-shadow: 0 6px 16px -8px rgb(0 0 0 / 0.6);
-}
-html[data-mode="room"] .grid-sign__title {
-  font-size: 12.5px;
-}
-html[data-mode="room"] .grid-sign__value {
-  margin-top: 2px;
-  font-size: 14.5px;
-}
-html[data-mode="room"] .grid-sign[data-state="unavailable"] .grid-sign__value,
-html[data-mode="room"] .grid-sign[data-state="loading"] .grid-sign__value {
-  font-size: 15px;
-}
-html[data-mode="room"] .grid-sign__source {
-  font-size: 10.5px;
-  margin-top: 2px;
-}
-html[data-mode="room"] .grid-sign::after,
-html[data-mode="room"] .radio::after {
-  content: "";
+/* The sign's and the radio's cards: closed until you point at, reach or click the object. */
+html[data-mode="room"] .grid-sign,
+html[data-mode="room"] .radio {
   position: absolute;
-  left: 50%;
-  top: 100%;
-  width: 1px;
-  height: var(--leader, 12px);
-  background: rgb(236 230 218 / 0.6);
+  left: 0;
+  top: 0;
+  z-index: 6;
+  box-shadow: 0 14px 34px -16px rgb(42 38 32 / 0.55);
+}
+html[data-mode="room"] .grid-sign:not([data-open]),
+html[data-mode="room"] .radio:not([data-open]) {
+  display: none;
+}
+html[data-mode="room"] .grid-sign {
+  width: 260px;
 }
 html[data-mode="room"] .grid-sign__light {
   display: block;
 }
-html[data-mode="room"] .radio__button {
-  white-space: nowrap;
-}
 html[data-mode="room"] .radio {
-  grid-template-columns: auto;
-  width: 200px;
-  padding: 6px 8px;
-  gap: 2px;
-  background: rgb(21 18 14 / 0.82);
-  color: #f1ebe1;
-  border-color: rgb(241 235 225 / 0.3);
+  width: 250px;
+  grid-template-columns: 1fr;
+  gap: 6px;
+  padding: 12px 14px;
 }
 html[data-mode="room"] .radio__button {
   grid-row: auto;
-  font-size: 14px;
-}
-html[data-mode="room"] .radio__credit {
-  color: #bdb2a1;
-  font-size: 11.5px;
+  justify-self: start;
+  white-space: nowrap;
 }
 
 /* Where you stand decides what shows. */
@@ -602,9 +561,15 @@ html[data-mode="room"] #card-body li {
 html[data-mode="room"] .folder-card__recorded {
   font-size: 12px;
 }
+/* The desk's screen: a 640 × 400 box, mapped onto the monitor's corners (room/quad.ts). */
 .room__screen {
   position: absolute;
+  left: 0;
+  top: 0;
   z-index: 3;
+  width: 640px;
+  height: 400px;
+  transform-origin: 0 0;
   object-fit: cover;
   background: #000;
 }
@@ -617,8 +582,8 @@ html[data-mode="room"] .folder-card__recorded {
   bottom: 0;
   z-index: 1;
   padding: 12px 24px 14px;
-  background: linear-gradient(transparent, rgb(21 18 14 / 0.88) 36%);
-  color: #f1ebe1;
+  background: linear-gradient(rgb(235 231 224 / 0), rgb(235 231 224 / 0.94) 38%);
+  color: var(--ink);
   pointer-events: none;
 }
 .room__caption {
@@ -631,7 +596,7 @@ html[data-mode="room"] .folder-card__recorded {
   pointer-events: auto;
   margin: 0;
   max-width: none;
-  color: #f1ebe1;
+  color: var(--ink);
   grid-template-rows: 22px 22px 22px;
   grid-auto-rows: 0;
   row-gap: 0;
@@ -658,7 +623,7 @@ html[data-mode="room"] .folder-card__recorded {
 }
 .room__caption .replay__evidence,
 .room__caption .replay__note {
-  color: #bdb2a1;
+  color: var(--ink-3);
 }
 html[data-station="desk"] .room__caption,
 html[data-station="reception"] .room__caption {
@@ -670,7 +635,7 @@ html[data-mode="room"] .room__status {
   bottom: 110px;
   z-index: 4;
   max-width: 440px;
-  color: #f1ebe1;
+  color: var(--ink);
 }
 
 /* Photo mode: the bare model, for the poster and the social image. */

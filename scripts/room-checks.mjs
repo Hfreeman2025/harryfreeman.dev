@@ -172,7 +172,7 @@ export async function roomChecks({ check, expect, BASE, config, shot }) {
     await live(page, BASE);
     // Just under each label is the object itself, drawn in WebGL.
     let b = await box(page, '[data-target="cabinet"]');
-    await page.mouse.click(b.x + b.width / 2 + 6, b.y + b.height + 60);
+    await page.mouse.click(b.x + b.width / 2, b.y - 50);
     await waitStation(page, 'cabinet');
     // The labels come back once the camera has arrived.
     await page.locator('[data-target="drawer:agents"]').waitFor({ state: 'visible', timeout: 5000 });
@@ -197,9 +197,19 @@ export async function roomChecks({ check, expect, BASE, config, shot }) {
   });
 
   await check('room: clicking a desk in the model turns to it', desk, async (page) => {
-    await live(page, BASE);
-    const b = await box(page, '[data-target="desk:sourced"]');
-    await page.mouse.click(b.x + b.width / 2 + 6, b.y + b.height + 40);
+    await live(page, `${BASE}/?debug`);
+    const sourced = (await page.evaluate(() => window.roomDebug.monitorRects()))[6];
+    // Pointing at a desk (here, its monitor) shows its tag; clicking turns to it.
+    await page.mouse.move(sourced.x + sourced.width / 2, sourced.y + sourced.height / 2);
+    await page.waitForFunction(() => document.querySelector('[data-target="desk:sourced"]')?.dataset.hot === 'true', null, {
+      timeout: 3000,
+    });
+    await page.waitForTimeout(200);
+    expect(
+      Number(await page.locator('[data-target="desk:sourced"]').evaluate((el) => getComputedStyle(el).opacity)) > 0.9,
+      'its tag did not show',
+    );
+    await page.mouse.click(sourced.x + sourced.width / 2, sourced.y + sourced.height / 2);
     await cardOpen(page);
     expect((await cardTitle(page)) === 'Sourced', `opened ${await cardTitle(page)}`);
   });
@@ -316,6 +326,9 @@ export async function roomChecks({ check, expect, BASE, config, shot }) {
     await live(page, BASE);
     await page.waitForTimeout(1500);
     expect((await page.evaluate(() => window.__audio.made)) === 0, 'an audio context was made before the press');
+    // The radio is an object on the shelf; its card opens on hover, with the switch in it.
+    await page.hover('[data-target="radio"]');
+    await page.waitForFunction(() => document.getElementById('radio')?.dataset.open === 'true', null, { timeout: 3000 });
     await page.hover('#radio-button');
     await page.waitForTimeout(800);
     expect((await page.evaluate(() => window.__audio.made)) === 0, 'reaching for the radio made an audio context');
@@ -379,6 +392,104 @@ export async function roomChecks({ check, expect, BASE, config, shot }) {
     expect((await where()) === top, `a suggestion moved from ${top} to ${await where()}`);
     expect((await height()) === h, `the box grew from ${h} to ${await height()}`);
   });
+
+  await check('room: at rest no label covers a monitor, and a desk’s tag never does when shown', desk, async (page) => {
+    await live(page, `${BASE}/?debug`);
+    const monitors = await page.evaluate(() => window.roomDebug.monitorRects());
+    const covering = (r) =>
+      monitors.some((m) => r.x < m.x + m.width && m.x < r.x + r.width && r.y < m.y + m.height && m.y < r.y + r.height);
+    const shown = await page.evaluate(() =>
+      [...document.querySelectorAll('.room__labels > [data-target]')]
+        .filter((el) => !el.hidden && Number(getComputedStyle(el).opacity) > 0.05 && el.dataset.place !== 'cover')
+        .map((el) => ({ target: el.dataset.target, ...el.getBoundingClientRect().toJSON() })),
+    );
+    expect(
+      shown
+        .map((l) => l.target)
+        .sort()
+        .join(',') === 'cabinet,credit,reception',
+      `labelled at rest: ${shown.map((l) => l.target).join(', ')}`,
+    );
+    for (const l of shown) expect(!covering(l), `${l.target} covers a monitor`);
+    // Each desk's tag, shown by keyboard focus.
+    const desks = [];
+    await page.focus('.board__more a[href="#brief"]');
+    for (let i = 0; i < 30; i++) {
+      await page.keyboard.press('Tab');
+      // Tags fade in over 140 ms.
+      await page.waitForTimeout(200);
+      const t = await page.evaluate(() => {
+        const el = document.activeElement;
+        return el?.dataset?.target?.startsWith('desk:')
+          ? { target: el.dataset.target, opacity: Number(getComputedStyle(el).opacity), ...el.getBoundingClientRect().toJSON() }
+          : null;
+      });
+      // Tab wraps round in some browsers: each desk counts once.
+      if (t && !desks.some((d) => d.target === t.target)) desks.push(t);
+    }
+    expect(desks.length === 10, `reached ${desks.length} desk tags`);
+    for (const t of desks) {
+      expect(t.opacity > 0.9, `${t.target} stayed hidden when focused`);
+      expect(!covering(t), `${t.target} covers a monitor`);
+    }
+    return { atRest: shown.length, deskTags: desks.length };
+  });
+
+  await check('room: the grid credit is visible at rest', desk, async (page) => {
+    await live(page, BASE);
+    const credit = await page.evaluate(() => {
+      const el = document.getElementById('grid-credit');
+      const r = el.getBoundingClientRect();
+      return {
+        hidden: el.hidden,
+        opacity: Number(getComputedStyle(el).opacity),
+        text: el.textContent,
+        inside: r.width > 50 && r.left >= 0 && r.top >= 0 && r.right <= innerWidth && r.bottom <= innerHeight,
+      };
+    });
+    expect(!credit.hidden && credit.opacity > 0.9 && credit.inside, `credit: ${JSON.stringify(credit)}`);
+    expect(credit.text === 'Data: Carbon Intensity API, © NESO, CC BY 4.0', `credit text: ${credit.text}`);
+  });
+
+  for (const [size, viewport] of [
+    ['1440×900', { width: 1440, height: 900 }],
+    ['1280×720', { width: 1280, height: 720 }],
+  ]) {
+    await check(`room (${size}): every card stays fully inside the viewport`, { viewport }, async (page, problems) => {
+      await live(page, BASE);
+      const inside = (selector) =>
+        page.evaluate((sel) => {
+          const r = document.querySelector(sel).getBoundingClientRect();
+          return {
+            ok: r.width > 0 && r.left >= 0 && r.top >= 0 && r.right <= innerWidth + 0.5 && r.bottom <= innerHeight + 0.5,
+            r: r.toJSON(),
+          };
+        }, selector);
+      const seen = {};
+      await page.hover('[data-target="sign"]');
+      await page.waitForFunction(() => document.getElementById('grid-sign')?.dataset.open === 'true', null, { timeout: 3000 });
+      seen.sign = await inside('#grid-sign');
+      await shot(page, `sign-card-${viewport.width}`);
+      await page.mouse.move(5, 5);
+      await page.click('[data-target="radio"]');
+      await page.waitForFunction(() => document.getElementById('radio')?.dataset.open === 'true', null, { timeout: 3000 });
+      seen.radio = await inside('#radio');
+      await shot(page, `radio-card-${viewport.width}`);
+      await page.keyboard.press('Escape');
+      await page.click('[data-target="reception"]');
+      await waitStation(page, 'reception');
+      await page.waitForTimeout(300);
+      seen.reception = await inside('#ask');
+      await page.keyboard.press('Escape');
+      await waitStation(page, 'door');
+      await page.locator('[data-target="cabinet"]').waitFor({ state: 'visible' });
+      await page.click('.board__row a[data-piece="gridtop"]');
+      await cardOpen(page);
+      seen.folder = await inside('#card .folder-card__open');
+      for (const [name, v] of Object.entries(seen)) expect(v.ok, `${name} card leaves the viewport: ${JSON.stringify(v.r)}`);
+      expect(problems.length === 0, problems.join(' | '));
+    });
+  }
 
   await check(
     'without WebGL the room says so and becomes the flat office',

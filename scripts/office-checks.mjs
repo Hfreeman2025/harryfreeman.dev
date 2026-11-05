@@ -160,6 +160,34 @@ export async function officeChecks({ check, expect, BASE, config, shot, name }) 
     return { line: marked.line ?? 'no Highlight API' };
   });
 
+  await check('office (phone): the sign, the radio and the folder fit the screen, and the grid credit shows', phone(name), async (page) => {
+    await page.goto(BASE, { waitUntil: 'load' });
+    await page.waitForFunction(() => document.getElementById('grid-sign')?.dataset.state === 'live', null, { timeout: 8000 });
+    const fits = async (selector) => {
+      await page.locator(selector).scrollIntoViewIfNeeded();
+      return page.evaluate((sel) => {
+        const r = document.querySelector(sel).getBoundingClientRect();
+        return { ok: r.width > 0 && r.left >= 0 && r.right <= innerWidth + 0.5 && r.height <= innerHeight, r: r.toJSON() };
+      }, selector);
+    };
+    for (const selector of ['#grid-sign', '#radio']) {
+      const v = await fits(selector);
+      expect(v.ok, `${selector} leaves the screen: ${JSON.stringify(v.r)}`);
+    }
+    expect(await page.locator('.grid-sign__source').isVisible(), 'no grid credit on the sign');
+    expect(await page.locator('#radio-credit').isVisible(), 'no grid credit by the radio');
+    await page.locator('#archive').scrollIntoViewIfNeeded();
+    await page.click('.drawer[data-drawer="grid"] .drawer__front', { position: { x: 20, y: 20 } });
+    await page.waitForTimeout(800);
+    await page.locator('.folder[data-piece="gridtop"] .folder__tab').click();
+    await cardOpen(page);
+    const card = await page.evaluate(() => {
+      const r = document.querySelector('#card .folder-card__open').getBoundingClientRect();
+      return { ok: r.left >= 0 && r.right <= innerWidth + 0.5 && r.top >= 0 && r.bottom <= innerHeight + 0.5, r: r.toJSON() };
+    });
+    expect(card.ok, `the folder leaves the screen: ${JSON.stringify(card.r)}`);
+  });
+
   await check('office: the grid sign and the radio are in the lobby too', desk, async (page) => {
     await page.goto(FLAT, { waitUntil: 'load' });
     await page.waitForFunction(() => document.getElementById('grid-sign')?.dataset.state === 'live', null, { timeout: 8000 });

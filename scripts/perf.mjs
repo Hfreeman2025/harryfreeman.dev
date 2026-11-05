@@ -2,7 +2,7 @@
 // shift, and frame times at the door, while the camera walks to the cabinet and while it turns to a
 // desk. The phone (the flat office) gets paint, bytes and layout shift. The grid API is mocked.
 //   npm run build && npm run preview, then: node scripts/perf.mjs [runs] [chromium|webkit|firefox ...]
-// Writes shots/office-3/performance.json.
+// Writes shots/office-4/performance.json.
 
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -14,7 +14,7 @@ const BASE = process.env.STUDIO_URL ?? 'http://127.0.0.1:4400';
 const [runsArg, ...names] = process.argv.slice(2);
 const RUNS = Number(runsArg ?? 3);
 const BROWSERS = names.length ? names : ['chromium', 'webkit', 'firefox'];
-const out = join(site, 'shots', 'office-3');
+const out = join(site, 'shots', 'office-4');
 mkdirSync(out, { recursive: true });
 
 function stats(values) {

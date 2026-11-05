@@ -65,7 +65,7 @@
         </section>
         <p class="room__status" id="room-status" role="status"></p>
 
-        <aside class="grid-sign" id="grid-sign" data-target="sign" data-at="door" data-place="wall" data-state="loading" aria-labelledby="grid-sign-title" hidden>
+        <aside class="grid-sign" id="grid-sign" tabindex="-1" data-state="loading" aria-labelledby="grid-sign-title" hidden>
           <h2 class="grid-sign__title" id="grid-sign-title">The grid, now</h2>
           <p class="grid-sign__value" id="grid-value" aria-live="polite">Reading the grid…</p>
           <p class="grid-sign__detail" id="grid-detail"></p>
@@ -73,7 +73,7 @@
           <p class="grid-sign__source">Source: <a href="https://carbonintensity.org.uk/">NESO Carbon Intensity API</a>, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></p>
         </aside>
 
-        <div class="radio" id="radio" data-target="radio" data-at="door" data-place="wall" data-state="off" hidden>
+        <div class="radio" id="radio" data-state="off" hidden>
           <button type="button" class="radio__button" id="radio-button" tabindex="0" aria-pressed="false" aria-describedby="radio-state radio-credit"><span class="radio__name">Radio</span> <span class="radio__what">Listen to the Grid</span></button>
           <p class="radio__state" id="radio-state">off</p>
           <p class="radio__credit" id="radio-credit">Data: Carbon Intensity API, © NESO, CC BY 4.0</p>
@@ -113,6 +113,8 @@
             </div>
             <div class="folder-card__leaf folder-card__leaf--text">
               <div id="card-body"></div>
+              <!-- The receipt stamp: filled from the receipts package, never by hand, once it lands. -->
+              <div class="stamp" id="card-stamp" hidden></div>
               <details class="readme" id="card-readme">
                 <summary>Its README, line by line</summary>
                 <div class="readme__lines" id="record-lines"></div>

@@ -16,7 +16,7 @@ import { silenceLiveAudio } from './silent.mjs';
 const site = join(dirname(fileURLToPath(import.meta.url)), '..');
 const BASE = process.env.STUDIO_URL ?? 'http://127.0.0.1:4400';
 const config = JSON.parse(readFileSync(join(site, 'site.config.json'), 'utf8'));
-const shots = join(site, 'shots', process.env.SHOTS_DIR ?? 'office-3');
+const shots = join(site, 'shots', process.env.SHOTS_DIR ?? 'office-4');
 mkdirSync(shots, { recursive: true });
 
 const wanted = process.argv.slice(2).length ? process.argv.slice(2) : ['chromium', 'webkit', 'firefox'];
@@ -49,6 +49,8 @@ const MIX = [
 export function gridMock(mode = 'ok') {
   return async (route) => {
     if (mode === 'fail') return route.fulfill({ status: 503, contentType: 'text/plain', body: 'service unavailable' });
+    // Never answers: the page keeps showing that it is reading the grid (for stills).
+    if (mode === 'hang') return;
     const from = Math.floor(Date.now() / HALF_HOUR) * HALF_HOUR;
     const half = { from: iso(from), to: iso(from + HALF_HOUR) };
     const path = new URL(route.request().url()).pathname;
