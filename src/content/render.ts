@@ -138,6 +138,7 @@ export function renderDeskLabels(): string {
     tag('reception', 'Reception', 'type a question'),
     tag('stamp', 'Receipts', 'stamp a card to check it'),
     `<button type="button" class="obj obj--cover" data-desk-target="sign" data-action="sign" data-at="door" data-place="cover" aria-expanded="false" aria-controls="grid-sign" aria-describedby="desk-credit"><span class="obj__name">The sticky note: the current carbon intensity of Great Britain’s grid</span></button>`,
+    `<button type="button" class="obj obj--cover obj--mic" data-desk-target="mic" data-action="mic" data-at="door" data-place="cover" aria-expanded="false" aria-controls="speak"><span class="obj__name">Speak to me: Harry’s email, LinkedIn and CV</span></button>`,
   ];
   const office = [
     ...PIECES.map(

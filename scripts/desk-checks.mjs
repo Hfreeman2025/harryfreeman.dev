@@ -28,6 +28,24 @@ const angle = (page) => page.evaluate(() => window.deskDebug.cameraAngle());
  */
 async function onScreen(page, piece, expect) {
   await page.locator('#desk-screen').waitFor({ state: 'visible', timeout: 5000 });
+  // The desk as it is now, whichever way in: no directory board, the scene the whole window, and the
+  // one way back, Back, saying where it goes.
+  const layout = await page.evaluate(() => ({
+    board: document.querySelectorAll('.board, .board__face').length,
+    stage: document.querySelector('.room__stage').getBoundingClientRect().toJSON(),
+    width: innerWidth,
+    back: document.getElementById('card-back').firstChild?.textContent,
+    where: document.querySelector('#card-back .folder-card__where')?.textContent?.trim(),
+  }));
+  expect(layout.board === 0, 'the old directory board is on the page');
+  expect(
+    layout.stage.x === 0 && Math.abs(layout.stage.width - layout.width) < 1,
+    `the scene is ${layout.stage.width}px wide at x ${layout.stage.x}`,
+  );
+  expect(
+    layout.back === 'Back' && /^to the (office|cabinet)$/.test(layout.where ?? ''),
+    `the way back says ${layout.back} ${layout.where}`,
+  );
   const at = await page.evaluate(() => {
     const video = document.getElementById('desk-loop');
     return {
@@ -82,19 +100,22 @@ async function live(page, url) {
   await page.waitForTimeout(500);
 }
 
-export async function deskChecks({ check, expect, BASE, shot, name }) {
+export async function deskChecks({ check, expect, BASE, shot, name, config }) {
   // Links are in the Tab order everywhere but Safari, where a keyboard reaches them with Option+Tab.
   const linkTab = name === 'webkit' ? 'Alt+Tab' : 'Tab';
   const DESK = (query = '') => `${BASE}/?debug${query ? `&${query}` : ''}`;
 
   await check('desk: the HTML carries the desk’s objects, the name tags and every card before any script', {}, async () => {
     const html = await (await fetch(`${BASE}/`)).text();
-    expect((html.match(/data-desk-target=/g) ?? []).length === 37, `desk targets: ${(html.match(/data-desk-target=/g) ?? []).length}`);
+    expect((html.match(/data-desk-target=/g) ?? []).length === 39, `desk targets: ${(html.match(/data-desk-target=/g) ?? []).length}`);
     for (const action of ['office', 'cabinet', 'notebook', 'reception', 'stamp', 'sign'])
       expect(html.includes(`data-action="${action}"`), `no ${action}`);
     expect(html.includes('id="notebook-panel"') && html.includes('id="printout"'), 'no notebook panel or printout');
     // Who this is, as real text before any script: the name, the role, the intro and the links.
-    expect(html.includes('<h1 class="masthead__name">Harry Freeman</h1>') && html.includes('>Head of AI</p>'), 'no name or role');
+    expect(
+      html.includes('<h1 class="masthead__name" tabindex="-1">Harry Freeman</h1>') && html.includes('>Head of AI</p>'),
+      'no name or role',
+    );
     expect(html.includes('class="masthead__line">I run AI strategy'), 'no intro');
     expect(
       /class="masthead__links"><a href="[^"]+">CV<\/a><a href="mailto:[^"]+">Email<\/a><a href="https:[^"]+">LinkedIn<\/a>/.test(html),
@@ -271,6 +292,7 @@ export async function deskChecks({ check, expect, BASE, shot, name }) {
       await page.click('[data-action="desk:sourced"][data-at="office"]');
       await cardOpen(page);
       expect((await cardTitle(page)) === 'Sourced', `card ${await cardTitle(page)}`);
+      await onScreen(page, 'sourced', expect);
       expect((await page.locator('#card-back').textContent())?.trim() === 'Back to the office', 'the way back does not say the office');
       await page.keyboard.press('Escape');
       await waitStation(page, 'office');
@@ -309,7 +331,10 @@ export async function deskChecks({ check, expect, BASE, shot, name }) {
       // The intro's type, as it lands on screen: its set size times the card's scale.
       const intro = await page.evaluate(() => {
         const el = document.querySelector('.masthead__card');
-        return (Number.parseFloat(getComputedStyle(document.querySelector('.masthead__line')).fontSize) * el.getBoundingClientRect().width) / el.offsetWidth;
+        return (
+          (Number.parseFloat(getComputedStyle(document.querySelector('.masthead__line')).fontSize) * el.getBoundingClientRect().width) /
+          el.offsetWidth
+        );
       });
       expect(intro >= 12, `the intro is set at ${intro.toFixed(1)}px on screen`);
       expect(at.line.startsWith('I run AI strategy'), 'the intro is not on the card');
@@ -349,8 +374,134 @@ export async function deskChecks({ check, expect, BASE, shot, name }) {
       await page.click('.index a[data-piece="sourced"]');
       await cardOpen(page);
       await waitStation(page, 'desk:sourced');
+      await onScreen(page, 'sourced', expect);
       expect(problems.length === 0, problems.join(' | '));
       return { index: index.length };
+    },
+  );
+
+  await check('desk: a deep link to a card lands square-on to its screen, the desk as it is now', desk, async (page, problems) => {
+    await page.goto(`${BASE}/?debug#folder-dreaming`, { waitUntil: 'load' });
+    await cardOpen(page);
+    await waitStation(page, 'desk:dreaming');
+    await page.waitForTimeout(400);
+    await onScreen(page, 'dreaming', expect);
+    await shot(page, 'desk-card-deep-link');
+    expect(problems.length === 0, problems.join(' | '));
+  });
+
+  // A clipboard to read back, and a microphone that counts any request for it.
+  const micWatch = () => {
+    window.__copied = null;
+    window.__mic = 0;
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: {
+        writeText: (text) => {
+          window.__copied = text;
+          return Promise.resolve();
+        },
+      },
+    });
+    if (navigator.mediaDevices)
+      navigator.mediaDevices.getUserMedia = () => {
+        window.__mic++;
+        return Promise.reject(new Error('not here'));
+      };
+  };
+  /** Opens the mic's bubble and reads it: the email on one line, and the bubble clear of every thing and label. */
+  const bubble = async (page) => {
+    const mic = '[data-action="mic"][data-at="door"]';
+    await page.locator(mic).waitFor({ state: 'visible', timeout: 5000 });
+    await page.click(mic);
+    await page.locator('#speak[data-open="true"]').waitFor({ timeout: 3000 });
+    await page.waitForTimeout(500);
+    return page.evaluate(() => {
+      const card = document.getElementById('speak');
+      const email = document.getElementById('speak-email').parentElement;
+      const box = card.getBoundingClientRect();
+      const lineHeight = Number.parseFloat(getComputedStyle(email).lineHeight);
+      const labels = [...document.querySelectorAll('.desk__labels > :not([hidden]), .masthead [data-placed]:not([data-away])')]
+        .filter((el) => el.dataset.action !== 'mic')
+        .map((el) => ({ name: el.dataset.deskTarget ?? el.className, ...el.getBoundingClientRect().toJSON() }));
+      const things = window.deskDebug.objectRects();
+      const hit = (a, b) => a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
+      return {
+        oneLine: email.scrollWidth <= email.clientWidth + 1 && email.getBoundingClientRect().height < lineHeight * 1.5,
+        emailText: email.textContent.trim(),
+        inView: box.x >= 0 && box.y >= 0 && box.right <= innerWidth && box.bottom <= innerHeight,
+        over: [...things, ...labels].filter((t) => hit(box, t)).map((t) => t.name),
+        focus: document.activeElement?.id,
+        lamp: window.deskDebug.onAir(),
+      };
+    });
+  };
+
+  await check(
+    'desk: Speak to me: the mic’s speech bubble says hello with the email on one line, clear of the desk’s things; Copy, Esc and a click away work, and it never listens',
+    { ...desk, initScript: micWatch },
+    async (page, problems) => {
+      await live(page, DESK());
+      const at = await bubble(page);
+      expect(at.lamp, 'the ON AIR lamp is off');
+      expect(at.focus === 'speak-copy', `focus went to ${at.focus}`);
+      expect(at.emailText === config.email && at.oneLine, `the email is not on one line: ${JSON.stringify(at)}`);
+      expect(at.inView && at.over.length === 0, `the bubble is over ${at.over.join(', ')}`);
+      const chips = await page.evaluate(() =>
+        [...document.querySelectorAll('#speak .speak__chip')].map((c) => ({
+          tag: c.tagName,
+          text: c.textContent,
+          href: c.getAttribute('href'),
+        })),
+      );
+      expect(
+        chips.map((c) => c.text).join('|') === 'Copy email|LinkedIn|CV' && chips[1].href === config.linkedin && chips[2].href === config.cv,
+        `the chips: ${JSON.stringify(chips)}`,
+      );
+      for (const i of [0, 1, 2]) {
+        await page.locator('#speak .speak__chip').nth(i).focus();
+        expect(
+          await page
+            .locator('#speak .speak__chip')
+            .nth(i)
+            .evaluate((c) => document.activeElement === c),
+          `chip ${i} cannot take focus`,
+        );
+      }
+      await page.click('#speak-copy');
+      await page.waitForFunction(() => document.getElementById('speak-copy')?.textContent === 'Copied ✓', null, { timeout: 2000 });
+      expect((await page.evaluate(() => window.__copied)) === config.email, 'the clipboard does not hold the email');
+      await shot(page, 'desk-mic');
+      await page.waitForFunction(() => document.getElementById('speak-copy')?.textContent === 'Copy email', null, { timeout: 3500 });
+      await page.keyboard.press('Escape');
+      expect(await page.locator('#speak').isHidden(), 'Esc did not close the bubble');
+      expect(!(await page.evaluate(() => window.deskDebug.onAir())), 'the lamp stayed on');
+      expect((await page.evaluate(() => document.activeElement?.dataset?.action)) === 'mic', 'focus did not go back to the mic');
+      expect((await station(page)) === 'door', 'Esc stepped away from the desk too');
+      // Enter on the mic opens it; a click on the desk closes it.
+      await page.keyboard.press('Enter');
+      await page.locator('#speak[data-open="true"]').waitFor({ timeout: 3000 });
+      await page.mouse.click(1380, 60);
+      expect(await page.locator('#speak').isHidden(), 'a click on the desk did not close the bubble');
+      // At a smaller window the email still fits on its line, and the bubble still finds space.
+      await page.setViewportSize({ width: 1280, height: 720 });
+      await page.waitForTimeout(800);
+      const small = await bubble(page);
+      expect(small.oneLine && small.inView && small.over.length === 0, `at 1280 × 720: ${JSON.stringify(small)}`);
+      expect((await page.evaluate(() => window.__mic)) === 0, 'the page asked for a microphone');
+      expect(problems.length === 0, problems.join(' | '));
+    },
+  );
+
+  await check(
+    'desk (phone width): the mic’s bubble keeps the email on one line',
+    { viewport: { width: 390, height: 844 }, initScript: micWatch },
+    async (page) => {
+      await live(page, DESK('room'));
+      const at = await bubble(page);
+      expect(at.emailText === config.email && at.oneLine, `the email is not on one line: ${JSON.stringify(at)}`);
+      expect(at.inView, `the bubble runs off the screen: ${JSON.stringify(at)}`);
+      return { over: at.over.length ? at.over.join(', ') : 'nothing' };
     },
   );
 
@@ -405,6 +556,7 @@ export async function deskChecks({ check, expect, BASE, shot, name }) {
       await shot(page, 'desk-printout');
       await cardOpen(page);
       await waitStation(page, 'desk:gridtop');
+      await onScreen(page, 'gridtop', expect);
       expect(await page.locator('#printout').isHidden(), 'the slip stayed up at the desk');
       const marked = await page.evaluate(() => {
         const highlight = globalThis.CSS?.highlights?.get('ask-the-record');

@@ -16,11 +16,14 @@ import type { Timeline } from '../timeline/schema';
 import type { DeskEngine, Station } from './engine';
 import { ROUNDS, type Round } from './objects';
 import { placeSlip, printResult } from './printout';
+import { speakCard } from './speak';
 
 export interface DeskControl {
   answer(pieces: readonly PieceId[], mark: () => Range | null, result?: unknown): void;
-  /** Back to the seated view of the desk, from wherever the visitor was (going back out to the door). */
-  home(): void;
+  /** In through the door: the walk, the cut, and whether a click is on the door. */
+  walkIn(): Promise<void>;
+  cutIn(): void;
+  hitsDoor(x: number, y: number): boolean;
   source(piece: PieceId): void;
   setLight(light: RoomLight): void;
   setSign(text: SignText): void;
@@ -73,12 +76,17 @@ export async function startDesk(timeline: Timeline): Promise<DeskControl> {
     stage,
     labels: labelsRoot,
     // Harry's name and role on the nameplate, his intro and links on the card: real text, laid onto them.
-    onto: [...document.querySelectorAll<HTMLElement>('.masthead [data-place="quad"]')],
+    onto: [...document.querySelectorAll<HTMLElement>('.masthead [data-place="quad"], #entrance-plate')],
+    // Outside the office door on a fresh visit or a reload (the head script's call).
+    entrance: root.dataset.entrance === 'door',
     timeline,
     ...(Number.isFinite(at) && at > 0 ? { startAt: at } : {}),
     paused: photo,
     reduced,
   });
+
+  // Skipped in (or came back) while the desk was loading: straight to the seat.
+  if (engine.station() === 'entrance' && root.dataset.entrance !== 'door') engine.cutIn();
 
   const replay = document.getElementById('replay');
   const caption = document.querySelector('.room__caption');
@@ -120,7 +128,13 @@ export async function startDesk(timeline: Timeline): Promise<DeskControl> {
     card.hidden = false;
     card.dataset.open = 'true';
     card.setAttribute('aria-modal', 'false');
-    if (back) back.textContent = cameFrom === 'office' ? 'Back to the office' : 'Back to the cabinet';
+    // One label, Back, wherever the card was opened from; under it, where Back (and Esc) goes.
+    if (back) {
+      const where = document.createElement('span');
+      where.className = 'folder-card__where';
+      where.textContent = cameFrom === 'office' ? ' to the office' : ' to the cabinet';
+      back.replaceChildren('Back', where);
+    }
     if (toReception) toReception.hidden = cameFrom !== 'reception';
     // The live tool opens from its screen: its Open line moves from the card to under the bezel.
     under?.querySelector('.work__open')?.remove();
@@ -243,6 +257,7 @@ export async function startDesk(timeline: Timeline): Promise<DeskControl> {
     else if (kind === 'notebook') void run(toNotebook);
     else if (kind === 'reception') void run(toReceptionDesk);
     else if (kind === 'radio') document.getElementById('radio-button')?.click();
+    else if (kind === 'mic') speak?.toggle();
     else if ((kind === 'desk' || kind === 'folder') && id && isPieceId(id)) void run(() => toDesk(id, from));
     else if (kind === 'drawer' && id) {
       void run(async () => {
@@ -262,7 +277,7 @@ export async function startDesk(timeline: Timeline): Promise<DeskControl> {
   labelsRoot.addEventListener('click', (event) => {
     const el = (event.target as Element | null)?.closest<HTMLElement>('[data-action]');
     const action = el?.dataset.action ?? '';
-    if (!el || action === 'sign' || action === 'radio' || !action) return;
+    if (!el || action === 'sign' || action === 'radio' || action === 'mic' || !action) return;
     event.preventDefault();
     choose(action);
   });
@@ -361,6 +376,28 @@ export async function startDesk(timeline: Timeline): Promise<DeskControl> {
     });
   }
 
+  // ---------- Speak to me: the mic's contact card (it never listens) ----------
+  const micCover = label('mic', 'door');
+  const speakEl = document.getElementById('speak');
+  const speak =
+    micCover && speakEl
+      ? speakCard({
+          trigger: micCover,
+          card: speakEl,
+          hall,
+          reduced,
+          onAir: (on) => engine.onAir(on),
+          head: () => engine.micHead(),
+          // Every thing on the desk, and every label shown over it.
+          avoid: () => [
+            ...engine.objectRects(),
+            ...[...document.querySelectorAll<HTMLElement>('.desk__labels > :not([hidden]), .masthead [data-placed]:not([data-away])')]
+              .filter((el) => el !== micCover)
+              .map((el) => el.getBoundingClientRect()),
+          ],
+        })
+      : null;
+
   // ---------- The grid's and the radio's cards ----------
   popovers(hall, [
     [label('sign', 'door'), document.getElementById('grid-sign')],
@@ -368,7 +405,7 @@ export async function startDesk(timeline: Timeline): Promise<DeskControl> {
   ]);
   document.addEventListener('radio:state', (event) => engine.setRadio((event as CustomEvent<{ on: boolean }>).detail.on));
 
-  if (params.has('debug')) Object.assign(window, { deskDebug: engine.debug });
+  if (params.has('debug')) Object.assign(window, { deskDebug: { ...engine.debug, objectRects: () => engine.objectRects() } });
 
   const toggle = document.getElementById('replay-toggle');
   toggle?.addEventListener('click', () => {
@@ -400,11 +437,11 @@ export async function startDesk(timeline: Timeline): Promise<DeskControl> {
         if (engine.station() === 'reception') await toDesk(first, 'reception', mark);
       });
     },
+    walkIn: () => engine.walkIn(),
+    cutIn: () => engine.cutIn(),
+    hitsDoor: (x, y) => engine.hitsDoor(x, y),
     source(piece) {
       void run(() => toDesk(piece, engine.station()));
-    },
-    home() {
-      if (engine.station() !== 'door') void run(() => toDoor(null));
     },
     setLight(light) {
       engine.setLight(light, !reduced);

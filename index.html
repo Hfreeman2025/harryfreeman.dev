@@ -31,6 +31,12 @@
       root.dataset.mode = webgl && !query.has('flat') && !lessData && (large || query.has('room')) ? 'room' : 'office';
       root.dataset.scene = query.has('style') ? 'room' : 'desk';
       if (query.has('photo')) root.dataset.photo = '';
+      // Every fresh visit and every reload starts outside the office door. Back and Forward return to the
+      // desk, and a deep link, ?in, a style direction or a still go straight in (?door always shows the
+      // door). Without script the door is the page's hero.
+      const nav = performance.getEntriesByType?.('navigation')[0]?.type;
+      const inside = nav === 'back_forward' || location.hash.length > 1 || ['in', 'style', 'photo'].some((k) => query.has(k));
+      root.dataset.entrance = query.has('door') || !inside ? 'door' : 'in';
     })();
   </script>
   <link rel="stylesheet" href="/src/styles/office.css">
@@ -38,18 +44,30 @@
 </head>
 <body>
   <main>
+    <!-- The way in: the outside of the office door. In 3D, Come in walks through it to the desk; as a still
+         (phones without WebGL, no script), Come in is a link to the content below. -->
+    <section class="entrance" id="entrance" aria-labelledby="entrance-plate">
+      <picture>
+        <source media="(max-width: 760px)" srcset="/still/entrance-phone.webp" width="780" height="1100">
+        <img class="entrance__poster" src="/still/entrance-1600.webp" srcset="/still/entrance-1200.webp 1200w, /still/entrance-1600.webp 1600w, /still/entrance-2400.webp 2400w" sizes="100vw" alt="" width="1600" height="1000" fetchpriority="high" decoding="async">
+      </picture>
+      <div class="entrance__stage" aria-hidden="true"></div>
+      <p class="entrance__plate" id="entrance-plate" data-desk-target="door-plate" data-place="quad"><span class="entrance__name">Harry Freeman</span><span class="entrance__comma">, </span><span class="entrance__role">Head of AI</span></p>
+      <p class="entrance__ways"><a class="entrance__in" id="come-in" href="#directory">Come in</a> <a class="entrance__skip" id="skip-in" href="#directory">Skip to the desk</a></p>
+    </section>
+
     <div class="lobby">
       <!-- Who this is, and the way round: on the desk, the name on a nameplate and the intro and links on a
            card (this real text, laid onto them), and a quiet index along the foot; flat, an editorial header. -->
       <div class="front" id="directory">
         <header class="masthead">
           <div class="masthead__plate" data-desk-target="nameplate" data-place="quad">
-            <h1 class="masthead__name">Harry Freeman</h1>
+            <h1 class="masthead__name" tabindex="-1">Harry Freeman</h1>
             <p class="masthead__role">Head of AI</p>
           </div>
           <div class="masthead__card" data-desk-target="business-card" data-place="quad">
             <p class="masthead__line">I run AI strategy, products and governance at a UK sustainability consultancy; coding agents built these ten tools to my briefs, and a reviewer sent the work back until it met them.</p>
-            <p class="masthead__links"><a href="%CV%">CV</a><a href="mailto:%EMAIL%">Email</a><a href="%LINKEDIN%">LinkedIn</a></p>
+            <p class="masthead__links"><a href="%CV%">CV</a><a href="mailto:%EMAIL%">Email</a><a href="%LINKEDIN%">LinkedIn</a><a class="masthead__speak" href="mailto:%EMAIL%">Speak to me</a></p>
           </div>
         </header>
         <nav class="index" aria-label="Directory">
@@ -99,6 +117,14 @@
           <p class="grid-sign__light" id="grid-light"></p>
           <p class="grid-sign__source">Source: <a href="https://carbonintensity.org.uk/">NESO Carbon Intensity API</a>, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></p>
         </aside>
+
+        <div class="speak" id="speak" role="dialog" aria-modal="false" aria-labelledby="speak-title">
+          <svg class="speak__shape" aria-hidden="true"><path class="speak__outline" d=""></path></svg>
+          <p class="speak__title" id="speak-title">Say hello</p>
+          <p class="speak__email"><span id="speak-email">%EMAIL%</span></p>
+          <p class="speak__chips"><button type="button" class="speak__chip" id="speak-copy">Copy email</button><a class="speak__chip" href="%LINKEDIN%">LinkedIn</a><a class="speak__chip" href="%CV%">CV</a></p>
+          <p class="speak__said" id="speak-copied" role="status"></p>
+        </div>
 
         <div class="radio" id="radio" data-state="off" hidden>
           <button type="button" class="radio__button" id="radio-button" tabindex="0" aria-pressed="false" aria-describedby="radio-state radio-credit"><span class="radio__name">Radio</span> <span class="radio__what">Listen to the Grid</span></button>

@@ -59,8 +59,9 @@ export async function officeChecks({ check, expect, BASE, config, shot, name }) 
           (await page.locator(sel).isVisible()) && (await page.locator(sel).textContent()).startsWith(text),
           `the header has no ${text}`,
         );
-      for (const name of ['CV', 'Email', 'LinkedIn'])
-        expect(await page.locator('.masthead__links').getByRole('link', { name }).isVisible(), `no ${name} link`);
+      for (const name of ['CV', 'Email', 'LinkedIn', 'Speak to me'])
+        expect(await page.locator('.masthead__links').getByRole('link', { name, exact: true }).isVisible(), `no ${name} link`);
+      expect((await page.locator('.masthead__speak').getAttribute('href'))?.startsWith('mailto:'), 'Speak to me is not a contact link');
       expect((await page.locator('.index a:visible').count()) >= 13, 'the index is not all shown');
       const shift = await page.evaluate(() => window.__shift);
       if (shift !== null) expect(shift === 0, `layout shift ${shift}`);

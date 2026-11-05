@@ -11,6 +11,7 @@ import {
   BasicShadowMap,
   Box3,
   CanvasTexture,
+  CatmullRomCurve3,
   Color,
   DirectionalLight,
   HemisphereLight,
@@ -44,6 +45,7 @@ import {
   deskTop,
   IndexBox,
   Keyboard,
+  Microphone,
   Nameplate,
   Notebook,
   pencil,
@@ -54,8 +56,10 @@ import {
 import { buildOffice, CABINET_AT, standAt, ZONES } from './office';
 import { CREAM } from './palette';
 import { DeskPass } from './pass';
+import { buildRoom, DOOR, FLOOR, M, ROOM as OFFICE, OUTSIDE, TABLE } from './room';
 
-export type Station = 'door' | 'office' | 'cabinet' | 'notebook' | 'reception' | `desk:${PieceId}`;
+/** 'entrance' is outside the office door; 'door' is seated at the desk (the desk's own first view). */
+export type Station = 'entrance' | 'door' | 'office' | 'cabinet' | 'notebook' | 'reception' | `desk:${PieceId}`;
 
 export interface DeskEngine {
   station(): Station;
@@ -72,6 +76,18 @@ export interface DeskEngine {
   setSign(text: SignText): void;
   /** Turns the notebook to a round, and replays that round in the office. */
   turnTo(round: Round): void;
+  /** From outside the door: it swings open and the camera walks in and sits, ending on the desk's own view. */
+  walkIn(): Promise<void>;
+  /** Straight in from the door to the seated view, without the walk (Skip, Esc, reduced motion). */
+  cutIn(): void;
+  /** Whether a click at this page point lands on the door (outside it). */
+  hitsDoor(x: number, y: number): boolean;
+  /** The mic's ON AIR lamp, on while its contact card is open. */
+  onAir(on: boolean): void;
+  /** The top of the mic's head on screen, in page pixels, for the speech bubble's tail. */
+  micHead(): { x: number; y: number } | null;
+  /** The things on the desk, each as its box on screen in page pixels, for the bubble to keep clear of. */
+  objectRects(): Array<{ name: string; x: number; y: number; width: number; height: number }>;
   /** Presses the 3D key a typed character falls on. */
   press(key: string): void;
   /** The printer on the model's Reception counter, on screen, in page pixels. */
@@ -91,6 +107,8 @@ interface MountOptions {
   readonly startAt?: number;
   readonly paused?: boolean;
   readonly reduced?: boolean;
+  /** Start outside the office door rather than seated at the desk. */
+  readonly entrance?: boolean;
 }
 
 /** The desk's layout: where each real-size thing stands, around the model at the origin. */
@@ -102,9 +120,11 @@ const PLACES = {
   keyboard: { x: 8.6, z: 13.4, turn: -0.1 },
   cup: { x: 9.5, z: -11.2 },
   pencil: { x: 13.6, z: 6.6, turn: -0.5 },
-  // The card turned square to the door camera (its azimuth, -12°), so its lines read level.
-  nameplate: { x: -17.6, z: -10.8, turn: -0.04 },
-  card: { x: -5.2, z: -12.4, turn: -0.2 },
+  // The card turned square to the door camera (its azimuth, -12°), so its lines read level; the mic
+  // between them.
+  nameplate: { x: -19.0, z: -10.6, turn: -0.04 },
+  mic: { x: -11.2, z: -11.4, turn: 0.15 },
+  card: { x: -1.0, z: -13.0, turn: -0.2 },
 } as const;
 
 /**
@@ -127,6 +147,7 @@ const LEAN_IN = { ahead: 1.4 } as const;
  * the monitor is in the clear; the desk itself stays.
  */
 const FOCUS: Record<string, { strength: number; focus: number; band: number; cut: number }> = {
+  entrance: { strength: 0, focus: 0.5, band: 0.5, cut: 0 },
   door: { strength: 0.8, focus: 0.48, band: 0.16, cut: 0 },
   cabinet: { strength: 0.55, focus: 0.55, band: 0.22, cut: 0 },
   notebook: { strength: 0.4, focus: 0.5, band: 0.26, cut: 0 },
@@ -220,6 +241,7 @@ export async function mountDesk({
   startAt = 0,
   paused: startPaused = false,
   reduced = false,
+  entrance: startOutside = false,
 }: MountOptions): Promise<DeskEngine> {
   let renderer: WebGLRenderer;
   try {
@@ -265,7 +287,10 @@ export async function mountDesk({
   scene.add(model.group);
   // The paper under the model gives way to the desk.
   for (const o of model.group.children) if ((o as Mesh).material === model.baked[0]) o.visible = false;
-  scene.add(deskTop());
+  scene.add(deskTop(TABLE.x1 - TABLE.x0, TABLE.z1 - TABLE.z0));
+  // The office round the desk, and the door into it: one space, so the walk in ends on the desk's view.
+  const room = buildRoom();
+  scene.add(room.group);
 
   // ---------- Daylight: a sun with crisp shadows, and a soft fill ----------
   const sun = new DirectionalLight('#fff6e6', 2.5);
@@ -324,7 +349,10 @@ export async function mountDesk({
   const card = new BusinessCard();
   card.group.position.set(PLACES.card.x, DESK_Y, PLACES.card.z);
   card.group.rotation.y = PLACES.card.turn;
-  scene.add(box.group, notebook.group, keyboard.group, stamp, cup, pen, note, plate.group, card.group);
+  const mic = new Microphone();
+  mic.group.position.set(PLACES.mic.x, DESK_Y, PLACES.mic.z);
+  mic.group.rotation.y = PLACES.mic.turn;
+  scene.add(box.group, notebook.group, keyboard.group, stamp, cup, pen, note, plate.group, card.group, mic.group);
 
   // Labels: real buttons and links laid over what they name.
   const labelEls = [...labels.querySelectorAll<HTMLElement>('[data-desk-target]'), ...onto];
@@ -354,12 +382,21 @@ export async function mountDesk({
     v3(PLACES.cup.x + 3, 4.5, PLACES.cup.z - 3),
     ...plate.corners(),
     ...card.corners(),
+    ...mic.corners(),
     ...worldOf(stamp, [
       [-7, 0, -2],
       [3, 0, 2.5],
     ]),
   ];
+  /** Outside the door: the door and its frame fill the height; held upright, a phone keeps its width too. */
+  const outsideView = (aspect: number): View => {
+    const distance = OUTSIDE.pos.distanceTo(OUTSIDE.look);
+    const byHeight = 2 * Math.atan((DOOR.height + DOOR.frame + 0.5 * M) / 2 / distance);
+    const byWidth = 2 * Math.atan((DOOR.width + 0.9 * M) / 2 / distance / aspect);
+    return { pos: OUTSIDE.pos.clone(), look: OUTSIDE.look.clone(), fov: (Math.max(byHeight, byWidth) * 180) / Math.PI };
+  };
   const viewOf = (s: Station, aspect: number): View => {
+    if (s === 'entrance') return outsideView(aspect);
     // The foot of the window is kept for the index.
     if (s === 'door') return framed(fromAngles(52, -12), 26, aspect, deskScene(), 0, { top: 0.92, bottom: -0.8, side: 0.96 });
     if (s === 'office')
@@ -399,9 +436,9 @@ export async function mountDesk({
     return framed(new Vector3(0, 0, 1), 15, aspect, points, -0.45, { top: 0.9, bottom: -0.9, side: 0.47 });
   };
 
-  let station: Station = 'door';
+  let station: Station = startOutside ? 'entrance' : 'door';
   const aspectNow = () => Math.max(1, stage.clientWidth) / Math.max(1, stage.clientHeight);
-  let target = viewOf('door', aspectNow());
+  let target = viewOf(station, aspectNow());
   const current = { pos: target.pos.clone(), look: target.look.clone(), fov: target.fov };
   const offset = new Vector3();
   let presses = 0;
@@ -416,7 +453,13 @@ export async function mountDesk({
     done: () => void;
   } | null = null;
   const focusOf = (s: Station) => FOCUS[s.startsWith('desk:') ? 'desk' : s] ?? FOCUS.door;
-  let focusNow = { ...(focusOf('door') ?? { strength: 1, focus: 0.5, band: 0.13, cut: 0 }) };
+  let focusNow = { ...(focusOf(station) ?? { strength: 1, focus: 0.5, band: 0.13, cut: 0 }) };
+  /** The walk in from the door, while it lasts: when it started, and what to call when seated. */
+  let walk: { start: number; ms: number; done: () => void; path: CatmullRomCurve3; gaze: CatmullRomCurve3; from: View; to: View } | null =
+    null;
+  let walked = startOutside ? 0 : 1;
+  const pickRay = new Raycaster();
+  const pickNdc = new Vector2();
   let labelsDirty = true;
 
   const pass = new DeskPass(renderer);
@@ -462,6 +505,7 @@ export async function mountDesk({
   const coverOf = (key: string): Vector3[] => {
     if (key.startsWith('drawer:')) return box.frontCorners(key.slice(7));
     if (key.startsWith('folder:') && isPieceId(key.slice(7))) return box.cardCorners(key.slice(7) as PieceId);
+    if (key === 'mic') return mic.corners();
     if (key === 'sign')
       return worldOf(note, [
         [-2.2, -2.2, 0],
@@ -585,15 +629,22 @@ export async function mountDesk({
         // Text laid onto a thing on the desk, in perspective, wherever that thing is in view and faces the
         // camera (during a glide too: it moves with the thing, so it never floats).
         const thing = key === 'nameplate' ? plate : key === 'business-card' ? card : null;
-        const corners = thing?.group.visible ? thing.face().map((c) => c.clone().project(camera)) : [];
+        const outside = key === 'door-plate';
+        // Each in its own place along the walk: the door's plate until you are through it, the desk's
+        // words once you are at it, so neither shows through a wall.
+        const due = outside ? walked < 0.3 : walked > 0.42;
+        const face = outside ? room.plateFace() : thing?.group.visible ? thing.face() : [];
+        const corners = due ? face.map((c) => c.clone().project(camera)) : [];
         const pts = corners.map((c) => [(c.x * 0.5 + 0.5) * w, (-c.y * 0.5 + 0.5) * h] as const);
         const [a, b, , d] = pts;
         const facing = a && b && d ? (b[0] - a[0]) * (d[1] - a[1]) - (b[1] - a[1]) * (d[0] - a[0]) > 0 : false;
         const onScreen = corners.length === 4 && corners.every((c) => c.z < 1 && Math.abs(c.x) < 1.3 && Math.abs(c.y) < 1.3) && facing;
-        if (!onScreen) {
-          if (el.dataset.placed !== undefined) delete el.dataset.placed;
-          continue;
+        // Out of view, the words fade rather than change shape, so nothing on the page moves.
+        if (onScreen === (el.dataset.away !== undefined)) {
+          if (onScreen) delete el.dataset.away;
+          else el.dataset.away = '';
         }
+        if (!onScreen) continue;
         el.style.transform = quadTransform(el.offsetWidth, el.offsetHeight, pts as unknown as Parameters<typeof quadTransform>[2]);
         if (el.dataset.placed === undefined) el.dataset.placed = '';
         continue;
@@ -668,16 +719,17 @@ export async function mountDesk({
     const reach = current.pos.distanceTo(current.look);
     // Leaning in to a screen, the near plane cuts away what stands between: the look point is on the
     // screen's plane, so nothing more than LEAN_IN.ahead in front of it is drawn.
-    const open = Math.max(0.1, reach * 0.4 - 12);
+    const open = station === 'entrance' || walk ? 1 : Math.max(0.1, reach * 0.4 - 12);
     const near = open + (Math.max(open, reach - LEAN_IN.ahead) - open) * focusNow.cut;
     const clear = focusNow.cut > 0.5;
     if (clear !== cleared) {
       cleared = clear;
-      for (const thing of [box.group, notebook.group, keyboard.group, stamp, cup, pen, plate.group, card.group]) thing.visible = !clear;
+      for (const thing of [box.group, notebook.group, keyboard.group, stamp, cup, pen, plate.group, card.group, mic.group])
+        thing.visible = !clear;
       office.openSide(clear);
       office.solo(clear && station.startsWith('desk:') ? (station.slice(5) as PieceId) : null);
     }
-    const far = reach + 120;
+    const far = reach + 1600;
     if (camera.fov !== current.fov || camera.near !== near || camera.far !== far) {
       camera.fov = current.fov;
       camera.near = near;
@@ -724,6 +776,23 @@ export async function mountDesk({
     for (let i = 0; i < 3; i++) light.colour[i] = (light.colour[i] ?? 1) + ((lightTarget.colour[i] ?? 1) - (light.colour[i] ?? 1)) * k;
     light.level += (lightTarget.level - light.level) * k;
     applyLight();
+    if (walk) {
+      const t = Math.min(1, (now - walk.start) / walk.ms);
+      walked = t;
+      poseWalk(t, walk);
+      labelsDirty = true;
+      if (t >= 1) {
+        const done = walk.done;
+        walk = null;
+        station = 'door';
+        target = viewOf('door', aspectNow());
+        current.pos.copy(target.pos);
+        current.look.copy(target.look);
+        current.fov = target.fov;
+        focusNow = { ...(focusOf('door') ?? focusNow) };
+        done();
+      }
+    }
     if (glide) {
       const t = Math.min(1, (now - glide.start) / glide.ms);
       const e = easeInOut(t);
@@ -750,6 +819,20 @@ export async function mountDesk({
     pass.render(scene, camera);
     if (labelsDirty) placeLabels();
     requestAnimationFrame(frame);
+  }
+  /**
+   * Where the walk is at t (0 outside, 1 seated): the door swings open, the camera walks through the room
+   * and lowers into the seat, ending exactly on the desk's own view, its focus pulling in as it sits.
+   */
+  function poseWalk(t: number, w: NonNullable<typeof walk>): void {
+    room.hinge.rotation.y = 1.85 * easeInOut(Math.min(1, t / 0.32));
+    const along = easeInOut(Math.max(0, Math.min(1, (t - 0.08) / 0.92)));
+    current.pos.copy(w.path.getPointAt(along));
+    current.look.copy(w.gaze.getPointAt(along));
+    current.fov = w.from.fov + (w.to.fov - w.from.fov) * smooth(along);
+    const sit = smooth((t - 0.7) / 0.3);
+    const to = focusOf('door') ?? focusNow;
+    focusNow = { strength: to.strength * sit, focus: to.focus, band: 0.5 + (to.band - 0.5) * sit, cut: 0 };
   }
   function setRunning(on: boolean): void {
     if (on === running) return;
@@ -940,11 +1023,115 @@ export async function mountDesk({
       scene.add(next);
       note = next;
     },
+    walkIn() {
+      if (station !== 'entrance' || walk) return Promise.resolve();
+      const from = viewOf('entrance', aspectNow());
+      const to = viewOf('door', aspectNow());
+      if (reduced) {
+        this.cutIn();
+        return Promise.resolve();
+      }
+      // Through the doorway at standing height, across the room, then down into the seat: the last
+      // point is the desk's own camera, so sitting down lands on its frame.
+      const stand = FLOOR + 1.62 * M;
+      const path = new CatmullRomCurve3([
+        from.pos.clone(),
+        v3(0, stand, OFFICE.z1 + 1.1 * M),
+        v3(0, stand, OFFICE.z1 - 0.9 * M),
+        v3(to.pos.x * 0.6, stand - 0.05 * M, to.pos.z + 1.4 * M),
+        to.pos.clone(),
+      ]);
+      const gaze = new CatmullRomCurve3([
+        from.look.clone(),
+        v3(0, FLOOR + 1.3 * M, OFFICE.z1 - 2.2 * M),
+        v3(0, FLOOR + 1.0 * M, 0.4 * M),
+        to.look.clone(),
+      ]);
+      return new Promise((resolve) => {
+        walk = { start: performance.now(), ms: 3000, done: resolve, path, gaze, from, to };
+        setRunning(true);
+      });
+    },
+    hitsDoor(x, y) {
+      if (station !== 'entrance') return false;
+      const r = renderer.domElement.getBoundingClientRect();
+      pickNdc.set(((x - r.left) / r.width) * 2 - 1, -((y - r.top) / r.height) * 2 + 1);
+      pickRay.setFromCamera(pickNdc, camera);
+      return pickRay.intersectObject(room.hinge, true).length > 0;
+    },
+    cutIn() {
+      walk = null;
+      walked = 1;
+      room.hinge.rotation.y = 1.85;
+      station = 'door';
+      target = viewOf('door', aspectNow());
+      current.pos.copy(target.pos);
+      current.look.copy(target.look);
+      current.fov = target.fov;
+      focusNow = { ...(focusOf('door') ?? focusNow) };
+      labelsDirty = true;
+    },
     turnTo(round) {
       notebook.turnTo(round, reduced);
       const beat = crew.replay.beats.find((b) => b.kind === 'briefed' && b.brief === round);
       if (beat) crew.s = Math.max(0, beat.scene - 0.5);
       document.documentElement.dataset.round = round;
+    },
+    onAir(on) {
+      mic.onAir(on);
+    },
+    micHead() {
+      const at = mic.group.localToWorld(v3(0, 8.6, 0)).project(camera);
+      if (at.z >= 1) return null;
+      const r = renderer.domElement.getBoundingClientRect();
+      return { x: r.left + (at.x * 0.5 + 0.5) * r.width, y: r.top + (-at.y * 0.5 + 0.5) * r.height };
+    },
+    objectRects() {
+      const r = renderer.domElement.getBoundingClientRect();
+      const bounds = new Box3();
+      const things: Array<[string, Object3D | Vector3[]]> = [
+        ['nameplate', plate.group],
+        ['card', card.group],
+        ['mic', mic.group],
+        ['index box', box.group],
+        ['notebook', notebook.group],
+        ['keyboard', keyboard.group],
+        ['cup', cup],
+        ['stamp', stamp],
+        ['sticky note', note],
+        ['pencil', pen],
+        // The model by its base and walls (it holds a hidden paper sheet larger than itself).
+        ['office', modelCorners],
+      ];
+      return things.map(([name, o]) => {
+        // Each visible part's own box, projected, so the rect hugs the thing rather than its whole box.
+        const xs: number[] = [];
+        const ys: number[] = [];
+        const take = (b: Box3) => {
+          for (const x of [b.min.x, b.max.x])
+            for (const y of [b.min.y, b.max.y])
+              for (const z of [b.min.z, b.max.z]) {
+                projected.set(x, y, z).project(camera);
+                xs.push(r.left + (projected.x * 0.5 + 0.5) * r.width);
+                ys.push(r.top + (-projected.y * 0.5 + 0.5) * r.height);
+              }
+        };
+        if (Array.isArray(o)) take(bounds.setFromPoints(o));
+        else
+          o.traverseVisible((part) => {
+            const mesh = part as Mesh;
+            if (!mesh.isMesh) return;
+            mesh.geometry.computeBoundingBox();
+            if (mesh.geometry.boundingBox) take(bounds.copy(mesh.geometry.boundingBox).applyMatrix4(mesh.matrixWorld));
+          });
+        return {
+          name,
+          x: Math.min(...xs),
+          y: Math.min(...ys),
+          width: Math.max(...xs) - Math.min(...xs),
+          height: Math.max(...ys) - Math.min(...ys),
+        };
+      });
     },
     press(key) {
       if (keyboard.press(key)) presses++;
@@ -964,10 +1151,40 @@ export async function mountDesk({
     },
     debug: {
       station: () => station,
+      walked: () => walked,
+      doorAngle: () => room.hinge.rotation.y,
+      /** Everything in the scene graph, and anything that is a stand-in rather than the real thing. */
+      sceneSummary: () => {
+        let meshes = 0;
+        let placeholders = 0;
+        scene.traverse((o) => {
+          if (!(o as Mesh).isMesh) return;
+          meshes++;
+          if (o.userData.placeholder || /placeholder|proxy|stand-?in/i.test(o.name)) placeholders++;
+        });
+        const real = {
+          box: box.group,
+          notebook: notebook.group,
+          keyboard: keyboard.group,
+          stamp,
+          cup,
+          nameplate: plate.group,
+          card: card.group,
+          mic: mic.group,
+          note,
+        };
+        return {
+          meshes,
+          placeholders,
+          desk: Object.fromEntries(Object.entries(real).map(([k, o]) => [k, o.parent === scene])),
+          model: model.group.parent === scene,
+        };
+      },
       replayTime: () => crew.s,
       strength: () => pass.strength,
       keysDown: () => keyboard.down,
       presses: () => presses,
+      onAir: () => mic.lit,
       monitorRects: () => {
         const w = stage.clientWidth;
         const h = stage.clientHeight;

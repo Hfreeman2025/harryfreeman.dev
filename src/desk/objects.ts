@@ -6,17 +6,21 @@
 import {
   BoxGeometry,
   type CanvasTexture,
+  Color,
   CylinderGeometry,
+  DoubleSide,
   ExtrudeGeometry,
   Group,
   LatheGeometry,
   type Material,
   Mesh,
+  MeshBasicMaterial,
   MeshLambertMaterial,
   type Object3D,
   PlaneGeometry,
   RepeatWrapping,
   Shape,
+  SphereGeometry,
   TorusGeometry,
   Vector2,
   Vector3,
@@ -43,7 +47,8 @@ function shadows(o: Object3D, receive = true): Object3D {
 }
 
 // ---------- The desk ----------
-export function deskTop(): Mesh {
+/** The desk's top surface, width × depth, centred on the model. */
+export function deskTop(width: number, depth: number): Mesh {
   const texture = canvasTexture(1024, 1024, (c) => {
     c.fillStyle = BIRCH;
     c.fillRect(0, 0, 1024, 1024);
@@ -57,8 +62,8 @@ export function deskTop(): Mesh {
   });
   texture.wrapS = RepeatWrapping;
   texture.wrapT = RepeatWrapping;
-  texture.repeat.set(6, 6);
-  const mesh = new Mesh(new PlaneGeometry(200, 200), new MeshLambertMaterial({ map: texture }));
+  texture.repeat.set((6 * width) / 200, (6 * depth) / 200);
+  const mesh = new Mesh(new PlaneGeometry(width, depth), new MeshLambertMaterial({ map: texture }));
   mesh.rotation.x = -Math.PI / 2;
   mesh.position.y = DESK_Y - 0.004;
   mesh.receiveShadow = true;
@@ -729,5 +734,92 @@ export class BusinessCard {
       [1, 1],
       [-1, 1],
     ].map(([sx = 0, sz = 0]) => this.group.localToWorld(new Vector3((sx * BCARD.width) / 2, 0.1, (sz * BCARD.depth) / 2)));
+  }
+}
+
+/**
+ * The "Speak to me" microphone: a podcast mic on a short arm, its ON AIR lamp on the base and a printed
+ * paper tag hung on the arm. It never listens: clicking it lights the lamp and opens Harry's contact
+ * card (#speak), nothing more.
+ */
+export class Microphone {
+  readonly group = new Group();
+  readonly #lamp: Mesh<BoxGeometry, MeshLambertMaterial>;
+  constructor() {
+    const ink = flat(INK);
+    const base = new Mesh(new CylinderGeometry(2.0, 2.2, 0.5, 32), ink);
+    base.position.y = 0.25;
+    const arm = new Mesh(new CylinderGeometry(0.22, 0.22, 4.6, 16), flat('#5d6577'));
+    arm.position.y = 0.5 + 2.3;
+    const yoke = new Mesh(new TorusGeometry(1.35, 0.16, 10, 28, Math.PI), ink);
+    yoke.position.y = 5.6;
+    yoke.rotation.z = Math.PI;
+    // The head: a grille capsule, ink bands top and bottom.
+    const head = new Mesh(new CylinderGeometry(1.05, 1.05, 3.2, 28), flat('#c9ccd3'));
+    head.position.y = 6.4;
+    const crown = new Mesh(new SphereGeometry(1.05, 28, 14, 0, Math.PI * 2, 0, Math.PI / 2), flat('#c9ccd3'));
+    crown.position.y = 8.0;
+    const band = new Mesh(new CylinderGeometry(1.1, 1.1, 0.5, 28), ink);
+    band.position.y = 4.95;
+    const ring = new Mesh(new CylinderGeometry(1.08, 1.08, 0.12, 28), ink);
+    ring.position.y = 7.0;
+    // The ON AIR lamp on the base: dark until the mic is clicked.
+    this.#lamp = new Mesh(new BoxGeometry(1.5, 0.42, 0.55), new MeshLambertMaterial({ color: '#4a2a2a', emissive: new Color('#000000') }));
+    this.#lamp.position.set(0, 0.62, 1.55);
+    // The printed tag, hung on the arm.
+    const tag = new Mesh(
+      new PlaneGeometry(3.0, 1.1),
+      new MeshLambertMaterial({
+        map: canvasTexture(600, 220, (c) => {
+          c.fillStyle = PAPER;
+          c.fillRect(0, 0, 600, 220);
+          c.strokeStyle = INK;
+          c.lineWidth = 10;
+          c.strokeRect(5, 5, 590, 210);
+          c.fillStyle = INK;
+          c.textAlign = 'center';
+          c.textBaseline = 'middle';
+          fitFont(c, 'Speak to me', cond(700), 110, 540);
+          c.fillText('Speak to me', 300, 112);
+        }),
+        side: DoubleSide,
+      }),
+    );
+    tag.position.set(1.9, 3.2, 0.3);
+    tag.rotation.set(-0.35, -0.25, 0.08);
+    const lampText = new Mesh(
+      new PlaneGeometry(1.3, 0.3),
+      new MeshBasicMaterial({
+        transparent: true,
+        map: canvasTexture(260, 60, (c) => {
+          c.fillStyle = '#ffe7d6';
+          c.textAlign = 'center';
+          c.textBaseline = 'middle';
+          c.font = cond(700)(40);
+          c.fillText('ON AIR', 130, 32);
+        }),
+      }),
+    );
+    lampText.position.set(0, 0.62, 1.83);
+    lampText.userData.noEdge = true;
+    this.group.add(base, arm, yoke, head, crown, band, ring, this.#lamp, lampText, tag);
+    this.group.position.y = DESK_Y;
+    shadows(this.group);
+  }
+  /** The lamp on or off. */
+  onAir(on: boolean): void {
+    this.#lamp.material.color.set(on ? '#ff3b3b' : '#4a2a2a');
+    this.#lamp.material.emissive.set(on ? '#ff2a2a' : '#000000');
+  }
+  get lit(): boolean {
+    return this.#lamp.material.emissive.r > 0.5;
+  }
+  /** What a click on the mic covers: the head, the arm and the base, as a box in the room. */
+  corners(): Vector3[] {
+    this.group.updateMatrixWorld(true);
+    const out: Vector3[] = [];
+    for (const x of [-2.2, 2.2])
+      for (const y of [0, 9.1]) for (const z of [-2.2, 2.2]) out.push(this.group.localToWorld(new Vector3(x, y, z)));
+    return out;
   }
 }

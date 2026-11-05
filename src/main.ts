@@ -6,6 +6,7 @@
 import { setupAsk } from './ask';
 import { isPieceId, type PieceId } from './content/pieces';
 import type { DeskControl } from './desk/main';
+import { startEntrance } from './entrance/main';
 import { loadLines, showLines } from './folder';
 import { type OfficeControl, startOffice } from './office/main';
 import { NEUTRAL_LIGHT, type RoomLight, type SignText } from './room/grid';
@@ -63,6 +64,12 @@ startGridSign({
 });
 setupRadio();
 
+/** The desk or the room, or the flat office, ready to be seen: the door hands over once it is. */
+let isReady: () => void = () => undefined;
+const ready = new Promise<void>((resolve) => {
+  isReady = resolve;
+});
+
 async function startRoomMode(): Promise<void> {
   try {
     const timeline = parseTimeline(JSON.parse(document.getElementById('timeline-data')?.textContent ?? 'null'));
@@ -86,10 +93,13 @@ async function startRoomMode(): Promise<void> {
     say(`The 3D room could not start here (${error instanceof Error ? error.message : String(error)}), so this is the flat office.`);
     control = startOffice();
   }
+  isReady();
 }
 
 if (root.dataset.mode === 'room') void startRoomMode();
 else {
   root.dataset.mode = 'office';
   control = startOffice();
+  isReady();
 }
+startEntrance({ ready, desk: () => (control && 'walkIn' in control ? control : null) });

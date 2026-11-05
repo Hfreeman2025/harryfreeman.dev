@@ -10,6 +10,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium, firefox, webkit } from 'playwright';
 import { deskChecks } from './desk-checks.mjs';
+import { doorChecks } from './door-checks.mjs';
 import { officeChecks } from './office-checks.mjs';
 import { roomChecks } from './room-checks.mjs';
 import { silenceLiveAudio } from './silent.mjs';
@@ -85,10 +86,11 @@ function countAudio() {
 }
 
 async function withPage(browser, options, fn) {
-  const { initScript, grid = 'ok', ...contextOptions } = options;
+  const { initScript, grid = 'ok', door = false, ...contextOptions } = options;
   const context = await browser.newContext({ deviceScaleFactor: 1, ...contextOptions });
   await context.addInitScript(silenceLiveAudio);
   await context.addInitScript(countAudio);
+
   if (initScript) await context.addInitScript(initScript);
   const requests = { grid: 0, offsite: [] };
   await context.route(/^https:\/\/api\.carbonintensity\.org\.uk\//, (route) => {
@@ -96,6 +98,16 @@ async function withPage(browser, options, fn) {
     return gridMock(grid)(route);
   });
   const page = await context.newPage();
+  // Every fresh visit starts outside the office door; checks that are not about the door go straight in
+  // (?in), as Back or a deep link would.
+  if (!door) {
+    const goto = page.goto.bind(page);
+    page.goto = (url, opts) => {
+      const u = new URL(url);
+      if (u.pathname === '/' || u.pathname === '/index.html') u.searchParams.set('in', '');
+      return goto(u.toString(), opts);
+    };
+  }
   const problems = [];
   page.on('request', (r) => {
     const url = new URL(r.url());
@@ -148,6 +160,7 @@ async function run(name) {
   const context = { check, expect, BASE, config, shots, shot, name };
 
   await deskChecks(context);
+  await doorChecks(context);
   await roomChecks(context);
   await officeChecks(context);
   await stampChecks(context);

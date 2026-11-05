@@ -42,9 +42,51 @@ async function open(url, width, height, scale) {
   }
 }
 
-// The social image: the way in, the directory board and the room behind it.
+// The door: the first paint of a first visit. The plate is left blank in the posters, for its words are
+// real text laid over it; the social image is the door with its plate, as a first visit sees it.
+async function openDoor(url, width, height, scale, phone = false) {
+  const context = await browser.newContext({
+    viewport: { width, height },
+    deviceScaleFactor: scale,
+    ...(phone ? { isMobile: true, hasTouch: true } : {}),
+  });
+  await context.addInitScript(silenceLiveAudio);
+  await context.route(/^https:\/\/api\.carbonintensity\.org\.uk\//, gridMock('hang'));
+  const page = await context.newPage();
+  await page.goto(url, { waitUntil: 'load' });
+  await page.waitForFunction(() => document.getElementById('entrance')?.dataset.door === 'live', null, { timeout: 20000 });
+  await page.waitForTimeout(1200);
+  return { page, done: () => context.close() };
+}
 {
-  const { page, done } = await open(`${base}/?room&hold&t=${MOMENT}`, 1200, 630, 1);
+  const { page, done } = await openDoor(`${base}/?door&photo`, 1600, 1000, 1.5);
+  const big = join(tmp, 'entrance-2400.png');
+  await page.screenshot({ path: big });
+  await done();
+  for (const w of [2400, 1600, 1200]) {
+    execFileSync('/opt/homebrew/bin/cwebp', [
+      '-quiet',
+      '-q',
+      '80',
+      '-resize',
+      String(w),
+      '0',
+      big,
+      '-o',
+      join(still, `entrance-${w}.webp`),
+    ]);
+  }
+}
+{
+  const { page, done } = await openDoor(`${base}/?door&photo`, 390, 844, 2, true);
+  const shot = join(tmp, 'entrance-phone.png');
+  await page.locator('#entrance').screenshot({ path: shot });
+  await done();
+  execFileSync('/opt/homebrew/bin/cwebp', ['-quiet', '-q', '80', '-resize', '780', '0', shot, '-o', join(still, 'entrance-phone.webp')]);
+}
+{
+  const { page, done } = await openDoor(`${base}/?door&hold`, 1200, 630, 1);
+  await page.waitForFunction(() => document.getElementById('entrance-plate')?.dataset.placed !== undefined, null, { timeout: 5000 });
   await page.screenshot({ path: join(site, 'public', 'og.png') });
   await done();
 }

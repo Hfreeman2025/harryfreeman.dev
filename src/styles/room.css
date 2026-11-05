@@ -281,6 +281,9 @@ html[data-mode="room"][data-scene="desk"] .masthead__card {
 html[data-mode="room"][data-scene="desk"] .masthead [data-placed] {
   opacity: 1;
 }
+html[data-mode="room"][data-scene="desk"] .masthead [data-away] {
+  opacity: 0;
+}
 html[data-mode="room"][data-scene="desk"] .masthead__plate {
   display: grid;
   place-content: center;
@@ -1419,4 +1422,270 @@ html[data-scene="desk"] .room__screen {
 html[data-motion="reduce"] .desk__printout .printout__paper,
 html[data-motion="reduce"] .stamp__ink {
   animation: none;
+}
+
+/* ---------- The entrance: the outside of the office door ---------- */
+/* A hero above the flat page (and without script); over the desk, the whole window until you come in. */
+/* As a hero it takes the poster's own shape (16:10, or 39:55 on a phone), so the plate's words sit on the
+   poster's plate exactly; over the desk it is the window, and the 3D door frames itself to fit. */
+.entrance {
+  position: relative;
+  container-type: size;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: #d8cfbf;
+  color: #1f2433;
+}
+@media (max-width: 760px) {
+  .entrance {
+    aspect-ratio: 39 / 55;
+  }
+}
+html[data-entrance="in"] .entrance {
+  display: none;
+}
+html[data-mode="room"][data-entrance="door"] .entrance {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  height: auto;
+  aspect-ratio: auto;
+  transition: opacity 0.42s ease;
+}
+.entrance[data-leaving] {
+  opacity: 0;
+}
+.entrance__poster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.entrance[data-door="live"] .entrance__poster {
+  visibility: hidden;
+}
+/* Over the desk the door is the desk's own scene, drawn on its stage under this layer: the layer is clear
+   once the scene is up, and the desk's own things stay hidden until you are in. */
+html[data-mode="room"][data-entrance="door"] .entrance[data-door="live"] {
+  background: transparent;
+}
+html[data-mode="room"][data-entrance="door"] :is(.front, .desk__labels, .room__back, .room__caption, .room__poster) {
+  visibility: hidden;
+}
+.entrance__in[aria-busy="true"] {
+  opacity: 0.75;
+  cursor: progress;
+}
+.entrance__stage {
+  position: absolute;
+  inset: 0;
+}
+.entrance__stage canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+/* The brass plate's words: one box, sized to the door view, either way. Over the poster it is a brass
+   badge in its own right, set on the door; once the 3D door is up it is laid onto the brass plate there
+   (door.ts) and only its paint changes, so nothing inside it moves. */
+.entrance__plate {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 2;
+  box-sizing: border-box;
+  display: grid;
+  place-content: center;
+  width: 20cqh;
+  height: 6.6cqh;
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(#f0c766, #d9a63b);
+  border: 2px solid #a9791f;
+  border-radius: 3px;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.5);
+  font: 700 2.3cqh / 1.05 var(--cond);
+  text-align: center;
+  transform: translate(calc(50cqw - 50%), calc(40.2cqh - 50%));
+  transform-origin: 0 0;
+}
+.entrance__plate[data-placed] {
+  background: none;
+  border-color: transparent;
+  box-shadow: none;
+}
+.entrance__plate[data-away] {
+  opacity: 0;
+}
+.entrance__name {
+  display: block;
+  letter-spacing: 0.01em;
+}
+.entrance__comma {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.entrance__role {
+  display: block;
+  margin-top: 0.12em;
+  font-weight: 600;
+  font-size: 0.62em;
+  color: #5b4413;
+}
+.entrance__ways {
+  position: absolute;
+  left: 50%;
+  bottom: 5cqh;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin: 0;
+  translate: -50% 0;
+  white-space: nowrap;
+}
+.entrance[data-walking] .entrance__ways {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+.entrance__in {
+  padding: 11px 26px 12px;
+  background: #1f2433;
+  color: #f6f1e7;
+  border-radius: 999px;
+  font: 700 20px / 1 var(--cond);
+  text-decoration: none;
+  box-shadow: 0 3px 0 rgb(31 36 51 / 0.3);
+}
+.entrance__in:hover {
+  background: #2f3650;
+}
+.entrance__skip {
+  padding: 6px 10px;
+  background: rgb(246 241 231 / 0.85);
+  color: #1f2433;
+  border-radius: 6px;
+  font: 600 15px / 1.2 var(--cond);
+}
+html[data-photo] .entrance__ways,
+html[data-photo] .entrance__plate {
+  /* biome-ignore lint/complexity/noImportantStyles: the stills show the bare door. */
+  display: none !important;
+}
+html[data-motion="reduce"] .entrance {
+  transition: none;
+}
+
+/* The card's way back: always Back, with where it goes underneath. */
+.folder-card__where {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  opacity: 0.72;
+}
+
+/* Speak to me: a speech bubble out of the mic, in the desk's cartoon line: a cream fill in a thick ink
+   outline (an SVG drawn to fit, its tail to the mic's head), "Say hello" in the hand, the email on one
+   line, and three ink chips. Only on the desk; the flat page has a plain Speak to me link instead. */
+.speak {
+  display: none;
+}
+html[data-mode="room"][data-scene="desk"] .speak[data-open="true"] {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 6;
+  display: block;
+  box-sizing: border-box;
+  width: 330px;
+  padding: 14px 18px 16px;
+  color: #1f2433;
+  transform-origin: var(--tail-x, 50%) var(--tail-y, 100%);
+}
+.speak[data-popped] {
+  animation: speak-pop 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@keyframes speak-pop {
+  from {
+    scale: 0.4;
+    opacity: 0;
+  }
+}
+.speak__shape {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: -1;
+  overflow: visible;
+  filter: drop-shadow(0 4px 0 rgb(31 36 51 / 0.18));
+}
+.speak__outline {
+  fill: #f6f1e7;
+  stroke: #1f2433;
+  stroke-width: 3.5;
+  stroke-linejoin: round;
+}
+.speak__title {
+  margin: 0;
+  font:
+    700 26px / 1 "Caveat",
+    cursive;
+  color: #1f2433;
+}
+.speak__email {
+  margin: 6px 0 0;
+  overflow: hidden;
+  white-space: nowrap;
+  font: 600 16px / 1.3 var(--mono);
+  color: #1f2433;
+  user-select: all;
+}
+.speak__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 0;
+}
+.speak__chip {
+  padding: 5px 12px 6px;
+  background: #1f2433;
+  color: #f6f1e7;
+  border: 0;
+  border-radius: 999px;
+  font: 600 14px / 1.2 var(--cond);
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: 0 2px 0 rgb(31 36 51 / 0.25);
+}
+.speak__chip:hover {
+  background: #2f3650;
+}
+.speak__chip:focus-visible {
+  outline: 3px solid #ffc94a;
+  outline-offset: 2px;
+}
+.speak__said {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+/* The mic is picked like the desk's other things: no box round it, a yellow ring when focused by keyboard. */
+.desk__labels .obj--mic:hover,
+.desk__labels .obj--mic[aria-expanded="true"] {
+  background: none;
+  outline: 0;
+}
+html[data-motion="reduce"] .speak[data-popped] {
+  animation: none;
+}
+html[data-mode="room"][data-scene="desk"] .masthead__speak {
+  display: none;
 }

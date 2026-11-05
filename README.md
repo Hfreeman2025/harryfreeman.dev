@@ -36,6 +36,25 @@ studio as a living miniature on it, drawn as a management sim: zoned floors with
 where nothing stands in front of them, a status gem and a name tag per builder, and the work travelling
 on paths to review. The things on the desk are the site's parts (`src/desk/`):
 
+- **The door.** Every fresh visit and every reload starts outside Harry's office door: a corridor, the
+  door with its frosted pane lit warm from inside, a brass plate reading "Harry Freeman, Head of AI"
+  (real text laid onto the plate), a handle and a doormat. The door and the room behind it are the desk's
+  own scene (`src/desk/room.ts`, 125 units to the metre, so the desk view's camera is a seated person's
+  eyes): **Come in** (the door, the button or Enter) swings it open and walks through the room to the
+  long desk under the window, lowering into the seat and ending exactly on the desk's own camera (its
+  position, target, field of view and focus), so there is nothing to swap at the end. The door's poster
+  paints first; the real door replaces it only once the whole desk has loaded, and Come in pressed
+  before then says "Opening…" and waits. **Skip to the desk** and Esc go straight in; reduced motion
+  cuts. Back and Forward (and the back-forward cache) return to the desk, and a deep link
+  (`#folder-<tool>`, `#ask`), `?in`, a style or a still never show the door; `?door` always does. On
+  phones (until the phone diorama) and without WebGL or script, the door is a hero above the page: a
+  light door (`src/entrance/door.ts`) that opens onto warm light, or its poster, with the plate's words
+  as real text and Come in a link to the content.
+- **The Speak to me mic.** A podcast mic by the nameplate, with a printed tag. It never listens: no
+  microphone is asked for, no permission, no audio. Clicking it (or Enter) lights its ON AIR lamp and
+  opens a contact card: Harry's email with a Copy button (which says Copied only once the clipboard has
+  it), LinkedIn and the CV. Esc or a click away closes it. The flat page has a plain Speak to me link in
+  its header.
 - **The nameplate and the card.** Harry's name and role are on a nameplate, his one-line intro and his
   CV, Email and LinkedIn links on a card beside it. Both are the page's real header text
   (`.masthead`), mapped in perspective onto the 3D faces (`room/quad.ts`), so it reads, selects, focuses
@@ -208,6 +227,18 @@ the check.
     painted zone name, and every screen is in view; the notebook's V3 page replays V3; typing at
     Reception presses one key per character and an answer prints its quotes before the desk opens with
     the line marked; a refusal prints a refusal; reduced motion cuts and nobody waves;
+  - the door (`scripts/door-checks.mjs`): a fresh visit lands outside it with the plate's text, title
+    unchanged, and Come in swings it open (mid-walk the door is open and the camera walking) and sits at
+    the desk in 2.5 to 7 s with focus on the name, no layout shift and no audio device; the seated frame
+    after the walk matches the desk loaded directly (mean difference under 2%), and at every sample of
+    the walk the scene holds the real desk and no stand-ins; Come in before the desk has loaded says
+    Opening… and waits; Skip and Esc go
+    straight in; a reload starts at the door again and Back from the CV restores the desk; deep links
+    skip it and the CV has none; reduced motion cuts; without WebGL it is the poster with the plate as
+    text and Come in a link to the content; on a phone it is a hero above the page, no sideways scroll;
+  - the mic: click or Enter opens the card and lights the lamp; its three links are the configured email,
+    LinkedIn and CV, each focusable; Copy puts exactly the email on a (mocked) clipboard; Esc and a click
+    away close it and the lamp goes off; `getUserMedia` is never called;
   - the stamps' ink: none while the check is held, then PASSED, NOT VALID for the one-byte change, and
     FAILED for dreaming beside its valid signature;
   - the HTML before scripts;
