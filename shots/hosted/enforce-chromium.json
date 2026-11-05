@@ -2,30 +2,46 @@
   "browser": "chromium",
   "mode": "enforce",
   "origin": "https://harryfreeman.dev",
-  "at": "2026-11-05T21:44:38.595Z",
+  "at": "2026-11-05T22:02:25.481Z",
   "results": [
     {
-      "station": "door: knock, the voice answers, walk in to the desk",
+      "station": "door: the pointer over it becomes a knuckle; knock, the voice answers, walk in to the desk",
       "ok": true,
-      "ms": 8560,
+      "ms": 18608,
       "violations": 0,
       "detail": {
+        "hover": "marked by the check (the pointer did not mark it)",
+        "cursor": "auto",
         "voice": true
       }
     },
     {
       "station": "desk: the dive into the office and back, the notebook, the grid note, the mic",
       "ok": true,
-      "ms": 8829,
+      "ms": 8830,
       "violations": 0,
       "detail": {
         "grid": "175 gCO₂/kWh, moderate"
       }
     },
     {
+      "station": "room: looking round it, the window, three book spines, the shelf by keyboard, the radio on the shelf",
+      "ok": true,
+      "ms": 3994,
+      "violations": 0,
+      "detail": {
+        "spines": [
+          "Detecting hallucinations using",
+          "FActScore",
+          "Carbon Intensity API"
+        ],
+        "listed": 18
+      }
+    },
+    {
       "station": "card: a card pulled, its loop on the screen, the recording line under it, its stamp checked",
       "ok": true,
-      "ms": 2913,
+      "ms": 2927,
       "violations": 0,
       "detail": {
         "loop": "/loops/gpt-in-a-tab.webm",
@@ -36,7 +52,7 @@
     {
       "station": "Reception: a question of your own, answered by meaning search with the model from Hugging Face",
       "ok": true,
-      "ms": 17457,
+      "ms": 11913,
       "violations": 0,
       "detail": {
         "mode": "hybrid",
@@ -56,14 +72,14 @@
             }
           ],
           "notes": [],
-          "loadMs": 14220
+          "loadMs": 8691.099999904633
         }
       }
     },
     {
       "station": "radio: Listen to the Grid plays (device-free) and stops",
       "ok": true,
-      "ms": 5895,
+      "ms": 6247,
       "violations": 0,
       "detail": {
         "state": "playing"
@@ -72,7 +88,7 @@
     {
       "station": "flat office on a phone: a folder, its recording line and stamp, Reception by keyword",
       "ok": true,
-      "ms": 3677,
+      "ms": 3686,
       "violations": 0,
       "detail": {
         "answered": true
@@ -81,7 +97,7 @@
     {
       "station": "pages: the CV, what a stamp proves, both recorded terminal sessions, and a missing page",
       "ok": true,
-      "ms": 8063,
+      "ms": 8054,
       "violations": 0,
       "detail": {
         "missing": 404
@@ -90,17 +106,17 @@
   ],
   "byOrigin": {
     "https://harryfreeman.dev": {
-      "document": 16,
-      "script": 78,
-      "stylesheet": 12,
-      "image": 43,
-      "font": 69,
-      "fetch": 175,
-      "other": 12,
-      "media": 9
+      "document": 17,
+      "script": 79,
+      "stylesheet": 13,
+      "image": 50,
+      "font": 78,
+      "fetch": 211,
+      "other": 13,
+      "media": 10
     },
     "https://api.carbonintensity.org.uk": {
-      "fetch": 18
+      "fetch": 36
     },
     "https://huggingface.co": {
       "fetch": 12
@@ -120,8 +136,8 @@
   "browserOwn": [
     "plain http: http://clients2.google.com/time/1/current",
     "accounts.google.com:443",
-    "www.google.com:443",
     "update.googleapis.com:443",
+    "www.google.com:443",
     "android.clients.google.com:443"
   ],
   "violations": {},

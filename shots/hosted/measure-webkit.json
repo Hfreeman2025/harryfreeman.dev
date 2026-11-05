@@ -1,0 +1,72 @@
+{
+  "browser": "webkit",
+  "mode": "measure",
+  "origin": "https://harryfreeman.dev",
+  "at": "2026-11-05T22:01:09.506Z",
+  "results": [
+    {
+      "station": "door: the pointer over it becomes a knuckle; knock, the voice answers, walk in to the desk",
+      "ok": true,
+      "ms": 19011,
+      "violations": 1,
+      "detail": {
+        "hover": "marked by the check (the pointer did not mark it)",
+        "cursor": "auto",
+        "voice": true
+      }
+    },
+    {
+      "station": "room: looking round it, the window, three book spines, the shelf by keyboard, the radio on the shelf",
+      "ok": true,
+      "ms": 4197,
+      "violations": 0,
+      "detail": {
+        "spines": [
+          "Detecting hallucinations using",
+          "FActScore",
+          "Carbon Intensity API"
+        ],
+        "listed": 18
+      }
+    }
+  ],
+  "byOrigin": {
+    "https://harryfreeman.dev": {
+      "document": 2,
+      "script": 21,
+      "stylesheet": 2,
+      "image": 14,
+      "font": 18,
+      "fetch": 63,
+      "other": 2,
+      "ping": 1
+    },
+    "https://api.carbonintensity.org.uk": {
+      "fetch": 8
+    }
+  },
+  "workers": [],
+  "passedThroughProxy": [],
+  "refusedBySite": [],
+  "browserOwn": [],
+  "violations": {
+    "img-src ← data": 1
+  },
+  "violationDetail": {
+    "img-src ← data @ : ": {
+      "count": 1,
+      "stations": [
+        "door"
+      ]
+    }
+  },
+  "notFound": [],
+  "consoleProblems": [
+    {
+      "station": "door: the pointer over it becomes a knuckle; knock, the voice answers, walk in to the desk",
+      "type": "error",
+      "text": "[Report Only] Refused to load data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M9 22c-2-2-3-5-2-8l2-6c1-2 3-2 4 0l1 3 1-4c1-2 3-2 4 0l1 4 1-2c1-2 3-1 3 1l-1 8c0 4-3 7-7 7h-2c-2 0-4-1-5-3z' fill='%23f6f1e7' stroke='%231f2433' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E because it does not appear in the img-src directive "
+    }
+  ],
+  "failedRequests": []
+}

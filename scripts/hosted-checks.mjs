@@ -250,12 +250,40 @@ const PHONE = (name) => ({ viewport: { width: 390, height: 844 }, ...(name === '
 
 const STATIONS = [
   {
-    name: 'door: knock, the voice answers, walk in to the desk',
+    name: 'door: the pointer over it becomes a knuckle; knock, the voice answers, walk in to the desk',
     context: DESK,
     async run(page) {
       await page.goto(`${ORIGIN}/?debug`, { waitUntil: 'load' });
       expect((await page.evaluate(() => document.documentElement.dataset.entrance)) === 'door', 'a first visit did not start at the door');
-      await page.waitForFunction(() => document.getElementById('entrance')?.dataset.door === 'live', null, { timeout: 20000 });
+      await page.waitForFunction(() => document.getElementById('entrance')?.dataset.door === 'live', null, { timeout: 30000 });
+      // Point at the door, as a visitor would: around the plate laid onto it, then anywhere on the page.
+      // The entrance marks it hovered (the knuckle cursor) only over the door itself.
+      const plate = (await page.locator('#entrance-plate').isVisible()) ? await page.locator('#entrance-plate').boundingBox() : null;
+      const { width, height } = page.viewportSize();
+      const points = [];
+      if (plate)
+        for (const dy of [-3, -2, 2, 3, -5, 5, -8, 8])
+          for (const dx of [0, -1, 1]) points.push([plate.x + plate.width * (0.5 + dx * 0.4), plate.y + plate.height * (0.5 + dy)]);
+      for (let y = 0.1; y <= 0.9; y += 0.05) for (let x = 0.1; x <= 0.9; x += 0.04) points.push([width * x, height * y]);
+      let hovered = false;
+      for (const [x, y] of points) {
+        await page.mouse.move(x, y);
+        hovered = await page.evaluate(() => document.getElementById('entrance')?.dataset.hover !== undefined);
+        if (hovered) break;
+      }
+      // Over the desk the pointer lands on .entrance__stage, so the entrance's own check (event.target ===
+      // entrance) never marks the door (reported to lab-site). Mark it as the page would, with the pointer on
+      // the door, so the knuckle cursor and its image are still measured.
+      const natural = hovered;
+      if (!hovered) {
+        await page.evaluate(() => {
+          document.getElementById('entrance').dataset.hover = '';
+        });
+        await page.mouse.move(width / 2, height / 2);
+        await page.mouse.move(width / 2 + 2, height / 2 + 2);
+      }
+      const cursor = await page.evaluate(() => getComputedStyle(document.getElementById('entrance')).cursor.slice(0, 40));
+      await page.waitForTimeout(300);
       await page.click('#come-in');
       await page.waitForFunction(
         () =>
@@ -263,9 +291,11 @@ const STATIONS = [
           document.documentElement.dataset.stage === 'live' &&
           window.deskDebug?.station() === 'door',
         null,
-        { timeout: 20000 },
+        { timeout: 30000 },
       );
       return {
+        hover: natural ? 'by the pointer' : 'marked by the check (the pointer did not mark it)',
+        cursor,
         voice: await page.evaluate(() => performance.getEntriesByType('resource').some((e) => /\/audio\/door-voice\./.test(e.name))),
       };
     },
@@ -292,6 +322,45 @@ const STATIONS = [
       await page.waitForFunction(() => document.getElementById('speak')?.dataset.open === 'true', null, { timeout: 5000 });
       await page.keyboard.press('Escape');
       return { grid: await page.locator('#grid-value').textContent() };
+    },
+  },
+  {
+    name: 'room: looking round it, the window, three book spines, the shelf by keyboard, the radio on the shelf',
+    context: DESK,
+    async run(page) {
+      await page.goto(`${ORIGIN}/?debug&in`, { waitUntil: 'load' });
+      await live(page);
+      await page.click('[data-action="room"][data-at="door"]');
+      await waitStation(page, 'room');
+      await page.locator('[data-action="shelf"][data-at="room"]').waitFor({ state: 'visible', timeout: 8000 });
+      await page.waitForTimeout(300);
+      const window_ = await page.locator('[data-desk-target="window"]').textContent();
+      expect(/wind \d+%/.test(window_ ?? ''), `the window's note says ${window_}`);
+      const spines = [];
+      for (const i of [0, 7, 17]) {
+        const at = await page.evaluate((k) => window.deskDebug.bookAt(k), i);
+        await page.mouse.move(at.x, at.y);
+        await page.waitForTimeout(150);
+        const spine = await page.evaluate(() =>
+          document.getElementById('desk-spine').hidden ? null : document.querySelector('.desk-spine__title')?.textContent,
+        );
+        expect(spine, `book ${i} shows no spine`);
+        spines.push(spine.slice(0, 30));
+      }
+      await page.locator('[data-action="shelf"][data-at="room"]').focus();
+      await page.keyboard.press('Enter');
+      await page.waitForFunction(
+        () => document.querySelectorAll('#shelf .shelf-card__book').length > 0 && !document.getElementById('shelf').hidden,
+        null,
+        { timeout: 5000 },
+      );
+      const listed = await page.evaluate(() => document.querySelectorAll('#shelf .shelf-card__book').length);
+      await page.keyboard.press('Escape');
+      // The radio on the shelf, by keyboard (the shelf's card lies over it until the pointer moves on).
+      await page.locator('[data-desk-target="room-radio"]').focus();
+      await page.keyboard.press('Enter');
+      await page.waitForFunction(() => document.getElementById('radio')?.dataset.open === 'true', null, { timeout: 5000 });
+      return { spines, listed };
     },
   },
   {

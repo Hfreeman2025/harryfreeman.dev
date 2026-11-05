@@ -446,7 +446,8 @@ allows exactly what was measured on every station (below):
 - `style-src-elem 'self'`; `style-src-attr 'unsafe-hashes'` with the hash of each style attribute in the
   pages: the flat cabinet's eight custom properties (`style="--i:0"` and so on), one by one, never
   `'unsafe-inline'`.
-- `img-src`, `font-src` and `media-src 'self'`: stills and textures, Plex and Caveat, the loops.
+- `img-src 'self' data:`: stills and textures, and the door's knuckle cursor, an inline SVG in the
+  stylesheet; `font-src` and `media-src 'self'`: Plex and Caveat, the loops.
 - `connect-src 'self' https://api.carbonintensity.org.uk https://huggingface.co https://*.hf.co`: the
   record, stamps, casts and voice; the grid; the model, and the CDN hosts Hugging Face redirects its
   weights to. Measured from London it was `us.aws.cdn.hf.co`; the host depends on the visitor's region, so
@@ -489,12 +490,13 @@ by wrangler's own Pages emulation with its `_headers`, behind a TLS front with a
 for harryfreeman.dev, and each browser reaches it through a local proxy: the page runs at
 `https://harryfreeman.dev`, in a secure context, off loopback. The proxy lets only Hugging Face out to
 the network; the Carbon Intensity API is mocked; anything else is refused. Every station is driven: the
-door and its knock (audio device-free, as in every check), the desk, the dive, the notebook, the grid
-note, the mic, a card with its loop and its recording line, its stamp checked, Reception answering a
+pointer on the door (its knuckle cursor) and the knock (audio device-free, as in every check), the desk,
+the dive, the notebook, the grid note, the mic, looking round the room (the window, three book spines,
+the shelf by keyboard, the radio on the shelf), a card with its loop and its recording line, its stamp checked, Reception answering a
 question of its own by meaning search, the radio playing, the flat office on a phone, the CV, the stamps
 page, both terminal sessions and a missing page. `measure` runs the policy report-only and records every
 origin and kind of request; the default runs it enforced and fails on any violation. Measured on 5
-November 2026 and then enforced: all seven stations pass in Chromium, Firefox and WebKit with no
+November 2026 and then enforced: all eight stations pass in Chromium, Firefox and WebKit with no
 violation and nothing the site asked for refused; meaning search ran from Hugging Face's model on WebGPU
 (Chromium, WebKit) and WebAssembly (Firefox), its vectors checked against the record's. The reports are
 in `shots/hosted/`. The browsers' own background traffic (update and autofill services) is refused by
