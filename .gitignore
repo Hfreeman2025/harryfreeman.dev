@@ -10,3 +10,7 @@ playwright-report/
 
 # Partial browser runs (ONLY=...) report beside the full ones; only the full reports are kept.
 shots/e2e-*-only.json
+
+# Per-run browser check screenshots at the root of shots/desk (curated sets live in its subfolders).
+/shots/desk/*-desktop-*.png
+/shots/desk/*-phone-*.png
