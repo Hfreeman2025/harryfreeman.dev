@@ -38,6 +38,8 @@ if (browsers.length === 0) browsers.push(...(mode === 'measure' ? ['chromium'] :
 const PASS = /(?:^|\.)(?:huggingface\.co|hf\.co)$/;
 const RECORDING_LINE = 'Runs on Harry’s machine; this is a recording of the real tool.';
 const OWN_QUESTION = 'Which tool turns the grid into something you can listen to?';
+/** Asked once the model is ready: answered by meaning (hybrid), not keywords alone. */
+const SECOND_QUESTION = 'How does Harry make sure an AI answer can be checked?';
 
 // ---------- The site, as Pages serves it ----------
 
@@ -75,7 +77,19 @@ async function startPages(port) {
   // Run from .cache/hosted-checks, so wrangler's own .wrangler/ state stays out of the site.
   const child = spawn(
     bin,
-    ['pages', 'dev', join(site, 'dist'), '--ip', '127.0.0.1', '--port', String(port), '--compatibility-date', '2026-11-01'],
+    [
+      'pages',
+      'dev',
+      join(site, 'dist'),
+      '--ip',
+      '127.0.0.1',
+      '--port',
+      String(port),
+      '--inspector-port',
+      String(await freePort()),
+      '--compatibility-date',
+      '2026-11-01',
+    ],
     {
       cwd: work,
       env: { ...process.env, WRANGLER_SEND_METRICS: 'false' },
@@ -103,7 +117,8 @@ function startFront(pagesPort, record) {
       req.on('end', () => {
         try {
           const parsed = JSON.parse(body);
-          for (const r of Array.isArray(parsed) ? parsed : [parsed]) record.reports.push(r['csp-report'] ?? r.body ?? r);
+          for (const r of Array.isArray(parsed) ? parsed : [parsed])
+            record.reports.push({ ...(r['csp-report'] ?? r.body ?? r), station: record.station });
         } catch {
           record.reports.push({ unparsed: body.slice(0, 300) });
         }
@@ -171,7 +186,18 @@ function launch(name, proxy) {
     return chromium.launch({
       ...opts,
       channel: 'chromium',
-      args: ['--mute-audio', '--use-angle=metal', '--enable-gpu', '--ignore-gpu-blocklist'],
+      // The browser's own background traffic (updates, autofill, sync) is not the site's; keep it quiet.
+      args: [
+        '--mute-audio',
+        '--use-angle=metal',
+        '--enable-gpu',
+        '--ignore-gpu-blocklist',
+        '--disable-background-networking',
+        '--disable-component-update',
+        '--disable-sync',
+        '--no-pings',
+        '--disable-features=AutofillServerCommunication,OptimizationHints,MediaRouter',
+      ],
     });
   if (name === 'firefox') return firefox.launch({ ...opts, firefoxUserPrefs: { 'media.volume_scale': '0.0' } });
   return webkit.launch(opts);
@@ -316,14 +342,37 @@ const STATIONS = [
       const input = page.locator('ask-the-record').locator('[part="input"]');
       await input.fill(OWN_QUESTION);
       await input.press('Enter');
-      await page.waitForFunction(
-        (q) => {
+      const state = () =>
+        page.evaluate(() => {
           const el = document.querySelector('ask-the-record');
-          return (el?.result?.question === q && el.result.mode === 'hybrid') || el?.modelState === 'failed';
-        },
-        OWN_QUESTION,
-        { timeout: 240000 },
-      );
+          return {
+            question: el?.result?.question,
+            mode: el?.result?.mode,
+            kind: el?.result?.kind,
+            model: el?.modelState,
+            record: el?.recordState,
+            diagnostics: el?.diagnostics,
+            text: el?.shadowRoot?.textContent?.replace(/\s+/g, ' ').trim().slice(0, 300),
+          };
+        });
+      try {
+        // The first answer comes by keywords while the model loads; once it is ready, ask again.
+        await page.waitForFunction(() => ['ready', 'failed'].includes(document.querySelector('ask-the-record')?.modelState?.kind), null, {
+          timeout: 240000,
+        });
+        // The first answer turned the camera to its desk; ask the element itself, as the site does.
+        await page.evaluate((q) => document.querySelector('ask-the-record').ask(q), SECOND_QUESTION);
+        await page.waitForFunction(
+          (q) => {
+            const el = document.querySelector('ask-the-record');
+            return (el?.result?.question === q && el.result.mode === 'hybrid') || el?.modelState?.kind === 'failed';
+          },
+          SECOND_QUESTION,
+          { timeout: 30000 },
+        );
+      } catch {
+        throw new Error(`no answer by meaning: ${JSON.stringify(await state())}`);
+      }
       const result = await page.evaluate(() => {
         const el = document.querySelector('ask-the-record');
         return {
@@ -334,7 +383,7 @@ const STATIONS = [
           first: el.result?.quotes?.[0]?.fact?.text?.slice(0, 120),
         };
       });
-      expect(result.mode === 'hybrid', `meaning search did not run: ${JSON.stringify(result)}`);
+      expect(result.mode === 'hybrid' && result.model?.kind === 'ready', `meaning search did not run: ${JSON.stringify(result)}`);
       return result;
     },
   },
@@ -373,7 +422,8 @@ const STATIONS = [
       await page.waitForFunction(() => document.querySelector('#card-stamp .stamp__status')?.dataset.state === 'valid', null, {
         timeout: 20000,
       });
-      await page.goto(`${ORIGIN}/#ask`, { waitUntil: 'load' });
+      // A fresh page (the folder's card is closed), at Reception.
+      await page.goto(`${ORIGIN}/?flat#ask`, { waitUntil: 'load' });
       await page.locator('#ask').scrollIntoViewIfNeeded();
       await page.getByRole('button', { name: 'How does gridtop choose when to run?' }).click();
       await page.waitForFunction(() => document.querySelector('ask-the-record')?.result?.kind === 'answer', null, { timeout: 30000 });
@@ -406,7 +456,8 @@ async function run(name, proxyPort, record) {
   const browser = await launch(name, proxyPort);
   const results = [];
   try {
-    for (const s of STATIONS) {
+    const only = process.env.ONLY ? new RegExp(process.env.ONLY, 'i') : null;
+    for (const s of STATIONS.filter((x) => !only || only.test(x.name))) {
       const context = await browser.newContext({
         deviceScaleFactor: 1,
         ignoreHTTPSErrors: true,
@@ -424,6 +475,7 @@ async function run(name, proxyPort, record) {
         return gridMock('ok')(route);
       });
       const page = await context.newPage();
+      record.station = s.name;
       watch(context, page, record, s);
       const started = Date.now();
       const before = record.reports.length;
@@ -456,20 +508,39 @@ function summarise(record) {
     byOrigin[r.origin][r.type] = (byOrigin[r.origin][r.type] ?? 0) + 1;
   }
   const violations = {};
+  const detail = {};
   for (const r of record.reports) {
     const key = `${r['effective-directive'] ?? r.effectiveDirective ?? r['violated-directive'] ?? '?'} ← ${r['blocked-uri'] ?? r.blockedURL ?? '?'}`;
     violations[key] = (violations[key] ?? 0) + 1;
+    const file = String(r['source-file'] ?? r.sourceFile ?? '').replace(ORIGIN, '');
+    const where = `${key} @ ${file}:${r['line-number'] ?? r.lineNumber ?? ''} ${String(r['script-sample'] ?? r.sample ?? '').slice(0, 60)}`;
+    detail[where] ??= { count: 0, stations: new Set() };
+    detail[where].count++;
+    detail[where].stations.add(String(r.station).split(':')[0]);
   }
+  // A refused host the page or a worker asked for is the site's; the rest is the browser's own traffic.
+  const asked = new Set(record.requests.map((r) => r.origin.replace(/^https:\/\//, '')));
+  const refusedBySite = record.refused.filter((h) => asked.has(h.replace(/:443$/, '')));
   return {
     byOrigin,
     workers: [...new Set(record.workers.map((w) => w.url.replace(ORIGIN, '')))],
     passedThroughProxy: [...record.passed],
-    refused: record.refused,
+    refusedBySite,
+    browserOwn: [...new Set(record.refused.filter((h) => !refusedBySite.includes(h)).map((h) => h.replace(/\?.*/, '')))],
     violations,
+    violationDetail: Object.fromEntries(Object.entries(detail).map(([k, d]) => [k, { count: d.count, stations: [...d.stations] }])),
   };
 }
 
-const pagesPort = 8788 + Math.floor(Math.random() * 500);
+/** A port the system says is free now (other builders share this machine). */
+const freePort = () =>
+  new Promise((resolve) => {
+    const probe = net.createServer().listen(0, '127.0.0.1', () => {
+      const { port } = probe.address();
+      probe.close(() => resolve(port));
+    });
+  });
+const pagesPort = await freePort();
 let pages;
 let front;
 let proxy;
@@ -500,11 +571,14 @@ try {
     writeFileSync(join(out, `${mode}-${name}.json`), `${JSON.stringify(report, null, 2)}\n`);
     console.log(`  origins: ${JSON.stringify(summary.byOrigin)}`);
     console.log(
-      `  workers: ${summary.workers.join(', ') || 'none'}; through the proxy: ${summary.passedThroughProxy.join(', ') || 'nothing'}; refused: ${summary.refused.join(', ') || 'nothing'}`,
+      `  workers: ${summary.workers.join(', ') || 'none'}; through the proxy: ${summary.passedThroughProxy.join(', ') || 'nothing'}`,
+    );
+    console.log(
+      `  refused, asked for by the site: ${summary.refusedBySite.join(', ') || 'nothing'}; the browser’s own traffic refused: ${summary.browserOwn.join(', ') || 'none'}`,
     );
     console.log(`  violations: ${Object.keys(summary.violations).length ? JSON.stringify(summary.violations) : 'none'}`);
     failed += results.filter((r) => !r.ok).length;
-    if (mode === 'enforce' && (record.reports.length || record.refused.length)) failed++;
+    if (mode === 'enforce' && (record.reports.length || summary.refusedBySite.length)) failed++;
     front.close();
     proxy.close();
   }

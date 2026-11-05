@@ -1,0 +1,144 @@
+{
+  "browser": "firefox",
+  "mode": "enforce",
+  "origin": "https://harryfreeman.dev",
+  "at": "2026-11-05T21:12:58.227Z",
+  "results": [
+    {
+      "station": "door: knock, the voice answers, walk in to the desk",
+      "ok": true,
+      "ms": 8996,
+      "violations": 0,
+      "detail": {
+        "voice": true
+      }
+    },
+    {
+      "station": "desk: the dive into the office and back, the notebook, the grid note, the mic",
+      "ok": true,
+      "ms": 8723,
+      "violations": 0,
+      "detail": {
+        "grid": "175 gCO₂/kWh, moderate"
+      }
+    },
+    {
+      "station": "card: a card pulled, its loop on the screen, the recording line under it, its stamp checked",
+      "ok": true,
+      "ms": 2906,
+      "violations": 0,
+      "detail": {
+        "loop": "/loops/gpt-in-a-tab.webm",
+        "playing": true,
+        "stamp": "valid"
+      }
+    },
+    {
+      "station": "Reception: a question of your own, answered by meaning search with the model from Hugging Face",
+      "ok": true,
+      "ms": 13069,
+      "violations": 0,
+      "detail": {
+        "mode": "hybrid",
+        "kind": "refusal",
+        "model": {
+          "kind": "ready",
+          "device": "wasm"
+        },
+        "diagnostics": {
+          "runtimeVersion": "4.3.2",
+          "device": "wasm",
+          "checks": [
+            {
+              "device": "wasm",
+              "ok": true,
+              "detail": "reproduces the record's vectors to cosine 0.978 (needs 0.95)"
+            }
+          ],
+          "notes": [],
+          "loadMs": 9800
+        }
+      }
+    },
+    {
+      "station": "radio: Listen to the Grid plays (device-free) and stops",
+      "ok": true,
+      "ms": 6861,
+      "violations": 0,
+      "detail": {
+        "state": "playing"
+      }
+    },
+    {
+      "station": "flat office on a phone: a folder, its recording line and stamp, Reception by keyword",
+      "ok": true,
+      "ms": 2710,
+      "violations": 0,
+      "detail": {
+        "answered": true
+      }
+    },
+    {
+      "station": "pages: the CV, what a stamp proves, both recorded terminal sessions, and a missing page",
+      "ok": true,
+      "ms": 8191,
+      "violations": 0,
+      "detail": {
+        "missing": 404
+      }
+    }
+  ],
+  "byOrigin": {
+    "https://harryfreeman.dev": {
+      "document": 16,
+      "script": 78,
+      "stylesheet": 12,
+      "image": 46,
+      "font": 69,
+      "fetch": 175,
+      "media": 9
+    },
+    "https://api.carbonintensity.org.uk": {
+      "fetch": 18
+    },
+    "https://huggingface.co": {
+      "fetch": 12
+    },
+    "https://us.aws.cdn.hf.co": {
+      "fetch": 2
+    }
+  },
+  "workers": [
+    "blob:"
+  ],
+  "passedThroughProxy": [
+    "huggingface.co",
+    "us.aws.cdn.hf.co"
+  ],
+  "refusedBySite": [],
+  "browserOwn": [
+    "aus5.mozilla.org:443"
+  ],
+  "violations": {},
+  "violationDetail": {},
+  "notFound": [],
+  "consoleProblems": [
+    {
+      "station": "Reception: a question of your own, answered by meaning search with the model from Hugging Face",
+      "type": "warning",
+      "text": "[JavaScript Warning: \"WebGPU is disabled by blocklist.\" {file: \"blob:https://harryfreeman.dev/a725e155-9e95-4a5b-bd29-4f8ec71a1b83\" line: 1}]"
+    },
+    {
+      "station": "flat office on a phone: a folder, its recording line and stamp, Reception by keyword",
+      "type": "error",
+      "text": "[JavaScript Error: \"downloadable font: download failed (font-family: \"IBM Plex Sans\" style:normal weight:600..700 width:100 src index:0): status=2152398850 source: https://harryfreeman.dev/fonts/plex/ibm-plex-sans-latin-600-normal.woff2\"]"
+    }
+  ],
+  "failedRequests": [
+    {
+      "station": "flat office on a phone: a folder, its recording line and stamp, Reception by keyword",
+      "url": "https://harryfreeman.dev/fonts/plex/ibm-plex-sans-latin-600-normal.woff2",
+      "error": "NS_BINDING_ABORTED"
+    }
+  ]
+}

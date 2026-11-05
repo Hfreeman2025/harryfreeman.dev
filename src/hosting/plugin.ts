@@ -16,7 +16,7 @@ import { basename, join } from 'node:path';
 import * as v from 'valibot';
 import type { Plugin } from 'vite';
 import { readHostingConfig } from './config';
-import { fillHeaders, inlineScriptHashes, robotsTxt } from './headers';
+import { fillHeaders, inlineScriptHashes, robotsTxt, styleAttributeHashes } from './headers';
 import { hostedHtml, pageOf } from './html';
 import { checkHostedRecord, HOSTED_RECORD_DIR, RECORD_FILES } from './record';
 
@@ -159,9 +159,11 @@ function writeNotFound(outDir: string): void {
 }
 
 function writeHeaders(root: string, outDir: string, indexable: boolean): void {
-  const hashes = htmlFiles(outDir).flatMap((f) => inlineScriptHashes(readFileSync(f, 'utf8')));
+  const pages = htmlFiles(outDir).map((f) => readFileSync(f, 'utf8'));
+  const hashes = pages.flatMap(inlineScriptHashes);
+  const styleHashes = pages.flatMap(styleAttributeHashes);
   const template = readFileSync(join(root, 'public/_headers'), 'utf8');
-  writeFileSync(join(outDir, '_headers'), fillHeaders(template, { hashes, indexable }));
+  writeFileSync(join(outDir, '_headers'), fillHeaders(template, { hashes, styleHashes, indexable }));
   writeFileSync(join(outDir, 'robots.txt'), robotsTxt(indexable));
 }
 

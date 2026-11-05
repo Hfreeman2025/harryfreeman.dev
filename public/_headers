@@ -1,19 +1,28 @@
 # Cloudflare Pages response headers for https://harryfreeman.dev, used by the hosted build only
 # (src/hosting/plugin.ts): it fills __INLINE_SCRIPT_HASHES__ with the SHA-256 of each inline script in
-# the built pages, and removes the X-Robots-Tag line only when hosting.config.json's SITE_INDEXABLE is true.
+# the built pages and __INLINE_STYLE_HASHES__ with those of their style attributes (the flat cabinet's
+# custom properties, allowed one by one with 'unsafe-hashes', never 'unsafe-inline'); it writes the terminal
+# page's policy, __TERMINAL_CSP__, as the main one with only style-src-elem widening to 'unsafe-inline',
+# because xterm.js writes measured cell sizes into <style> elements; and it removes the X-Robots-Tag line
+# only when hosting.config.json's SITE_INDEXABLE is true.
 # The Content-Security-Policy allows exactly the origins and kinds of request measured on every station
 # of the hosted build (scripts/hosted-checks.mjs; README, Hosting). scripts/predeploy-check.mjs checks it.
 # "! Access-Control-Allow-Origin" removes the header Pages adds by default: nothing here is for other
 # sites to read. Comments stay outside rule blocks, where Pages reads every indented line as a header.
 
 /*
-  Content-Security-Policy: default-src 'none'; script-src 'self' 'wasm-unsafe-eval' __INLINE_SCRIPT_HASHES__; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; media-src 'self'; connect-src 'self' https://api.carbonintensity.org.uk https://huggingface.co; worker-src 'self' blob:; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; object-src 'none'
+  Content-Security-Policy: default-src 'none'; script-src 'self' 'wasm-unsafe-eval' __INLINE_SCRIPT_HASHES__; style-src 'self'; style-src-elem 'self'; style-src-attr 'unsafe-hashes' __INLINE_STYLE_HASHES__; img-src 'self'; font-src 'self'; media-src 'self'; connect-src 'self' https://api.carbonintensity.org.uk https://huggingface.co https://us.aws.cdn.hf.co; worker-src 'self' blob:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'
   X-Robots-Tag: noindex, nofollow
   Referrer-Policy: strict-origin-when-cross-origin
   X-Content-Type-Options: nosniff
   Permissions-Policy: camera=(), microphone=(), geolocation=(), accelerometer=(self), gyroscope=(self)
   Strict-Transport-Security: max-age=31536000; includeSubDomains
   ! Access-Control-Allow-Origin
+
+# Pages serves terminal.html at /terminal (it redirects /terminal.html there).
+/terminal
+  ! Content-Security-Policy
+  Content-Security-Policy: __TERMINAL_CSP__
 
 # Vite names these by content hash, so they never change under the same URL.
 /assets/*

@@ -315,6 +315,12 @@ display would pace. WebKit and Firefox do not report layout shift; it is measure
 - The timeline's times are inferred from file times; three hand-ins come from pane DONE lines.
 - Meaning search is heavy (about 50 MB on first use, mostly ONNX Runtime's WebAssembly).
 - Not deployed yet. The hosted build, its headers, the gate and the deploy script are ready (Hosting).
+- **Hugging Face's weights host is pinned as measured** (`us.aws.cdn.hf.co`, where `huggingface.co`
+  redirects the model). If Hugging Face moves the file to another host, the policy blocks it and
+  Reception answers by keywords only until the host is added; `https://*.hf.co` would be the looser
+  choice.
+- **The local checks are not Cloudflare.** wrangler's Pages emulation serves the headers, the redirects
+  and the 404 as Pages does, but not byte ranges; check the live site (Hosting, Attach the domain).
 - Not tested with a real screen reader, or in real Safari: Harry will try it.
 
 ## Hosting
@@ -356,13 +362,28 @@ fonts, `NOTICES.txt`. Nothing else: no source, no source maps, nothing from Harr
   from. Pages, canonical links, `og:url` and the social card use `https://harryfreeman.dev`. A missing
   path gets a 404 page (Pages would otherwise answer with the studio).
 
-**Headers** ([public/_headers](public/_headers), filled by the build): a Content-Security-Policy that
-allows exactly what was measured (below), with the inline script's hash filled from the built pages;
-`Referrer-Policy: strict-origin-when-cross-origin`; `X-Content-Type-Options: nosniff`; a
-`Permissions-Policy` denying camera, microphone and geolocation and allowing the accelerometer and
-gyroscope for this site only; `frame-ancestors 'none'`; HSTS (the `.dev` domain is preloaded anyway); no
-`Access-Control-Allow-Origin` (Pages adds `*` by default); and immutable caching for Vite's hashed
-`/assets/`.
+**Headers** ([public/_headers](public/_headers), filled by the build). A Content-Security-Policy that
+allows exactly what was measured on every station (below):
+
+| Directive | Allows | Because |
+| --- | --- | --- |
+| `default-src` | `'none'` | everything not listed is refused |
+| `script-src` | `'self'`, the head script's hash, `'wasm-unsafe-eval'` | the site's modules; ONNX Runtime compiles WebAssembly |
+| `style-src-elem` | `'self'` | the stylesheets |
+| `style-src-attr` | `'unsafe-hashes'` and the hash of each style attribute in the pages | the flat cabinet's eight custom properties (`style="--i:0"` and so on), one by one; never `'unsafe-inline'` |
+| `img-src`, `font-src`, `media-src` | `'self'` | stills, textures, Plex and Caveat, the loops |
+| `connect-src` | `'self'`, `https://api.carbonintensity.org.uk`, `https://huggingface.co`, `https://us.aws.cdn.hf.co` | the record, stamps, casts and the voice; the grid; the model, and where Hugging Face redirects its weights |
+| `worker-src` | `'self'`, `blob:` | ask-the-record's model worker (a `blob:`), which imports the runtime from this site: Firefox checks that import against `worker-src` |
+| `base-uri`, `form-action`, `frame-ancestors`, `object-src` | `'none'` | |
+
+The terminal page (`/terminal`) gets the same policy with only `style-src-elem` widened to
+`'unsafe-inline'`: xterm.js writes its theme and its measured cell sizes into `<style>` elements, which
+cannot be hashed ahead. The build derives it from the main policy and the gate refuses any other
+difference. Also on every response: `Referrer-Policy: strict-origin-when-cross-origin`;
+`X-Content-Type-Options: nosniff`; a `Permissions-Policy` denying camera, microphone and geolocation and
+allowing the accelerometer and gyroscope for this site only; HSTS (the `.dev` domain is preloaded
+anyway); no `Access-Control-Allow-Origin` (Pages adds `*` by default); and immutable caching for Vite's
+hashed `/assets/`.
 
 **Indexing.** `SITE_INDEXABLE` in `hosting.config.json` is the one switch. While it is `false`, every
 response carries `X-Robots-Tag: noindex, nofollow` and `robots.txt` disallows everything; set it to
@@ -393,7 +414,12 @@ door and its knock (audio device-free, as in every check), the desk, the dive, t
 note, the mic, a card with its loop and its recording line, its stamp checked, Reception answering a
 question of its own by meaning search, the radio playing, the flat office on a phone, the CV, the stamps
 page, both terminal sessions and a missing page. `measure` runs the policy report-only and records every
-origin and kind of request; the default runs it enforced and fails on any violation.
+origin and kind of request; the default runs it enforced and fails on any violation. Measured on 5
+November 2026 and then enforced: all seven stations pass in Chromium, Firefox and WebKit with no
+violation and nothing the site asked for refused; meaning search ran from Hugging Face's model on WebGPU
+(Chromium, WebKit) and WebAssembly (Firefox), its vectors checked against the record's. The reports are
+in `shots/hosted/`. The browsers' own background traffic (update and autofill services) is refused by
+the proxy and listed apart; the page never asked for it.
 
 **Deploy** (`npm run deploy`, `scripts/deploy.mjs`): refuses uncommitted changes; builds the hosted site
 and runs the gate; asks wrangler who it is logged in as and refuses unless the email is exactly the
@@ -406,6 +432,7 @@ because it brings LGPL-3.0 and CC0 packages that `npm run licences` does not all
 **Attach the domain** (once): Cloudflare dashboard → Workers & Pages → `harryfreeman-studio` → Custom
 domains → Set up a custom domain → `harryfreeman.dev`. The domain is in the same account, so Pages adds
 the DNS record itself. Then check it: `curl -sI https://harryfreeman.dev/` shows the headers above, and
+`curl -sI https://harryfreeman.dev/terminal` carries only the terminal page's policy, and
 `curl -sI -H 'Range: bytes=0-99' https://harryfreeman.dev/loops/gridtop.webm` answers 206 (Safari needs
 ranges for video; wrangler's local emulation does not do them, so only the real site can show this).
 

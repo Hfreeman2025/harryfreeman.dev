@@ -1,7 +1,7 @@
 // The pre-deploy gate's rules (scripts/predeploy-check.mjs runs them over dist/). Pure, so the unit tests
 // prove each rule fires and each exception stays as narrow as it is written.
 
-import { cspOf, inlineScriptHashes } from './headers';
+import { directives, inlineScriptHashes, parseHeaders, styleAttributeHashes, terminalPolicy } from './headers';
 
 export interface Finding {
   readonly file: string;
@@ -23,14 +23,18 @@ export function parseDenylist(text: string): string[] {
   return names;
 }
 
-/** Case-insensitive, whole words, any run of spaces between the words of a name. */
+/**
+ * Case-insensitive, whole words: not preceded or followed by [A-Za-z0-9], so a short name inside a
+ * base64 hash or a longer word never matches, and a standalone one does. Any run of spaces, a hyphen
+ * or an underscore may stand between the words of a name.
+ */
 export function denyMatchers(names: readonly string[]): RegExp[] {
   return names.map((name) => {
     const body = name
       .split(/\s+/)
       .map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
       .join(String.raw`[\s _-]+`);
-    return new RegExp(String.raw`(?<![\p{L}\p{N}])${body}(?![\p{L}\p{N}])`, 'iu');
+    return new RegExp(`(?<![A-Za-z0-9])${body}(?![A-Za-z0-9])`, 'i');
   });
 }
 
@@ -145,7 +149,7 @@ export const REQUIRED_HEADERS: ReadonlyArray<readonly [name: string, value: RegE
   ],
 ];
 
-/** The filled _headers and robots.txt, checked against the indexing switch and the pages' inline scripts. */
+/** The filled _headers and robots.txt, checked against the indexing switch and the pages' inline scripts and styles. */
 export function checkHeaders(
   headers: string,
   robots: string | null,
@@ -154,34 +158,44 @@ export function checkHeaders(
 ): Finding[] {
   const found: Finding[] = [];
   const bad = (what: string) => found.push({ file: '_headers', what });
-  if (/__[A-Z_]+__|ORT_BUILDS/.test(headers)) bad('a placeholder was never filled');
-  const csp = cspOf(headers);
-  if (!csp) bad('no Content-Security-Policy');
+  if (/^[^#\n]*(?:__[A-Z_]+__|ORT_BUILDS)/m.test(headers)) bad('a placeholder was never filled');
+  const rules = parseHeaders(headers);
+  const all = rules.find((r) => r.path === '/*');
+  const csp = all?.set.find(([n]) => n === 'content-security-policy')?.[1];
+  if (!csp) bad('no Content-Security-Policy for /*');
   else {
-    const directives = new Map(
-      csp
-        .split(';')
-        .map((d) => d.trim().split(/\s+/))
-        .filter((d) => d[0])
-        .map((d) => [d[0] ?? '', d.slice(1)]),
-    );
-    if (directives.get('default-src')?.join(' ') !== "'none'") bad("the CSP's default-src is not 'none'");
-    if (directives.get('frame-ancestors')?.join(' ') !== "'none'") bad("the CSP's frame-ancestors is not 'none'");
-    for (const [name, sources] of directives) {
-      if (sources.includes("'unsafe-inline'") || sources.includes("'unsafe-eval'") || sources.includes('*'))
-        bad(`the CSP's ${name} allows ${sources.filter((s) => ["'unsafe-inline'", "'unsafe-eval'", '*'].includes(s)).join(' ')}`);
+    const d = directives(csp);
+    if (d.get('default-src')?.join(' ') !== "'none'") bad("the CSP's default-src is not 'none'");
+    if (d.get('frame-ancestors')?.join(' ') !== "'none'") bad("the CSP's frame-ancestors is not 'none'");
+    for (const [name, sources] of d) {
+      const loose = sources.filter((s) => ["'unsafe-inline'", "'unsafe-eval'", '*'].includes(s));
+      if (loose.length) bad(`the CSP's ${name} allows ${loose.join(' ')}`);
+      if (sources.includes("'unsafe-hashes'") && name !== 'style-src-attr') bad(`the CSP's ${name} allows 'unsafe-hashes'`);
       for (const s of sources) if (/^http:/.test(s)) bad(`the CSP's ${name} allows plain http (${s})`);
     }
-    const scripts = directives.get('script-src') ?? [];
-    for (const p of pages)
+    const scripts = d.get('script-src') ?? [];
+    const styles = d.get('style-src-attr') ?? [];
+    for (const p of pages) {
       for (const h of inlineScriptHashes(p.html))
         if (!scripts.includes(h)) found.push({ file: p.file, what: `an inline script the CSP does not allow (${h})` });
+      for (const h of styleAttributeHashes(p.html))
+        if (!styles.includes(h)) found.push({ file: p.file, what: `a style attribute the CSP does not allow (${h})` });
+    }
+    // Any other policy must be the terminal page's, replacing the main one, and differ only as allowed.
+    for (const r of rules) {
+      const other = r.set.find(([n]) => n === 'content-security-policy')?.[1];
+      if (r === all || other === undefined) continue;
+      if (r.path !== '/terminal') bad(`${r.path} has its own Content-Security-Policy`);
+      else if (!r.detach.includes('content-security-policy')) bad('/terminal adds a policy without detaching the main one');
+      else if (other !== terminalPolicy(csp)) bad("/terminal's policy differs from the main one by more than xterm's style elements");
+    }
   }
+  const header = (name: string) => all?.set.find(([n]) => n === name.toLowerCase())?.[1];
   for (const [name, value] of REQUIRED_HEADERS) {
-    const line = new RegExp(`^\\s*${name}:\\s*(.+)$`, 'im').exec(headers)?.[1]?.trim();
+    const line = header(name);
     if (!line || !value.test(line)) bad(`${name} is ${line ? `“${line}”` : 'missing'}`);
   }
-  const noindex = /^\s*X-Robots-Tag:\s*noindex,\s*nofollow\s*$/im.test(headers);
+  const noindex = header('X-Robots-Tag') === 'noindex, nofollow';
   if (indexable && noindex) bad('X-Robots-Tag noindex is sent, but SITE_INDEXABLE is true');
   if (!indexable && !noindex) bad('X-Robots-Tag: noindex, nofollow is missing, and SITE_INDEXABLE is false');
   if (robots === null) found.push({ file: 'robots.txt', what: 'missing' });

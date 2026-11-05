@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -7,7 +8,18 @@ import { PIECES } from '../src/content/pieces';
 import { renderList } from '../src/content/render';
 import { parseHostingConfig } from '../src/hosting/config';
 import { checkHeaders, deniedIn, denyMatchers, parseDenylist, printableRuns, scanText } from '../src/hosting/gate';
-import { fillHeaders, HASHES_TOKEN, inlineScriptHashes, robotsTxt } from '../src/hosting/headers';
+import {
+  directives,
+  fillHeaders,
+  HASHES_TOKEN,
+  inlineScriptHashes,
+  parseHeaders,
+  robotsTxt,
+  STYLE_HASHES_TOKEN,
+  styleAttributeHashes,
+  TERMINAL_STYLE_ELEM,
+  TERMINAL_TOKEN,
+} from '../src/hosting/headers';
 import { hostedHtml, INDEX_COPY, pageOf } from '../src/hosting/html';
 import { hostedOpenLine, isLocalOnly, RECORDING_LINE } from '../src/hosting/open';
 import { checkHostedRecord } from '../src/hosting/record';
@@ -156,29 +168,62 @@ describe('hosting: the pages on the public origin', () => {
 });
 
 describe('hosting: _headers and robots.txt', () => {
-  const template = `/*\n  Content-Security-Policy: default-src 'none'; script-src 'self' ${HASHES_TOKEN}; frame-ancestors 'none'\n  X-Robots-Tag: noindex, nofollow\n  Referrer-Policy: strict-origin-when-cross-origin\n  X-Content-Type-Options: nosniff\n  Permissions-Policy: camera=(), microphone=(), geolocation=(), accelerometer=(self), gyroscope=(self)\n`;
+  const template = [
+    '# A comment may name __INLINE_SCRIPT_HASHES__ and stays as it is.',
+    '/*',
+    `  Content-Security-Policy: default-src 'none'; script-src 'self' ${HASHES_TOKEN}; style-src-elem 'self'; style-src-attr 'unsafe-hashes' ${STYLE_HASHES_TOKEN}; frame-ancestors 'none'`,
+    '  X-Robots-Tag: noindex, nofollow',
+    '  Referrer-Policy: strict-origin-when-cross-origin',
+    '  X-Content-Type-Options: nosniff',
+    '  Permissions-Policy: camera=(), microphone=(), geolocation=(), accelerometer=(self), gyroscope=(self)',
+    '',
+    '/terminal',
+    '  ! Content-Security-Policy',
+    `  Content-Security-Policy: ${TERMINAL_TOKEN}`,
+    '',
+  ].join('\n');
   const html =
-    '<script>console.log(1)</script><script type="application/json" id="d">{"a":1}</script><script type="module" src="/a.js"></script>';
+    '<script>console.log(1)</script><script type="application/json" id="d">{"a":1}</script><script type="module" src="/a.js"></script>' +
+    '<div class="cabinet" style="--drawers:4"><a style=\'--f:0\'>x</a></div><script>const s = \'<b style="--not-markup">\';</script>';
+  const fill = (over: Partial<Parameters<typeof fillHeaders>[1]> = {}) =>
+    fillHeaders(template, { hashes: inlineScriptHashes(html), styleHashes: styleAttributeHashes(html), indexable: false, ...over });
 
   it('hashes the scripts a browser runs, not data blocks or external scripts', () => {
-    const hashes = inlineScriptHashes(html);
+    const hashes = inlineScriptHashes(
+      '<script>console.log(1)</script><script type="application/json">{}</script><script src="/a.js"></script>',
+    );
     expect(hashes).toHaveLength(1);
     // SHA-256 of "console.log(1)", base64 (as `openssl dgst -sha256 -binary | base64` gives it).
     expect(hashes[0]).toBe("'sha256-CihokcEcBW4atb/CW/XWsvWwbTjqwQlE9nj9ii5ww5M='");
     expect(inlineScriptHashes('<script type="module">import "/x.js"</script>')).toHaveLength(1);
   });
 
-  it('fills the hashes and applies the indexing switch to the header and robots.txt together', () => {
-    const hashes = inlineScriptHashes(html);
-    const off = fillHeaders(template, { hashes, indexable: false });
-    expect(off).toContain(hashes[0]);
+  it('hashes each style attribute in the markup, not text inside scripts', () => {
+    const hashes = styleAttributeHashes(html);
+    expect(hashes).toHaveLength(2);
+    expect(hashes[0]).toBe(`'sha256-${createHash('sha256').update('--drawers:4').digest('base64')}'`);
+  });
+
+  it('fills the hashes in rule lines only, and the terminal policy from the main one', () => {
+    const filled = fill();
+    expect(filled.split('\n')[0]).toBe('# A comment may name __INLINE_SCRIPT_HASHES__ and stays as it is.');
+    const rules = parseHeaders(filled);
+    const main = rules.find((r) => r.path === '/*')?.set.find(([n]) => n === 'content-security-policy')?.[1] ?? '';
+    const terminal = rules.find((r) => r.path === '/terminal');
+    expect(directives(main).get('style-src-attr')).toEqual(["'unsafe-hashes'", ...styleAttributeHashes(html).sort()]);
+    expect(terminal?.detach).toEqual(['content-security-policy']);
+    expect(terminal?.set[0]?.[1]).toBe(main.replace("style-src-elem 'self'", TERMINAL_STYLE_ELEM));
+    expect(checkHeaders(filled, robotsTxt(false), [{ file: 'index.html', html }], false)).toEqual([]);
+  });
+
+  it('applies the indexing switch to the header and robots.txt together', () => {
+    const pages = [{ file: 'index.html', html }];
+    const off = fill();
+    const on = fill({ indexable: true });
     expect(off).toMatch(/X-Robots-Tag: noindex, nofollow/);
-    const on = fillHeaders(template, { hashes, indexable: true });
     expect(on).not.toMatch(/X-Robots-Tag/);
     expect(robotsTxt(false)).toBe('User-agent: *\nDisallow: /\n');
     expect(robotsTxt(true)).toBe('User-agent: *\nAllow: /\n');
-    const pages = [{ file: 'index.html', html }];
-    expect(checkHeaders(off, robotsTxt(false), pages, false)).toEqual([]);
     expect(checkHeaders(on, robotsTxt(true), pages, true)).toEqual([]);
     // Out of step: either half alone fails.
     expect(checkHeaders(off, robotsTxt(true), pages, false).map((f) => f.file)).toEqual(['robots.txt']);
@@ -189,27 +234,30 @@ describe('hosting: _headers and robots.txt', () => {
   });
 
   it('refuses a template it cannot fill, and a line Pages would not read', () => {
-    expect(() => fillHeaders('/*\n  X-Robots-Tag: noindex\n', { hashes: [], indexable: false })).toThrow(HASHES_TOKEN);
-    expect(() =>
-      fillHeaders(template, {
-        hashes: Array(60)
-          .fill("'sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA='")
-          .map((h, i) => h + i),
-        indexable: false,
-      }),
-    ).toThrow(/2000/);
+    expect(() => fillHeaders('/*\n  X-Robots-Tag: noindex\n', { hashes: [], styleHashes: [], indexable: false })).toThrow(HASHES_TOKEN);
+    const many = Array.from({ length: 60 }, (_, i) => `'sha256-${'A'.repeat(43)}${i}'`);
+    expect(() => fill({ hashes: many })).toThrow(/2000/);
   });
 
-  it('flags an unhashed inline script, unsafe sources and missing headers', () => {
-    const filled = fillHeaders(template, { hashes: [], indexable: false });
-    expect(checkHeaders(filled, robotsTxt(false), [{ file: 'index.html', html }], false)[0]?.what).toMatch(
-      /inline script the CSP does not allow/,
+  it('flags an unhashed script or style, unsafe sources, a loosened terminal policy and missing headers', () => {
+    const pages = [{ file: 'index.html', html }];
+    const what = (headers: string, p = pages) => checkHeaders(headers, robotsTxt(false), p, false).map((f) => f.what);
+    expect(what(fill({ hashes: [] }))[0]).toMatch(/inline script the CSP does not allow/);
+    expect(what(fill({ styleHashes: [] }))[0]).toMatch(/style attribute the CSP does not allow/);
+    const filled = fill();
+    expect(what(filled.replace("script-src 'self'", "script-src 'self' 'unsafe-inline'"))).toContain(
+      "the CSP's script-src allows 'unsafe-inline'",
     );
-    const loose = filled.replace("script-src 'self'", "script-src 'self' 'unsafe-inline'");
-    expect(checkHeaders(loose, robotsTxt(false), [], false).map((f) => f.what)).toContain("the CSP's script-src allows 'unsafe-inline'");
-    const bare = filled.replace(/^\s*Referrer-Policy:.*$/m, '');
-    expect(checkHeaders(bare, robotsTxt(false), [], false).map((f) => f.what)).toContain('Referrer-Policy is missing');
-    expect(checkHeaders(`${filled}\n__LEFT__`, robotsTxt(false), [], false).map((f) => f.what)).toContain('a placeholder was never filled');
+    expect(what(filled.replace("script-src 'self'", "script-src 'self' 'unsafe-hashes'"))).toContain(
+      "the CSP's script-src allows 'unsafe-hashes'",
+    );
+    const terminal = filled.split('\n').findIndex((l) => l.startsWith('/terminal'));
+    const lines = filled.split('\n');
+    lines[terminal + 2] = `${lines[terminal + 2]} https://example.org`;
+    expect(what(lines.join('\n'))).toContain("/terminal's policy differs from the main one by more than xterm's style elements");
+    expect(what(filled.replace('/terminal', '/cv'))).toContain('/cv has its own Content-Security-Policy');
+    expect(what(filled.replace(/^\s*Referrer-Policy:.*$/m, ''))).toContain('Referrer-Policy is missing');
+    expect(what(`${filled}\n  X-Left: __LEFT__`)).toContain('a placeholder was never filled');
   });
 });
 
@@ -225,6 +273,12 @@ describe('hosting: the pre-deploy gate', () => {
     expect(deniedIn('acme-widgets', m)).toEqual([1]);
     expect(deniedIn('GlobexCorp and Acmewidgets', m)).toEqual([]);
     expect(deniedIn('globex.', m)).toEqual([2]);
+    // A short entry inside a base64 hash or a longer word never matches; standing alone, it does.
+    const short = denyMatchers(['Zorb']);
+    expect(deniedIn('integrity="sha384-xZorbQ9q+Ab"', short)).toEqual([]);
+    expect(deniedIn('the Zorba files', short)).toEqual([]);
+    expect(deniedIn('built for ZORB, in 2025', short)).toEqual([1]);
+    expect(deniedIn('sha384-/Zorb+Ab', short)).toEqual([1]);
   });
 
   it('reads binary files as their printable text, which still carries a name in metadata', () => {
