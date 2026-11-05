@@ -1,0 +1,133 @@
+{
+  "browser": "firefox",
+  "mode": "enforce",
+  "origin": "https://harryfreeman.dev",
+  "at": "2026-11-05T21:45:31.310Z",
+  "results": [
+    {
+      "station": "door: knock, the voice answers, walk in to the desk",
+      "ok": true,
+      "ms": 8930,
+      "violations": 0,
+      "detail": {
+        "voice": true
+      }
+    },
+    {
+      "station": "desk: the dive into the office and back, the notebook, the grid note, the mic",
+      "ok": true,
+      "ms": 9192,
+      "violations": 0,
+      "detail": {
+        "grid": "175 gCO₂/kWh, moderate"
+      }
+    },
+    {
+      "station": "card: a card pulled, its loop on the screen, the recording line under it, its stamp checked",
+      "ok": true,
+      "ms": 3024,
+      "violations": 0,
+      "detail": {
+        "loop": "/loops/gpt-in-a-tab.webm",
+        "playing": true,
+        "stamp": "valid"
+      }
+    },
+    {
+      "station": "Reception: a question of your own, answered by meaning search with the model from Hugging Face",
+      "ok": true,
+      "ms": 11471,
+      "violations": 0,
+      "detail": {
+        "mode": "hybrid",
+        "kind": "refusal",
+        "model": {
+          "kind": "ready",
+          "device": "wasm"
+        },
+        "diagnostics": {
+          "runtimeVersion": "4.3.2",
+          "device": "wasm",
+          "checks": [
+            {
+              "device": "wasm",
+              "ok": true,
+              "detail": "reproduces the record's vectors to cosine 0.978 (needs 0.95)"
+            }
+          ],
+          "notes": [],
+          "loadMs": 8207
+        }
+      }
+    },
+    {
+      "station": "radio: Listen to the Grid plays (device-free) and stops",
+      "ok": true,
+      "ms": 7126,
+      "violations": 0,
+      "detail": {
+        "state": "playing"
+      }
+    },
+    {
+      "station": "flat office on a phone: a folder, its recording line and stamp, Reception by keyword",
+      "ok": true,
+      "ms": 2810,
+      "violations": 0,
+      "detail": {
+        "answered": true
+      }
+    },
+    {
+      "station": "pages: the CV, what a stamp proves, both recorded terminal sessions, and a missing page",
+      "ok": true,
+      "ms": 8120,
+      "violations": 0,
+      "detail": {
+        "missing": 404
+      }
+    }
+  ],
+  "byOrigin": {
+    "https://harryfreeman.dev": {
+      "document": 16,
+      "script": 78,
+      "stylesheet": 12,
+      "image": 47,
+      "font": 69,
+      "fetch": 175,
+      "media": 9
+    },
+    "https://api.carbonintensity.org.uk": {
+      "fetch": 18
+    },
+    "https://huggingface.co": {
+      "fetch": 12
+    },
+    "https://us.aws.cdn.hf.co": {
+      "fetch": 2
+    }
+  },
+  "workers": [
+    "blob:"
+  ],
+  "passedThroughProxy": [
+    "huggingface.co",
+    "us.aws.cdn.hf.co"
+  ],
+  "refusedBySite": [],
+  "browserOwn": [
+    "aus5.mozilla.org:443"
+  ],
+  "violations": {},
+  "violationDetail": {},
+  "notFound": [],
+  "consoleProblems": [
+    {
+      "station": "Reception: a question of your own, answered by meaning search with the model from Hugging Face",
+      "type": "warning",
+      "text": "[JavaScript Warning: \"WebGPU is disabled by blocklist.\" {file: \"blob:https://harryfreeman.dev/54d0bfad-ce6c-4be0-842f-6fcc5410dd55\" line: 1}]"
+    }
+  ],
+  "failedRequests": []
+}

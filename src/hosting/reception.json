@@ -1,0 +1,31 @@
+{
+  "$comment": "Reception’s runtime on the public site, from ask-the-record’s install: written by scripts/vendor-reception.mjs, checked by the hosted build before it copies each file.",
+  "from": "Personal/oss/ask-the-record/node_modules",
+  "commit": "138597c1e9543de5ac2914755ed5b9475a7b8f97",
+  "runtime": [
+    {
+      "package": "@huggingface/transformers",
+      "version": "4.3.2",
+      "integrity": "sha512-V3+dqf3iWlRYJ9I9GreM3zGQd0lAXnnoPeddmkOQYWAEE4l/+Fi6p7tx/qVUJlKQgLXGim2W76rTOzz+eC0i7g==",
+      "licence": "Apache-2.0",
+      "to": "vendor/transformers",
+      "files": {
+        "dist/transformers.min.js": "8b5a3171f8876bab2b1820a7d65eb87628e3d30bb5ea85b9dd398e76eb34decb",
+        "LICENSE": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+      }
+    },
+    {
+      "package": "onnxruntime-web",
+      "version": "1.31.0-dev.20260914-8d85527a0",
+      "integrity": "sha512-Iy7rtadoBgxS/LLvDr3QW38DB1PNXRnr0GJMcL0TAt7c9qjgVQl83UlGCVyeAnK2InpmW8Uc3PL8XIuqtDeF6g==",
+      "licence": "MIT",
+      "to": "vendor/ort",
+      "files": {
+        "dist/ort-wasm-simd-threaded.asyncify.mjs": "0966b6105cd936744498aa60df7a22cbd47af3374dbc64a9ab561c08a71e3611",
+        "dist/ort-wasm-simd-threaded.asyncify.wasm": "49871f5a4409519797e127440868a6d1923339d9185907f301a5b2a1d90af082",
+        "dist/ort-wasm-simd-threaded.mjs": "c57ca56328877353a575e51bbca6f18450027d6c9bf2307a2cb2c41363b4de9f",
+        "dist/ort-wasm-simd-threaded.wasm": "06ba057753da3847e4c24f02d91ab133455b0817c69a44993a9a53a2146df9e3"
+      }
+    }
+  ]
+}

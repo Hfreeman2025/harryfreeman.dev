@@ -1,4 +1,4 @@
-import { copyFileSync, existsSync, mkdirSync, readFileSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, statSync } from 'node:fs';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { dirname, extname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -7,6 +7,7 @@ import { defineConfig, type Plugin } from 'vite';
 import { BRIEFS_HTML } from './src/content/briefs';
 import { parseConfig } from './src/content/config';
 import { renderDeskLabels, renderList, renderRoomLabels, renderTimelineJson } from './src/content/render';
+import { hosting } from './src/hosting/plugin';
 import { renderCabinet, renderDirectory, renderPlan } from './src/office/render';
 import placeholder from './src/timeline/placeholder.json' with { type: 'json' };
 import { parseTimeline, type Timeline } from './src/timeline/schema';
@@ -17,6 +18,8 @@ const checkout = root.includes('/.worktrees/') ? root.slice(0, root.indexOf('/.w
 const personal = resolve(checkout, '..');
 /** ask-the-record is used from its own folder, read-only: its built element, runtime and model. */
 const atr = join(personal, 'oss', 'ask-the-record');
+/** The public site (src/hosting/, README Hosting): `npm run build:hosted`. */
+const HOSTED = process.env.VITE_HOSTED === '1';
 
 interface TimelineSource {
   readonly timeline: Timeline;
@@ -92,12 +95,10 @@ function serveVendor(req: IncomingMessage, res: ServerResponse, next: () => void
 
 function studio(): Plugin {
   let strict = false;
-  let outDir = 'dist';
   return {
     name: 'studio',
     configResolved(config) {
       strict = config.command === 'build';
-      outDir = resolve(root, config.build.outDir);
     },
     configureServer(server) {
       server.middlewares.use(serveVendor);
@@ -131,7 +132,7 @@ function studio(): Plugin {
           .replace('<!--office:directory-->', renderDirectory())
           .replace('<!--office:cabinet-->', renderCabinet())
           .replace('<!--office:plan-->', renderPlan())
-          .replace('<!--studio:list-->', renderList(config, source.timeline))
+          .replace('<!--studio:list-->', renderList(config, source.timeline, HOSTED))
           .replace('<!--studio:timeline-->', renderTimelineJson(source.timeline) + status)
           .replaceAll('%CV%', config.cv)
           .replaceAll('%EMAIL%', config.email)
@@ -139,24 +140,11 @@ function studio(): Plugin {
           .replaceAll('%TIMELINE_ORIGIN%', source.origin);
       },
     },
-    closeBundle() {
-      // Hosting later: copy the sibling files into the build. Off by default to save disk.
-      if (!strict || process.env.STUDIO_COPY_VENDOR !== '1') return;
-      for (const v of VENDOR) {
-        for (const file of v.files) {
-          const from = join(v.dir, file);
-          if (!existsSync(from)) continue;
-          const to = join(outDir, v.prefix, file);
-          mkdirSync(dirname(to), { recursive: true });
-          copyFileSync(from, to);
-        }
-      }
-    },
   };
 }
 
 export default defineConfig({
-  plugins: [studio()],
+  plugins: [studio(), ...(HOSTED ? [hosting({ root, atr })] : [])],
   build: {
     target: 'es2022',
     // No injected modulepreload links: WebKit warns when one re-preloads a chunk the page already ran.

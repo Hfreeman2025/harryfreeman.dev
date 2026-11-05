@@ -1,0 +1,10 @@
+{
+  "name": "harry-freeman-studio-deploy",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Deploy tooling for the public site: wrangler, pinned exactly, with its own lockfile. Kept apart from the site's dependencies because wrangler brings LGPL-3.0 and CC0 packages (sharp's libvips, via miniflare) that the site's licence check (scripts/licences.mjs) does not allow; none of it is ever in dist/.",
+  "license": "MIT",
+  "devDependencies": {
+    "wrangler": "4.158.0"
+  }
+}

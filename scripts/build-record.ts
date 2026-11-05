@@ -12,12 +12,17 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { PIECES } from '../src/content/pieces';
+import { hostedSources } from '../src/hosting/record';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const site = join(here, '..');
-const personal = join(site, '..');
+// A git worktree (.worktrees/<name>) shares the repository's siblings: look beside the main checkout.
+const checkout = site.includes('/.worktrees/') ? site.slice(0, site.indexOf('/.worktrees/')) : site;
+const personal = join(checkout, '..');
 const atr = join(personal, 'oss', 'ask-the-record');
-const out = join(site, 'public', 'record');
+// Hosted (VITE_HOSTED=1): the committed record's own sources, local addresses and paths redacted (src/hosting/record.ts).
+const hosted = process.env.VITE_HOSTED === '1' ? hostedSources(site) : null;
+const out = hosted?.out ?? join(site, 'public', 'record');
 const tmp = join(site, '.tmp');
 mkdirSync(out, { recursive: true });
 mkdirSync(tmp, { recursive: true });
@@ -60,15 +65,22 @@ const sources: Array<{ section: string; piece: string | null; path: string; sha2
 const parts: string[] = ['# Ask the studio', ''];
 
 const cvPath = join(site, 'src', 'content', 'cv.md');
-const cv = readFileSync(cvPath, 'utf8');
-parts.push(`## ${CV_SECTION}`, '', adapt(cv), '');
+const cv = hosted?.read('src/content/cv.md', cvPath) ?? readFileSync(cvPath, 'utf8');
+parts.push(`## ${CV_SECTION}`, '', adapt(hosted?.redact(cv) ?? cv), '');
 sources.push({ section: CV_SECTION, piece: null, path: 'src/content/cv.md', sha256: sha(cv), bytes: Buffer.byteLength(cv) });
 
 for (const piece of PIECES) {
   const rel = `${piece.folder}/${piece.id}/README.md`;
-  const text = readFileSync(join(personal, rel), 'utf8');
-  parts.push(`## ${piece.title}`, '', adapt(text), '');
-  sources.push({ section: piece.title, piece: piece.id, path: `~/Personal/${rel}`, sha256: sha(text), bytes: Buffer.byteLength(text) });
+  const key = `~/Personal/${rel}`;
+  const text = hosted?.read(key, join(personal, rel)) ?? readFileSync(join(personal, rel), 'utf8');
+  parts.push(`## ${piece.title}`, '', adapt(hosted?.redact(text) ?? text), '');
+  sources.push({
+    section: piece.title,
+    piece: piece.id,
+    path: hosted?.path(key, piece.id) ?? key,
+    sha256: sha(text),
+    bytes: Buffer.byteLength(text),
+  });
 }
 
 function sha(text: string): string {
@@ -121,7 +133,8 @@ try {
   await embedder.dispose();
 }
 
-writeFileSync(join(out, 'sources.json'), `${JSON.stringify({ builtAt: new Date().toISOString(), sources }, null, 2)}\n`);
+const redacted = hosted ? { redacted: `${hosted.spans} local addresses and paths replaced by “(local setup)”` } : {};
+writeFileSync(join(out, 'sources.json'), `${JSON.stringify({ builtAt: new Date().toISOString(), ...redacted, sources }, null, 2)}\n`);
 
 // The same markdown drawn as numbered source lines, by ask-the-record's own renderer, so every fact
 // is found on exactly its line. Split by section: the CV, then one block per tool for its folder.

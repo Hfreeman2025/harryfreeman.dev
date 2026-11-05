@@ -10,6 +10,7 @@
       "!public/assets/3d",
       "!public/casts",
       "!public/record",
+      "!public/vendor/ask-the-record",
       "!public/vendor/radio",
       "!public/vendor/stamps",
       "!public/vendor/transformers/transformers.min.js",

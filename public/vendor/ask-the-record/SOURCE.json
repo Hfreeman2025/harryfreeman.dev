@@ -1,0 +1,11 @@
+{
+  "from": "Personal/oss/ask-the-record/dist",
+  "commit": "138597c1e9543de5ac2914755ed5b9475a7b8f97",
+  "committed": "2026-11-03T13:59:22Z",
+  "build": "npm ci && npm run build in a clean clone at the commit; byte for byte its dist/",
+  "files": {
+    "ask-the-record.min.js": "aad261784b4d1a2007438e924f5e878503ea97ae5e7ed75d6516105602cce686",
+    "ask-the-record-explain.min.js": "3e1dd03239b1fbdb361e246ace71fc9b9b8130f05606bd53de78cb83cd19bc8e",
+    "LICENSE": "c841af0fbe85aa30a37aa14d3ee265aef97f6fbabfd472687532dbd54b4a1f48"
+  }
+}
