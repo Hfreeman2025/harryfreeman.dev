@@ -52,9 +52,9 @@
         <img class="entrance__poster" src="/still/entrance-1600.webp" srcset="/still/entrance-1200.webp 1200w, /still/entrance-1600.webp 1600w, /still/entrance-2400.webp 2400w" sizes="100vw" alt="" width="1600" height="1000" fetchpriority="high" decoding="async">
       </picture>
       <div class="entrance__stage" aria-hidden="true"></div>
-      <p class="entrance__plate" id="entrance-plate" data-desk-target="door-plate" data-place="quad"><span class="entrance__name">Harry Freeman</span><span class="entrance__comma">, </span><span class="entrance__role">Head of AI</span></p>
+      <p class="entrance__plate" id="entrance-plate"><span class="entrance__name">Harry Freeman</span><span class="entrance__comma">, </span><span class="entrance__role">Head of AI</span></p>
       <p class="entrance__ways"><a class="entrance__in" id="come-in" href="#directory">Come in</a> <a class="entrance__skip" id="skip-in" href="#directory">Skip to the desk</a></p>
-      <button type="button" class="entrance__sound" id="door-sound" aria-pressed="true" hidden>Sound on</button>
+      <button type="button" class="entrance__sound" id="door-sound" aria-pressed="true" hidden><svg class="entrance__speaker" viewBox="0 0 24 24" aria-hidden="true"><path class="entrance__cone" d="M4 9h4l5-4v14l-5-4H4z"/><path class="entrance__waves" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"/><path class="entrance__off" d="M16 9l6 6M22 9l-6 6"/></svg><span class="entrance__sound-state">Sound: on</span></button>
       <span class="entrance__knock" aria-hidden="true">knock</span><span class="entrance__knock" aria-hidden="true">knock</span>
       <div class="entrance__said" id="door-said" role="status"><svg class="entrance__said-shape" aria-hidden="true"><path d=""></path></svg><p class="entrance__said-text"></p></div>
     </section>
@@ -64,11 +64,11 @@
            card (this real text, laid onto them), and a quiet index along the foot; flat, an editorial header. -->
       <div class="front" id="directory">
         <header class="masthead">
-          <div class="masthead__plate" data-desk-target="nameplate" data-place="quad">
+          <div class="masthead__plate">
             <h1 class="masthead__name" tabindex="-1">Harry Freeman</h1>
             <p class="masthead__role">Head of AI</p>
           </div>
-          <div class="masthead__card" data-desk-target="business-card" data-place="quad">
+          <div class="masthead__card">
             <p class="masthead__line">I run AI strategy, products and governance at a UK sustainability consultancy; coding agents built these ten tools to my briefs, and a reviewer sent the work back until it met them.</p>
             <p class="masthead__links"><a href="%CV%">CV</a><a href="mailto:%EMAIL%">Email</a><a href="%LINKEDIN%">LinkedIn</a><a class="masthead__speak" href="mailto:%EMAIL%">Speak to me</a></p>
           </div>
@@ -134,6 +134,13 @@
           <p class="radio__state" id="radio-state">off</p>
           <p class="radio__credit" id="radio-credit">Data: Carbon Intensity API, © NESO, CC BY 4.0</p>
         </div>
+
+        <div class="shelf-card" id="shelf" tabindex="-1" hidden>
+          <p class="shelf-card__title">On the shelf</p>
+          <p class="shelf-card__how">What the tools were built from: the papers, standards and data behind them.</p>
+          <ul class="shelf-card__list"></ul>
+        </div>
+        <p class="desk-spine" id="desk-spine" aria-hidden="true" hidden></p>
 
         <section class="archive" id="archive" aria-labelledby="archive-title">
           <h2 class="sign" id="archive-title">Filing cabinet</h2>

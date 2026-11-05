@@ -2,11 +2,27 @@
 // source, or "grid data unavailable". The 3D room prints it on the sign in the scene, and its light follows it. A reading is shown only while it
 // is current; when it expires without a fresh one, the sign says unavailable and the light goes neutral.
 
-import { expiresAt, fetchReading, type GridReading, lightFor, NEUTRAL_LIGHT, type RoomLight, type SignText, signFor } from './grid';
+import {
+  expiresAt,
+  fetchMix,
+  fetchReading,
+  type GridMix,
+  type GridReading,
+  lightFor,
+  NEUTRAL_LIGHT,
+  type RoomLight,
+  type SignText,
+  signFor,
+} from './grid';
 
 const RETRY_MS = 5 * 60_000;
 
-export function startGridSign(on: { light: (light: RoomLight) => void; sign: (text: SignText) => void }): void {
+export function startGridSign(on: {
+  light: (light: RoomLight) => void;
+  sign: (text: SignText) => void;
+  /** The generation mix (the office window's turbines and panels); null when there is none. */
+  mix?: (mix: GridMix | null) => void;
+}): void {
   const sign = document.getElementById('grid-sign');
   if (!sign) return;
   const set = (id: string, text: string) => {
@@ -27,6 +43,8 @@ export function startGridSign(on: { light: (light: RoomLight) => void; sign: (te
   };
 
   const read = async (): Promise<void> => {
+    // The mix alongside the reading, on its own: either can fail without the other.
+    if (on.mix) void fetchMix().then(on.mix, () => on.mix?.(null));
     try {
       current = await fetchReading();
       show(current);

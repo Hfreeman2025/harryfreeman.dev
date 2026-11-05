@@ -51,6 +51,18 @@ async function compare(page, a, b) {
     [a.toString('base64'), b.toString('base64')],
   );
 }
+/** Whether the hand (Caveat) has loaded: the doormat, the sticky note and the notebook are drawn in it. */
+const handLoaded = (page) =>
+  page.evaluate(() => {
+    // As the canvas sees it (WebKit's document.fonts.check says no while the hand is in use): the same
+    // words set in the hand and in the fallback come out different widths.
+    const c = document.createElement('canvas').getContext('2d');
+    const width = (font) => {
+      c.font = font;
+      return c.measureText('Hello, welcome! The grid, now 175').width;
+    };
+    return ['700', '500'].every((weight) => Math.abs(width(`${weight} 40px "Caveat", monospace`) - width(`${weight} 40px monospace`)) > 2);
+  });
 const seated = (page) =>
   page.waitForFunction(
     () =>
@@ -74,9 +86,13 @@ export async function doorChecks({ check, expect, BASE, shot, name }) {
         'the plate does not read the name and role',
       );
       await doorLive(page);
-      await page.waitForFunction(() => document.getElementById('entrance-plate')?.dataset.placed !== undefined, null, { timeout: 5000 });
-      const plate = await page.locator('#entrance-plate').boundingBox();
-      expect(plate && plate.width > 120 && plate.y > 0, 'the plate is not on the door');
+      // The plate's words engraved on the door in the scene, and the same words in the page, visually hidden.
+      const plate = await page.evaluate(() => window.deskDebug.printed().door);
+      expect(plate.width > 120 && plate.y > 0, `the plate is not on the door: ${JSON.stringify(plate)}`);
+      expect(
+        (await page.locator('#entrance-plate').evaluate((el) => el.getBoundingClientRect().width)) <= 1,
+        'the plate words float over the door',
+      );
       expect(await page.locator('#come-in').isVisible(), 'no Knock');
       expect((await page.locator('#come-in').textContent()) === 'Knock', 'the way in is not a knock');
       expect(await page.locator('#skip-in').isVisible(), 'no Skip to the desk');
@@ -85,13 +101,14 @@ export async function doorChecks({ check, expect, BASE, shot, name }) {
       const started = Date.now();
       await page.click('#come-in');
       // Two knocks, the voice and its words (about four seconds), then the door opens and the walk begins.
-      await page.waitForTimeout(5300);
+      await page.waitForTimeout(6600);
       const mid = await page.evaluate(() => ({ walked: window.deskDebug.walked(), door: window.deskDebug.doorAngle() }));
       expect(mid.walked > 0.15 && mid.walked < 0.85 && mid.door > 1, `mid-walk: ${JSON.stringify(mid)}`);
       await shot(page, 'door-walk');
       await seated(page);
       const took = Date.now() - started;
-      expect(took >= 6000 && took < 14000, `coming in took ${took} ms`);
+      // About four seconds of knock and answer, then a walk of about six and a half.
+      expect(took >= 9500 && took < 16000, `coming in took ${took} ms`);
       expect(await page.locator('#entrance').isHidden(), 'the door is still up');
       expect((await page.evaluate(() => document.activeElement?.className)) === 'masthead__name', 'focus did not land on the name');
       await page.waitForTimeout(600);
@@ -106,6 +123,56 @@ export async function doorChecks({ check, expect, BASE, shot, name }) {
   );
 
   await check(
+    'door: the walk in is paced like a person: still while the door swings, a pause on the threshold, slower at the shelf and the whiteboard, a slow sit-down',
+    desk,
+    async (page, problems) => {
+      await page.goto(`${BASE}/?debug`, { waitUntil: 'load' });
+      await page.waitForFunction(() => document.documentElement.dataset.stage === 'live', null, { timeout: 30000 });
+      await page.click('#come-in');
+      // The camera, frame by frame, from the walk's first frame to sitting down.
+      const trace = await page.evaluate(
+        () =>
+          new Promise((done) => {
+            const out = [];
+            let from;
+            const tick = (now) => {
+              if (window.deskDebug.walked() > 0 && from === undefined) from = now;
+              if (from !== undefined) out.push([now - from, ...window.deskDebug.cameraAt()]);
+              if (document.documentElement.dataset.entrance === 'in') return done(out);
+              requestAnimationFrame(tick);
+            };
+            requestAnimationFrame(tick);
+          }),
+      );
+      // Speed over a tenth of a second (desk units a second; 125 to the metre), sampled every tenth.
+      const speed = [];
+      for (let at = 100; at <= trace.at(-1)[0]; at += 100) {
+        const a = trace.findLast((r) => r[0] <= at - 100);
+        const b = trace.findLast((r) => r[0] <= at);
+        if (a && b && b[0] > a[0]) speed.push([at / 1000, Math.hypot(b[1] - a[1], b[2] - a[2], b[3] - a[3]) / ((b[0] - a[0]) / 1000)]);
+      }
+      const during = (t0, t1) => speed.filter(([t]) => t > t0 && t <= t1).map(([, v]) => v);
+      const max = (xs) => Math.max(...xs);
+      const total = trace.at(-1)[0];
+      expect(total >= 6000 && total < 7500, `the walk took ${Math.round(total)} ms`);
+      // Still while the door swings open; then on the threshold, still again for the pause.
+      expect(max(during(0, 0.4)) < 1, `the camera moved before the door opened: ${max(during(0, 0.4))}`);
+      // (The trace starts on the walk's first frame, a frame after it began: the pause is 2.7 to 3.1 s.)
+      expect(max(during(2.8, 3.05)) < 2, `no pause on the threshold: ${max(during(2.8, 3.05)).toFixed(1)}`);
+      // Never faster than a brisk walk (3 m/s).
+      expect(max(speed.map(([, v]) => v)) < 375, `too fast: ${max(speed.map(([, v]) => v)).toFixed(0)} units/s`);
+      // Not a constant glide: it slows while looking at the shelf and the whiteboard, between faster stretches.
+      const roam = during(3.3, 5.3);
+      expect(max(roam) / Math.min(...roam.slice(2)) > 1.4, `an even glide across the room: ${roam.map((v) => v.toFixed(0)).join(' ')}`);
+      // Sitting down slowly: the last half-second at under a fifth of the walk's top speed.
+      const end = during(total / 1000 - 0.5, total / 1000);
+      expect(max(end) < max(roam) / 5, `a hard landing: ${max(end).toFixed(0)} against ${max(roam).toFixed(0)}`);
+      expect(problems.length === 0, problems.join(' | '));
+      return { walkMs: Math.round(total), topSpeed: Math.round(max(speed.map(([, v]) => v))), landing: Math.round(max(end)) };
+    },
+  );
+
+  await check(
     'door: one continuous space: the walk-in ends on the desk’s own frame, with the real desk and no stand-ins all the way',
     desk,
     async (page, problems) => {
@@ -116,6 +183,19 @@ export async function doorChecks({ check, expect, BASE, shot, name }) {
       await page.waitForTimeout(500);
       await shot(page, 'walk-0-door');
       await page.click('#come-in');
+      // Timed in the page, frame by frame: from the first step of the walk to sitting down.
+      await page.evaluate(() => {
+        const tick = () => {
+          const walked = window.deskDebug.walked();
+          if (walked > 0 && window.__walkFrom === undefined) window.__walkFrom = performance.now();
+          if (window.__walkFrom !== undefined && document.documentElement.dataset.entrance === 'in') {
+            window.__walkMs = performance.now() - window.__walkFrom;
+            return;
+          }
+          requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      });
       // The knock and the answer, shot as they happen; then the door opening.
       await page.waitForTimeout(330);
       await shot(page, 'knock');
@@ -127,17 +207,21 @@ export async function doorChecks({ check, expect, BASE, shot, name }) {
       await shot(page, 'knock-said');
       await page.waitForTimeout(1300);
       await shot(page, 'knock-open');
+      // Three frames along the walk: on the threshold, mid-room past the shelf and the whiteboard, near
+      // the desk; and how long the walk itself took.
       const samples = [];
-      for (const [i, ms] of [
-        [1, 350],
-        [2, 800],
-        [3, 800],
+      for (const [i, at] of [
+        [1, 0.42],
+        [2, 0.64],
+        [3, 0.87],
       ]) {
-        await page.waitForTimeout(ms);
+        await page.waitForFunction((w) => window.deskDebug.walked() >= w, at, { timeout: 8000, polling: 16 });
         samples.push(await page.evaluate(() => ({ walked: window.deskDebug.walked(), ...window.deskDebug.sceneSummary() })));
         await shot(page, `walk-${i}`);
       }
       await seated(page);
+      const walkMs = Math.round(await page.evaluate(() => window.__walkMs));
+      expect(walkMs >= 6000 && walkMs < 7500, `the walk took ${walkMs} ms`);
       samples.push(await page.evaluate(() => ({ walked: window.deskDebug.walked(), ...window.deskDebug.sceneSummary() })));
       for (const s of samples) {
         expect(s.placeholders === 0, `a stand-in in the scene at ${s.walked.toFixed(2)}`);
@@ -157,11 +241,14 @@ export async function doorChecks({ check, expect, BASE, shot, name }) {
       await direct.waitForTimeout(1700);
       const straight = await direct.screenshot();
       await shot(direct, 'walk-direct');
+      // A frame drawn in the fallback hand is a font that did not arrive, not a different desk: say so.
+      expect(await handLoaded(page), 'the hand font did not load in the page that walked in');
+      expect(await handLoaded(direct), 'the hand font did not load in the page loaded directly');
       await direct.close();
       const diff = await compare(page, walked, straight);
-      expect(diff.mean < 0.02 && diff.far < 0.03, `the seated frame differs from the desk's own: ${JSON.stringify(diff)}`);
+      expect(diff.mean < 0.01 && diff.far < 0.01, `the seated frame differs from the desk's own: ${JSON.stringify(diff)}`);
       expect(problems.length === 0, problems.join(' | '));
-      return { meanDiff: Number(diff.mean.toFixed(4)), farPixels: Number(diff.far.toFixed(4)) };
+      return { meanDiff: Number(diff.mean.toFixed(4)), farPixels: Number(diff.far.toFixed(4)), walkMs };
     },
   );
 
@@ -186,7 +273,7 @@ export async function doorChecks({ check, expect, BASE, shot, name }) {
     await seated(page);
   });
 
-  await check('door: Skip and Esc go straight to the desk', desk, async (page) => {
+  await check('door: Skip and Esc go straight to the desk, before the knock, mid-knock and mid-walk', desk, async (page) => {
     await page.goto(`${BASE}/?debug`, { waitUntil: 'load' });
     await page.click('#skip-in');
     await page.waitForFunction(() => document.documentElement.dataset.entrance === 'in', null, { timeout: 500 });
@@ -204,6 +291,23 @@ export async function doorChecks({ check, expect, BASE, shot, name }) {
     await page.waitForFunction(() => document.documentElement.dataset.entrance === 'in', null, { timeout: 500 });
     await page.waitForTimeout(4500);
     expect((await page.evaluate(() => window.deskDebug.station())) === 'door', 'the knock carried on after Skip');
+    // Mid-walk, by Skip and by Esc: straight to the seat, the walk dropped.
+    for (const how of ['skip', 'escape']) {
+      await page.goto(`${BASE}/?debug&door`, { waitUntil: 'load' });
+      await page.waitForFunction(() => document.documentElement.dataset.stage === 'live', null, { timeout: 30000 });
+      await page.click('#come-in');
+      await page.waitForFunction(() => window.deskDebug.walked() > 0.45, null, { timeout: 15000, polling: 16 });
+      if (how === 'skip') await page.click('#skip-in');
+      else await page.keyboard.press('Escape');
+      await page.waitForFunction(() => document.documentElement.dataset.entrance === 'in', null, { timeout: 500 });
+      const after = await page.evaluate(() => ({ station: window.deskDebug.station(), walked: window.deskDebug.walked() }));
+      expect(after.station === 'door' && after.walked === 1, `after ${how} mid-walk: ${JSON.stringify(after)}`);
+      await page.waitForTimeout(800);
+      expect(
+        (await page.evaluate(() => document.activeElement?.className)) === 'masthead__name',
+        `focus is not on the name after ${how} mid-walk`,
+      );
+    }
   });
 
   await check(
@@ -224,6 +328,7 @@ export async function doorChecks({ check, expect, BASE, shot, name }) {
       expect(heard.audio.made === 1 && heard.audio.deviceFree === 1, `audio: ${JSON.stringify(heard.audio)}`);
       // Muted: the same knock, the same words, no sound at all, and still so after a reload.
       await page.goto(`${BASE}/?debug&door`, { waitUntil: 'load' });
+      await page.waitForFunction(() => document.documentElement.dataset.stage === 'live', null, { timeout: 30000 });
       await page.click('#door-sound');
       expect((await page.locator('#door-sound').getAttribute('aria-pressed')) === 'false', 'the speaker did not turn off');
       await page.reload({ waitUntil: 'load' });
@@ -247,10 +352,12 @@ export async function doorChecks({ check, expect, BASE, shot, name }) {
   await check('door: a reload starts at the door again; Back from the CV restores the desk', desk, async (page) => {
     await page.goto(`${BASE}/?debug`, { waitUntil: 'load' });
     expect((await entrance(page)) === 'door', 'a fresh visit did not start at the door');
+    await doorLive(page);
     await page.click('#skip-in');
     await page.waitForFunction(() => document.documentElement.dataset.entrance === 'in', null, { timeout: 500 });
     await page.reload({ waitUntil: 'load' });
     expect((await entrance(page)) === 'door', 'a reload did not start at the door');
+    await doorLive(page);
     await page.click('#skip-in');
     await page.waitForFunction(() => document.documentElement.dataset.stage === 'live', null, { timeout: 30000 });
     await page.goto(`${BASE}/cv.html`, { waitUntil: 'load' });
@@ -292,7 +399,7 @@ export async function doorChecks({ check, expect, BASE, shot, name }) {
   );
 
   await check(
-    'door: without WebGL the door is a poster with the plate as real text and a plain Come in link',
+    'door: without WebGL the door is a poster, the plate engraved in it and its words in the page, and a plain Come in link',
     {
       ...desk,
       // An init script runs in the page, so it carries its own layout-shift counter.
@@ -315,7 +422,29 @@ export async function doorChecks({ check, expect, BASE, shot, name }) {
         await page.locator('.entrance__poster').evaluate((img) => img.complete && img.naturalWidth > 0),
         'the door poster did not load',
       );
-      expect(await page.locator('#entrance-plate').isVisible(), 'the plate is not shown');
+      // The plate's words: engraved in the poster (dark letters in the plate's place), and in the page.
+      const entranceBox = await page.locator('#entrance').boundingBox();
+      const plateClip = {
+        x: entranceBox.x + entranceBox.width / 2 - entranceBox.height * 0.09,
+        y: entranceBox.y + entranceBox.height * 0.335,
+        width: entranceBox.height * 0.18,
+        height: entranceBox.height * 0.035,
+      };
+      const engraved = await page.evaluate(
+        async (b64) => {
+          const bitmap = await createImageBitmap(await (await fetch(`data:image/png;base64,${b64}`)).blob());
+          const c = new OffscreenCanvas(bitmap.width, bitmap.height);
+          const ctx = c.getContext('2d', { willReadFrequently: true });
+          ctx.drawImage(bitmap, 0, 0);
+          const d = ctx.getImageData(0, 0, bitmap.width, bitmap.height).data;
+          let dark = 0;
+          for (let i = 0; i < d.length; i += 4) if (0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2] < 90) dark++;
+          return dark / (d.length / 4);
+        },
+        (await page.screenshot({ clip: plateClip })).toString('base64'),
+      );
+      expect(engraved > 0.03, `no words on the poster's plate (${engraved.toFixed(3)} dark)`);
+      expect((await page.locator('#entrance-plate').textContent()) === 'Harry Freeman, Head of AI', 'the plate words are not in the page');
       expect((await page.locator('#come-in').getAttribute('href')) === '#directory', 'Come in does not lead to the content');
       await shot(page, 'door-poster');
       await page.click('#come-in');

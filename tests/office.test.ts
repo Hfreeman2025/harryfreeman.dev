@@ -4,6 +4,7 @@ import { DRAWERS, drawerOf } from '../src/content/drawers';
 import { PIECE_IDS } from '../src/content/pieces';
 import { renderCabinet, renderDirectory, renderPlan } from '../src/office/render';
 import { DESKS } from '../src/scene/layout';
+import { denylisted, haveDenylist } from './denylist';
 
 describe('the filing', () => {
   it('files every tool exactly once, in one of four drawers', () => {
@@ -16,12 +17,14 @@ describe('the filing', () => {
   });
 });
 
-describe('the directory board', () => {
-  it('lists every tool as a real link with where to find it', () => {
+describe('the index along the desk’s foot', () => {
+  it('lists every tool once as a real link, in the order the drawers file them', () => {
     const html = renderDirectory();
-    for (const id of PIECE_IDS) expect(html).toContain(`href="#work-${id}" data-piece="${id}"`);
-    expect(html.match(/class="board__where"/g)).toHaveLength(PIECE_IDS.length);
-    expect(html).toContain('Top drawer');
+    expect(html.startsWith('<ul class="index__tools">')).toBe(true);
+    const linked = [...html.matchAll(/<li><a href="#work-([^"]+)" data-piece="([^"]+)">/g)].map((m) => [m[1], m[2]]);
+    expect(linked.map(([href]) => href)).toEqual(DRAWERS.flatMap((d) => d.pieces));
+    for (const [href, piece] of linked) expect(href).toBe(piece);
+    expect(new Set(linked.map(([href]) => href)).size).toBe(PIECE_IDS.length);
   });
 });
 
@@ -67,10 +70,13 @@ describe('the floor plan', () => {
 describe('the office page', () => {
   const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 
-  it('labels recorded and live, and names no employer or client', () => {
+  it('labels recorded and live', () => {
     expect(html).toContain('recorded loop');
     expect(html).toContain('open it live');
-    expect(html).not.toMatch(/Simply\s*(Sustainable|Carbon)|redacted-term|redacted-term|redacted-term/);
+  });
+
+  it.skipIf(!haveDenylist)('names no employer or client (the denylist outside the repository)', () => {
+    expect(denylisted(html), 'denylist lines found').toEqual([]);
   });
 
   it('carries both timeline notes, placeholder and reconstructed', () => {

@@ -22,6 +22,76 @@ const cardTitle = async (page) => (await page.locator('#card-title').textContent
 const hit = (a, b) => a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
 const angle = (page) => page.evaluate(() => window.deskDebug.cameraAngle());
 
+/** The UI meant to float over the scene: tags, notes, bubbles, cards, panels, the index, buttons. */
+const FLOATING = [
+  '.dtag',
+  '.dnote',
+  '.desk-spine',
+  '.speak',
+  '.printout',
+  '.ask',
+  '.grid-sign',
+  '.radio',
+  '.shelf-card',
+  '.folder-card',
+  '.desk__screen',
+  '.desk__notebook',
+  '.index',
+  '.room__back',
+  '.replay',
+  '.entrance__ways',
+  '.entrance__sound',
+  '.entrance__said',
+  '.entrance__knock',
+];
+/** Every visible piece of DOM text over the 3D stage that is not floating UI (visually hidden copies aside). */
+const textOverScene = (page) =>
+  page.evaluate((floating) => {
+    const stage = document.querySelector('.room__stage').getBoundingClientRect();
+    const clipped = (el) => {
+      for (let a = el; a; a = a.parentElement) {
+        const cs = getComputedStyle(a);
+        const r = a.getBoundingClientRect();
+        if ((cs.clipPath !== 'none' || cs.overflow === 'hidden') && (r.width <= 1 || r.height <= 1)) return true;
+      }
+      return false;
+    };
+    const out = [];
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+      const el = n.parentElement;
+      if (!n.textContent.trim() || !el?.checkVisibility({ opacityProperty: true, visibilityProperty: true }) || clipped(el)) continue;
+      const range = document.createRange();
+      range.selectNodeContents(n);
+      const r = range.getBoundingClientRect();
+      if (r.width < 2 || r.height < 2 || r.right <= stage.left || r.left >= stage.right || r.bottom <= stage.top || r.top >= stage.bottom)
+        continue;
+      if (!el.closest(floating.join(',')))
+        out.push(`${el.tagName.toLowerCase()}.${[...el.classList].join('.')}: ${n.textContent.trim().slice(0, 30)}`);
+    }
+    return out;
+  }, FLOATING);
+/** Shares of a screenshot's pixels: dark ink, the test board's green, the focus ring's yellow. */
+const pixels = (page, png) =>
+  page.evaluate(async (b64) => {
+    const bitmap = await createImageBitmap(await (await fetch(`data:image/png;base64,${b64}`)).blob());
+    const c = new OffscreenCanvas(bitmap.width, bitmap.height);
+    const ctx = c.getContext('2d', { willReadFrequently: true });
+    ctx.drawImage(bitmap, 0, 0);
+    const d = ctx.getImageData(0, 0, bitmap.width, bitmap.height).data;
+    let ink = 0;
+    let green = 0;
+    let ring = 0;
+    for (let i = 0; i < d.length; i += 4) {
+      const [r, g, b] = [d[i], d[i + 1], d[i + 2]];
+      if (0.2126 * r + 0.7152 * g + 0.0722 * b < 90) ink++;
+      if (g > 150 && r < 110 && b < 150 && g - r > 80) green++;
+      if (r > 200 && g > 150 && g < 230 && b < 130 && r - b > 110) ring++;
+    }
+    const n = d.length / 4;
+    return { ink: ink / n, green: green / n, ring: ring / n };
+  }, png.toString('base64'));
+
 /**
  * At a desk: the camera square to the screen, the tool's loop laid exactly over the screen, big enough to
  * read, the Open line under the bezel, and no second copy of the loop in the card.
@@ -108,9 +178,15 @@ export async function deskChecks({ check, expect, BASE, shot, name, config }) {
   await check('desk: the HTML carries the desk’s objects, the name tags and every card before any script', {}, async () => {
     const html = await (await fetch(`${BASE}/`)).text();
     expect((html.match(/data-desk-target=/g) ?? []).length === 39, `desk targets: ${(html.match(/data-desk-target=/g) ?? []).length}`);
-    for (const action of ['office', 'cabinet', 'notebook', 'reception', 'stamp', 'sign'])
+    for (const action of ['office', 'cabinet', 'notebook', 'reception', 'stamp', 'sign', 'room', 'shelf'])
       expect(html.includes(`data-action="${action}"`), `no ${action}`);
     expect(html.includes('id="notebook-panel"') && html.includes('id="printout"'), 'no notebook panel or printout');
+    // What the scene prints (the door plate, the credit) is in the page too, in words.
+    expect(
+      html.includes('<span class="entrance__name">Harry Freeman</span>') && html.includes('<span class="entrance__role">Head of AI</span>'),
+      'no door plate words',
+    );
+    expect(html.includes('id="desk-credit">Data: Carbon Intensity API, © NESO, CC BY 4.0</p>'), 'no credit words');
     // Who this is, as real text before any script: the name, the role, the intro and the links.
     expect(
       html.includes('<h1 class="masthead__name" tabindex="-1">Harry Freeman</h1>') && html.includes('>Head of AI</p>'),
@@ -142,12 +218,16 @@ export async function deskChecks({ check, expect, BASE, shot, name, config }) {
       expect((await station(page)) === 'door', `station ${await station(page)}`);
       const strength = await page.evaluate(() => window.deskDebug.strength());
       expect(Math.abs(strength - 0.8) < 0.02, `tilt-shift at ${strength}`);
-      // The grid's credit is a slip stuck under the sticky note, not a box out on the desk.
-      const { credit, note } = await page.evaluate(() => ({
-        credit: document.getElementById('desk-credit').getBoundingClientRect().toJSON(),
+      // The grid's credit is a slip stuck under the sticky note, printed in the scene and clear of the
+      // keyboard; its words are in the page for screen readers.
+      const { credit, note, inSight } = await page.evaluate(() => ({
+        credit: window.deskDebug.printed().credit,
         note: document.querySelector('[data-desk-target="sign"]').getBoundingClientRect().toJSON(),
+        inSight: window.deskDebug.printedInSight(),
       }));
-      expect(credit.width > 0 && !(await page.locator('#desk-credit').isHidden()), 'the credit is not shown');
+      expect(credit.width > 60, 'the credit slip is not in view');
+      // Every part of every printed face in sight from the seat: nothing on the desk covers the words.
+      for (const [k, v] of Object.entries(inSight)) expect(v === 1, `${k}: only ${Math.round(v * 100)}% of it in sight`);
       expect(
         credit.y < note.y + note.height + 4 &&
           credit.y > note.y + note.height * 0.4 &&
@@ -301,51 +381,94 @@ export async function deskChecks({ check, expect, BASE, shot, name, config }) {
   );
 
   await check(
-    'desk: the name and role are on the nameplate and the intro and links on the card, as real text; the card’s links and the index reach everything by keyboard',
+    'desk: the name and role are printed on the nameplate and the intro and links on the card, in the scene, with the same words in the page; the keyboard rings each printed link and a click on one is that link; the index reaches everything',
     desk,
     async (page, problems) => {
       await live(page, DESK());
-      await page.waitForFunction(() => document.querySelectorAll('.masthead [data-placed]').length === 2, null, { timeout: 5000 });
+      await page.waitForTimeout(400);
       const at = await page.evaluate(() => {
-        const rect = (sel) => document.querySelector(sel).getBoundingClientRect().toJSON();
+        const masthead = document.querySelector('.masthead');
         return {
-          faces: window.deskDebug.faces(),
-          plate: rect('.masthead__plate'),
-          card: rect('.masthead__card'),
-          name: rect('.masthead__name'),
+          printed: window.deskDebug.printed(),
+          stage: document.querySelector('.room__stage').getBoundingClientRect().toJSON(),
+          // The page's copy: the same words and links, visually hidden (clipped, not removed).
+          name: document.querySelector('.masthead__name').textContent,
+          role: document.querySelector('.masthead__role').textContent,
           line: document.querySelector('.masthead__line').textContent,
-          stage: rect('.room__stage'),
+          links: [...document.querySelectorAll('.masthead__links a:not(.masthead__speak)')].map((a) => [
+            a.textContent,
+            a.getAttribute('href'),
+          ]),
+          hidden: masthead.getBoundingClientRect().width <= 1 && getComputedStyle(masthead).display !== 'none',
         };
       });
-      // Laid onto the faces: the text boxes land on the 3D faces, and are big enough to read.
-      for (const k of ['plate', 'card']) {
-        const face = at.faces[k === 'plate' ? 'nameplate' : 'card'];
-        for (const d of ['x', 'y', 'width', 'height'])
-          expect(
-            Math.abs(at[k][d] - face[d]) < 3,
-            `the ${k}’s text is off its face (${d}: ${at[k][d].toFixed(0)} vs ${face[d].toFixed(0)})`,
-          );
-        expect(at[k].x >= at.stage.x && at[k].y >= at.stage.y, `the ${k} is off screen`);
+      expect(at.name === 'Harry Freeman' && at.role === 'Head of AI', `the page's name and role: ${at.name}, ${at.role}`);
+      expect(at.line.startsWith('I run AI strategy'), 'the intro is not in the page');
+      expect(
+        JSON.stringify(at.links) ===
+          JSON.stringify([
+            ['CV', config.cv],
+            ['Email', `mailto:${config.email}`],
+            ['LinkedIn', config.linkedin],
+          ]),
+        `the page's links: ${JSON.stringify(at.links)}`,
+      );
+      expect(at.hidden, 'the header is not visually hidden over the scene');
+      // Printed on the faces, in view and big enough to read.
+      for (const k of ['nameplate', 'card']) {
+        const f = at.printed[k];
+        expect(f.x >= at.stage.x && f.y >= at.stage.y && f.x + f.width <= at.stage.x + at.stage.width, `the ${k} is off screen`);
       }
-      expect(at.name.height >= 22, `the name is ${at.name.height.toFixed(0)}px tall`);
-      // The intro's type, as it lands on screen: its set size times the card's scale.
-      const intro = await page.evaluate(() => {
-        const el = document.querySelector('.masthead__card');
-        return (
-          (Number.parseFloat(getComputedStyle(document.querySelector('.masthead__line')).fontSize) * el.getBoundingClientRect().width) /
-          el.offsetWidth
-        );
-      });
-      expect(intro >= 12, `the intro is set at ${intro.toFixed(1)}px on screen`);
-      expect(at.line.startsWith('I run AI strategy'), 'the intro is not on the card');
-      // The card's links, in order, by keyboard.
-      await page.focus('.masthead__links a');
-      const order = [await page.evaluate(() => document.activeElement.textContent)];
-      for (let i = 0; i < 2; i++) {
+      expect(at.printed.nameplate.height >= 60, `the nameplate is ${at.printed.nameplate.height.toFixed(0)}px tall`);
+      expect(at.printed.card.width >= 280, `the card is ${at.printed.card.width.toFixed(0)}px wide`);
+      // By keyboard from the name (where arriving puts focus): each card link in turn, ringed on the card.
+      await page.focus('.masthead__name');
+      const order = [];
+      for (let i = 0; i < 3; i++) {
         await page.keyboard.press(linkTab);
-        order.push(await page.evaluate(() => document.activeElement.textContent));
+        await page.waitForTimeout(60);
+        const now = await page.evaluate(() => ({
+          text: document.activeElement.textContent,
+          ringed: window.deskDebug.printed().card.ringed,
+        }));
+        order.push(now.text);
+        expect(now.ringed === i, `${now.text} has focus but the card rings ${now.ringed}`);
+        if (i === 0) {
+          const card = at.printed.card;
+          const ringPx = await pixels(
+            page,
+            await page.screenshot({ clip: { x: card.x, y: card.y, width: card.width, height: card.height } }),
+          );
+          expect(ringPx.ring > 0.001, `no focus ring on the printed CV link: ${JSON.stringify(ringPx)}`);
+        }
       }
       expect(order.join(',') === 'CV,Email,LinkedIn', `Tab on the card: ${order.join(', ')}`);
+      // A click on a printed link is a click on the page's link (stopped here, so the page stays).
+      for (const [i, text] of [
+        [0, 'CV'],
+        [2, 'LinkedIn'],
+      ]) {
+        await page.evaluate(() => {
+          window.__clicked = null;
+          for (const a of document.querySelectorAll('.masthead__links a'))
+            a.addEventListener(
+              'click',
+              (event) => {
+                window.__clicked = a.textContent;
+                event.preventDefault();
+              },
+              { once: true },
+            );
+        });
+        const spot = (await page.evaluate(() => window.deskDebug.printed().card.links))[i];
+        await page.mouse.click(spot.x, spot.y);
+        expect(
+          (await page.evaluate(() => window.__clicked)) === text,
+          `clicking the printed ${text} clicked ${await page.evaluate(() => window.__clicked)}`,
+        );
+      }
+      // Back to the keyboard order from the last card link.
+      await page.focus('.masthead__links a:nth-child(3)');
       // Then the quiet index: the ten tools, Ask, the briefs and the CV, every one shown and reachable.
       const index = [];
       for (let i = 0; i < 13; i++) {
@@ -421,7 +544,7 @@ export async function deskChecks({ check, expect, BASE, shot, name, config }) {
       const email = document.getElementById('speak-email').parentElement;
       const box = card.getBoundingClientRect();
       const lineHeight = Number.parseFloat(getComputedStyle(email).lineHeight);
-      const labels = [...document.querySelectorAll('.desk__labels > :not([hidden]), .masthead [data-placed]:not([data-away])')]
+      const labels = [...document.querySelectorAll('.desk__labels > :not([hidden])')]
         .filter((el) => el.dataset.action !== 'mic')
         .map((el) => ({ name: el.dataset.deskTarget ?? el.className, ...el.getBoundingClientRect().toJSON() }));
       const things = window.deskDebug.objectRects();
@@ -587,6 +710,188 @@ export async function deskChecks({ check, expect, BASE, shot, name, config }) {
     expect(await page.locator('#card').isHidden(), 'a card opened for a refusal');
     expect((await page.evaluate(() => window.deskDebug.standing())) === null, 'someone stood for a refusal');
     await shot(page, 'desk-refusal');
+  });
+
+  await check(
+    'desk: printed words are hidden by whatever stands in front of them, as paint is; no other text floats over the scene but its tags, notes and panels',
+    desk,
+    async (page, problems) => {
+      await live(page, DESK());
+      await page.waitForTimeout(600);
+      const plate = await page.evaluate(() => window.deskDebug.printed().nameplate);
+      const clip = {
+        x: plate.x + plate.width * 0.15,
+        y: plate.y + plate.height * 0.2,
+        width: plate.width * 0.7,
+        height: plate.height * 0.6,
+      };
+      const before = await pixels(page, await page.screenshot({ clip }));
+      expect(before.ink > 0.03, `no name printed on the plate: ${JSON.stringify(before)}`);
+      // A plain board stood in front of the nameplate: its words go, and nothing of them shows through.
+      await page.evaluate(() => window.deskDebug.blockNameplate(true));
+      await page.waitForTimeout(300);
+      const after = await pixels(page, await page.screenshot({ clip }));
+      expect(after.green > 0.95 && after.ink < 0.002, `the name shows through what stands in front of it: ${JSON.stringify(after)}`);
+      await page.evaluate(() => window.deskDebug.blockNameplate(false));
+      // No text over the scene but what is meant to float: seated, standing in the room, in the office, at a desk.
+      const stray = { seated: await textOverScene(page) };
+      await page.click('[data-action="room"][data-at="door"]');
+      await waitStation(page, 'room');
+      await page.locator('[data-action="shelf"][data-at="room"]').waitFor({ state: 'visible', timeout: 5000 });
+      stray.room = await textOverScene(page);
+      await page.click('#room-back');
+      await waitStation(page, 'door');
+      await page.locator('[data-action="office"][data-at="door"]').waitFor({ state: 'visible', timeout: 5000 });
+      await page.click('[data-action="office"][data-at="door"]');
+      await waitStation(page, 'office');
+      // The dive done: the office's name tags are up.
+      await page.locator('[data-action="desk:gridtop"][data-at="office"]').waitFor({ state: 'visible', timeout: 6000 });
+      await page.waitForTimeout(300);
+      stray.office = await textOverScene(page);
+      await page.click('[data-action="desk:gridtop"][data-at="office"]');
+      await cardOpen(page);
+      stray.desk = await textOverScene(page);
+      for (const [where, found] of Object.entries(stray))
+        expect(found.length === 0, `text over the scene (${where}): ${found.join(' | ')}`);
+      expect(problems.length === 0, problems.join(' | '));
+      return { inkBefore: Number(before.ink.toFixed(3)), greenAfter: Number(after.green.toFixed(3)) };
+    },
+  );
+
+  await check('desk: from the seated view the index box keeps clear of the nameplate at every window shape', desk, async (page) => {
+    await live(page, DESK());
+    const gaps = {};
+    for (const [w, h] of [
+      [1440, 900],
+      [1280, 720],
+      [1920, 1080],
+      [1024, 768],
+      [1280, 1024],
+      [2560, 1080],
+    ]) {
+      await page.setViewportSize({ width: w, height: h });
+      await page.waitForTimeout(500);
+      gaps[`${w}x${h}`] = await page.evaluate(() => {
+        const rects = window.deskDebug.objectRects();
+        const a = rects.find((r) => r.name === 'nameplate');
+        const b = rects.find((r) => r.name === 'index box');
+        // Their boxes on screen (generous: each its whole bounding box) apart, by this many pixels.
+        return Math.round(Math.max(b.y - (a.y + a.height), b.x - (a.x + a.width), a.x - (b.x + b.width), a.y - (b.y + b.height)));
+      });
+    }
+    for (const [size, gap] of Object.entries(gaps)) expect(gap >= 8, `at ${size} the index box is within ${gap}px of the nameplate`);
+    return gaps;
+  });
+
+  await check(
+    'desk: looking round the room: the window shows the grid’s wind and sun at the visitor’s time of day, the shelf names its sources, the radio is the radio',
+    {
+      ...desk,
+      initScript: () => {
+        window.__shift = PerformanceObserver.supportedEntryTypes?.includes('layout-shift') ? 0 : null;
+        window.__moved = [];
+        if (window.__shift === null) return;
+        new PerformanceObserver((list) => {
+          for (const e of list.getEntries()) {
+            if (e.hadRecentInput) continue;
+            window.__shift += e.value;
+            for (const s of e.sources ?? []) window.__moved.push(s.node?.id || s.node?.className || s.node?.nodeName);
+          }
+        }).observe({ type: 'layout-shift', buffered: true });
+      },
+    },
+    async (page, problems) => {
+      await live(page, DESK());
+      // The mocked grid: wind 38%, solar 4%. The turbines turn at that pace; no glint at 4% solar.
+      await page.waitForFunction(() => window.deskDebug.windowState().spin > 0, null, { timeout: 8000 });
+      const state = await page.evaluate(() => window.deskDebug.windowState());
+      const hour = await page.evaluate(() => new Date().getHours());
+      const daylight = hour >= 6 && hour < 11 ? 'morning' : hour < 17 && hour >= 11 ? 'day' : hour >= 17 && hour < 21 ? 'evening' : 'night';
+      expect(Math.abs(state.spin - (0.4 + (38 / 60) * 3.2)) < 1e-9, `the turbines turn at ${state.spin}`);
+      expect(state.glint === false, 'the panels glint at 4% solar');
+      expect(state.daylight === daylight, `the window shows ${state.daylight} at ${hour}:00`);
+      // Up from the desk, by its tag.
+      await page.click('[data-action="room"][data-at="door"]');
+      await waitStation(page, 'room');
+      // Its tags show once the camera has stood up.
+      await page.locator('[data-action="shelf"][data-at="room"]').waitFor({ state: 'visible', timeout: 5000 });
+      await page.waitForTimeout(200);
+      expect((await page.locator('#room-back').textContent()) === 'Sit back down', 'the way back does not say where');
+      expect(await page.locator('[data-desk-target="room-radio"]').isVisible(), 'no radio on the shelf');
+      // Over the window, what it shows and whose data it is.
+      const note = await page.locator('[data-desk-target="window"]').textContent();
+      expect(
+        note.includes('wind 38% and solar 4%') && note.includes('Carbon Intensity API, © NESO, CC BY 4.0'),
+        `the window's note says ${note}`,
+      );
+      await shot(page, 'room');
+      // A spine under the pointer says which source it is and which tool it fed.
+      for (const i of [0, 7, 17]) {
+        const at = await page.evaluate((k) => window.deskDebug.bookAt(k), i);
+        await page.mouse.move(at.x, at.y);
+        await page.waitForTimeout(120);
+        const spine = await page.evaluate(() => ({
+          hidden: document.getElementById('desk-spine').hidden,
+          title: document.querySelector('.desk-spine__title').textContent,
+          fed: document.querySelector('.desk-spine__fed').textContent,
+        }));
+        expect(!spine.hidden && spine.title.length > 2 && spine.fed.startsWith('fed '), `book ${i}: ${JSON.stringify(spine)}`);
+        if (i === 0) {
+          expect(
+            spine.title === 'Detecting hallucinations using semantic entropy' && spine.fed === 'fed Real or Hallucinated?',
+            `book 0 reads ${JSON.stringify(spine)}`,
+          );
+          await shot(page, 'room-book');
+        }
+      }
+      await page.mouse.move(720, 120);
+      await page.waitForTimeout(120);
+      expect(await page.locator('#desk-spine').isHidden(), 'the spine stayed up off the shelf');
+      // The same list from the keyboard: the shelf's tag opens it.
+      await page.locator('[data-action="shelf"][data-at="room"]').focus();
+      await page.keyboard.press('Enter');
+      await page.waitForTimeout(200);
+      const listed = await page.evaluate(() => [...document.querySelectorAll('#shelf .shelf-card__book')].map((b) => b.textContent));
+      expect(listed.length === 18 && (await page.locator('#shelf').isVisible()), `the shelf lists ${listed.length}`);
+      expect((await page.evaluate(() => document.activeElement?.id)) === 'shelf', 'focus did not go into the list');
+      // Esc unpins it and focus goes back to the tag; moving on closes it.
+      await page.keyboard.press('Escape');
+      expect((await page.evaluate(() => document.activeElement?.dataset.action)) === 'shelf', 'focus did not come back to the tag');
+      await page.locator('#room-back').focus();
+      await page.waitForTimeout(400);
+      expect(await page.locator('#shelf').isHidden(), 'the list stayed open');
+      // The radio on the shelf opens the radio's own card.
+      await page.locator('[data-desk-target="room-radio"]').click();
+      await page.waitForTimeout(200);
+      expect(await page.locator('#radio').isVisible(), 'the radio’s card did not open');
+      await page.keyboard.press('Escape');
+      // Back down to the desk by the button; up again by the wheel, and down by it.
+      await page.click('#room-back');
+      await waitStation(page, 'door');
+      await page.mouse.move(720, 450);
+      await page.mouse.wheel(0, -200);
+      await waitStation(page, 'room');
+      await page.waitForTimeout(1000);
+      await page.mouse.wheel(0, 200);
+      await waitStation(page, 'door');
+      const shift = await page.evaluate(() => window.__shift);
+      if (shift !== null) expect(shift === 0, `layout shift ${shift}: ${await page.evaluate(() => window.__moved.join(', '))}`);
+      expect(problems.length === 0, problems.join(' | '));
+      return { spin: Number(state.spin.toFixed(3)), daylight: state.daylight, layoutShift: shift ?? 'not reported by this browser' };
+    },
+  );
+
+  await check('desk: without the grid, the window is still: no turning, no glint', { ...desk, grid: 'fail' }, async (page) => {
+    await live(page, DESK());
+    // The reading failed (the sign says so); the mix, asked for at the same time, failed too.
+    await page.waitForFunction(() => document.getElementById('grid-sign')?.dataset.state === 'unavailable', null, { timeout: 12000 });
+    await page.waitForTimeout(800);
+    const state = await page.evaluate(() => window.deskDebug.windowState());
+    expect(state.spin === 0 && state.glint === false, `the window moves without data: ${JSON.stringify(state)}`);
+    expect(
+      (await page.locator('#window-now').textContent()).includes('unavailable, so the turbines stand still'),
+      'the window does not say the data is unavailable',
+    );
   });
 
   await check(

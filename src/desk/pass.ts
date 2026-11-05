@@ -1,6 +1,9 @@
 // The desk's one render pass: ink outlines on everything (the model's graphic look, carried out to the
 // desk objects so the picture is one design), then tilt-shift, whose strength the engine animates: full
 // at desk scale, pulling to sharp as the camera dives into the office. At zero the blur is skipped.
+// Printed lettering (desk/lettering.ts) stays sharp through it: its faces write 0 to the render's alpha
+// where they are seen (depth-tested, so only where nothing stands in front), and the blur leaves those
+// pixels as they are.
 
 import {
   Color,
@@ -71,7 +74,7 @@ export class DeskPass {
               vec2 uv = vUv + o[i];
               edge = max(edge, max(step(0.014, abs(linear(uv) - d0) / d0), step(0.4, 1.0 - dot(normalAt(uv), n0))));
             }
-            gl_FragColor = vec4(mix(base.rgb, ink, edge * 0.9), 1.0);
+            gl_FragColor = vec4(mix(base.rgb, ink, edge * 0.9), ${final ? '1.0' : 'base.a'});
             ${final ? '#include <colorspace_fragment>' : ''}
           }`,
         depthTest: false,
@@ -83,6 +86,7 @@ export class DeskPass {
       new ShaderMaterial({
         uniforms: {
           tInput: { value: input.texture },
+          tMask: { value: this.#inked.texture },
           resolution: { value: new Vector2(1, 1) },
           direction: { value: direction },
           focus: { value: 0.47 },
@@ -92,19 +96,19 @@ export class DeskPass {
         },
         vertexShader,
         fragmentShader: `
-          uniform sampler2D tInput; uniform vec2 resolution; uniform vec2 direction;
+          uniform sampler2D tInput; uniform sampler2D tMask; uniform vec2 resolution; uniform vec2 direction;
           uniform float focus; uniform float band; uniform float radius; uniform float strength;
           varying vec2 vUv;
           void main() {
             float d = max(0.0, abs(vUv.y - focus) - band);
-            float r = radius * strength * smoothstep(0.0, 0.3, d);
+            float r = radius * strength * smoothstep(0.0, 0.3, d) * clamp(texture2D(tMask, vUv).a, 0.0, 1.0);
             vec4 sum = vec4(0.0); float weights = 0.0;
             for (int i = -6; i <= 6; i++) {
               float x = float(i) / 6.0; float w = exp(-x * x * 2.5);
               sum += texture2D(tInput, vUv + direction * x * r / resolution) * w; weights += w;
             }
             vec4 c = sum / weights;
-            ${final ? 'float g = dot(c.rgb, vec3(0.2126, 0.7152, 0.0722)); c.rgb = mix(vec3(g), c.rgb, 1.0 + 0.15 * strength); gl_FragColor = vec4(c.rgb, 1.0);\n#include <colorspace_fragment>' : 'gl_FragColor = c;'}
+            ${final ? 'float g = dot(c.rgb, vec3(0.2126, 0.7152, 0.0722)); c.rgb = mix(vec3(g), c.rgb, 1.0 + 0.15 * strength); gl_FragColor = vec4(c.rgb, 1.0);\n#include <colorspace_fragment>' : 'gl_FragColor = vec4(c.rgb, 1.0);'}
           }`,
         depthTest: false,
         depthWrite: false,
@@ -118,6 +122,11 @@ export class DeskPass {
     for (const m of [this.#ink, this.#inkFinal, this.#blurH, this.#blurV]) m.material.uniforms.resolution?.value.set(width, height);
     const radius = 12 * Math.min(window.devicePixelRatio, 2);
     for (const m of [this.#blurH, this.#blurV]) if (m.material.uniforms.radius) m.material.uniforms.radius.value = radius;
+  }
+
+  /** How thick the ink outlines are, in pixels of the render (1.5 on the desk; bolder at the door). */
+  setInk(width: number): void {
+    for (const m of [this.#ink, this.#inkFinal]) if (m.material.uniforms.width) m.material.uniforms.width.value = width;
   }
 
   /** Where the sharp band sits (0 bottom, 1 top) and how tall it is. */

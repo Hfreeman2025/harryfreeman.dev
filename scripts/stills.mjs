@@ -86,7 +86,7 @@ async function openDoor(url, width, height, scale, phone = false) {
 }
 {
   const { page, done } = await openDoor(`${base}/?door&hold`, 1200, 630, 1);
-  await page.waitForFunction(() => document.getElementById('entrance-plate')?.dataset.placed !== undefined, null, { timeout: 5000 });
+  await page.waitForFunction(() => document.getElementById('entrance')?.dataset.door === 'live', null, { timeout: 15000 });
   await page.screenshot({ path: join(site, 'public', 'og.png') });
   await done();
 }

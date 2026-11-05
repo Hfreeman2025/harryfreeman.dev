@@ -137,6 +137,7 @@ export function renderDeskLabels(): string {
     tag('notebook', 'The briefs', 'three rounds, turn a page'),
     tag('reception', 'Reception', 'type a question'),
     tag('stamp', 'Receipts', 'stamp a card to check it'),
+    tag('room', 'The room', 'look up: the window, the shelf'),
     `<button type="button" class="obj obj--cover" data-desk-target="sign" data-action="sign" data-at="door" data-place="cover" aria-expanded="false" aria-controls="grid-sign" aria-describedby="desk-credit"><span class="obj__name">The sticky note: the current carbon intensity of Great Britain’s grid</span></button>`,
     `<button type="button" class="obj obj--cover obj--mic" data-desk-target="mic" data-action="mic" data-at="door" data-place="cover" aria-expanded="false" aria-controls="speak"><span class="obj__name">Speak to me: Harry’s email, LinkedIn and CV</span></button>`,
   ];
@@ -149,6 +150,13 @@ export function renderDeskLabels(): string {
     `<button type="button" class="dtag" data-desk-target="office-cabinet" data-action="cabinet" data-at="office" data-place="centre">Filing</button>`,
     `<button type="button" class="obj obj--cover" data-desk-target="radio" data-action="radio" data-at="office" data-place="cover" aria-expanded="false" aria-controls="radio"><span class="obj__name">The radio: Listen to the Grid</span></button>`,
   ];
+  // Looking round the room: the radio on the shelf is the same radio.
+  const room = [
+    // What the window's turbines and panels are showing, and whose data it is.
+    `<p class="dnote" data-desk-target="window" data-at="room" data-place="over" hidden><span class="dnote__now" id="window-now">Outside: reading the grid’s wind and sun…</span><span class="dnote__credit">Data: Carbon Intensity API, © NESO, CC BY 4.0</span></p>`,
+    `<button type="button" class="dtag dtag--place" data-desk-target="shelf" data-action="shelf" data-at="room" aria-expanded="false" aria-controls="shelf"><span class="dtag__name">The shelf</span><span class="dtag__note">the sources behind the tools</span></button>`,
+    `<button type="button" class="obj obj--cover" data-desk-target="room-radio" data-action="radio" data-at="room" data-place="cover" aria-expanded="false" aria-controls="radio"><span class="obj__name">The radio on the shelf: Listen to the Grid</span></button>`,
+  ];
   // Each divider, then its cards, so Tab goes from a divider into its cards.
   const filed = DRAWERS.flatMap((d) => [
     `<button type="button" class="obj obj--drawer" data-desk-target="drawer:${d.id}" data-action="drawer:${d.id}" data-at="cabinet" data-place="cover" aria-expanded="false"><span class="obj__name">${esc(d.label)}</span><span class="obj__note">${esc(d.position)} divider</span></button>`,
@@ -157,9 +165,10 @@ export function renderDeskLabels(): string {
         `<a class="obj obj--cover obj--card" href="#folder-${id}" data-desk-target="folder:${id}" data-action="folder:${id}" data-at="cabinet" data-place="cover" data-piece="${id}"><span class="obj__name">${esc(pieceById(id).title)}</span></a>`,
     ),
   ]);
-  const controls = [...door, ...office, ...filed].map((html) => html.replace(/^<(a|button) /, '<$1 hidden tabindex="0" '));
+  const controls = [...door, ...office, ...room, ...filed].map((html) => html.replace(/^<(a|button) /, '<$1 hidden tabindex="0" '));
   const credit =
-    '<p class="dtag dtag--credit" id="desk-credit" hidden data-desk-target="credit" data-at="door" data-place="tag">Data: Carbon Intensity API, © NESO, CC BY 4.0</p>' +
+    // The grid's credit is written on a slip under the sticky note, in the scene; these are its words.
+    '<p class="visually-hidden" id="desk-credit">Data: Carbon Intensity API, © NESO, CC BY 4.0</p>' +
     // Leaning in to a builder's monitor: the tool's recorded loop, crisp, laid exactly over the screen, and
     // under the bezel how to open the live tool and when the loop was recorded.
     '<div class="desk__screen" id="desk-screen" hidden data-desk-target="screen" data-at="desk" data-place="screen">' +

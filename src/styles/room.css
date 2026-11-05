@@ -256,8 +256,10 @@ html[data-mode="room"][data-scene="room"] .index ul {
   display: block;
 }
 
-/* The desk fills the window. The name and role are laid onto the nameplate and the intro and links onto
-   the card (engine.ts maps each box onto its face); a quiet index runs along the foot. */
+/* The desk fills the window. The name and role are printed on the nameplate and the intro and links on
+   the card, in the scene (desk/lettering.ts), so whatever stands in front hides them; the header here is
+   the same words for screen readers, search and the keyboard, visually hidden (focus on a link rings its
+   printed twin). A quiet index runs along the foot. */
 html[data-mode="room"][data-scene="desk"] .lobby {
   display: block;
   position: relative;
@@ -269,57 +271,15 @@ html[data-mode="room"][data-scene="desk"] .front {
   display: block;
   pointer-events: none;
 }
-html[data-mode="room"][data-scene="desk"] .masthead__plate,
-html[data-mode="room"][data-scene="desk"] .masthead__card {
+html[data-mode="room"][data-scene="desk"] .masthead {
   position: absolute;
-  left: 0;
-  top: 0;
-  transform-origin: 0 0;
-  pointer-events: auto;
-  opacity: 0;
-}
-html[data-mode="room"][data-scene="desk"] .masthead [data-placed] {
-  opacity: 1;
-}
-html[data-mode="room"][data-scene="desk"] .masthead [data-away] {
-  opacity: 0;
-}
-html[data-mode="room"][data-scene="desk"] .masthead__plate {
-  display: grid;
-  place-content: center;
-  width: 560px;
-  height: 158px;
-  text-align: center;
-  color: #1f2433;
-}
-html[data-mode="room"][data-scene="desk"] .masthead__name {
-  font: 700 60px / 1 var(--cond);
-  color: #1f2433;
-}
-html[data-mode="room"][data-scene="desk"] .masthead__role {
-  margin-top: 6px;
-  font: 600 32px / 1 var(--cond);
-  color: #5d6577;
-}
-html[data-mode="room"][data-scene="desk"] .masthead__card {
-  box-sizing: border-box;
-  width: 520px;
-  height: 272px;
-  padding: 6px 4px;
-  color: #1f2433;
-}
-html[data-mode="room"][data-scene="desk"] .masthead__line {
+  width: 1px;
+  height: 1px;
   margin: 0;
-  font: 500 24px / 1.36 var(--sans);
-  color: #1f2433;
-}
-html[data-mode="room"][data-scene="desk"] .masthead__links {
-  gap: 24px;
-  margin-top: 16px;
-  font: 700 26px / 1.2 var(--cond);
-}
-html[data-mode="room"][data-scene="desk"] .masthead__links a {
-  color: #3a6fd8;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 html[data-mode="room"][data-scene="desk"] .index {
   position: absolute;
@@ -519,9 +479,10 @@ html[data-mode="room"] :focus-visible {
   background: #f6e3b8;
 }
 
-/* The sign's and the radio's cards: closed until you point at, reach or click the object. */
+/* The sign's, the radio's and the shelf's cards: closed until you point at, reach or click the object. */
 html[data-mode="room"] .grid-sign,
-html[data-mode="room"] .radio {
+html[data-mode="room"] .radio,
+html[data-mode="room"] .shelf-card {
   position: absolute;
   left: 0;
   top: 0;
@@ -529,8 +490,102 @@ html[data-mode="room"] .radio {
   box-shadow: 0 14px 34px -16px rgb(42 38 32 / 0.55);
 }
 html[data-mode="room"] .grid-sign:not([data-open]),
-html[data-mode="room"] .radio:not([data-open]) {
+html[data-mode="room"] .radio:not([data-open]),
+.shelf-card:not([data-open]) {
   display: none;
+}
+
+/* The shelf's books, as a list: what each is, and which tool it fed. */
+.shelf-card {
+  width: min(380px, calc(100vw - 32px));
+  max-height: min(520px, 70vh);
+  overflow: auto;
+  padding: 14px 16px;
+  background: #fffaf0;
+  color: var(--ink);
+  border: 2px solid #1f2433;
+  border-radius: 10px;
+}
+.shelf-card__title {
+  margin: 0;
+  font: 700 17px var(--cond);
+}
+.shelf-card__how {
+  margin: 2px 0 10px;
+  font-size: 13px;
+  color: var(--ink-3);
+}
+.shelf-card__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+.shelf-card__book {
+  display: block;
+  font: 600 14px / 1.25 var(--cond);
+}
+.shelf-card__by {
+  display: block;
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+/* A book's spine, under the pointer: the title, who wrote it, which tool it fed. */
+.desk-spine {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 7;
+  max-width: 300px;
+  margin: 0;
+  padding: 6px 11px 7px;
+  background: #1f2433;
+  color: #f6f1e7;
+  border-radius: 8px;
+  box-shadow: 0 2px 0 rgb(31 36 51 / 0.25);
+  pointer-events: none;
+}
+.desk-spine[hidden] {
+  display: none;
+}
+
+/* Over the window: what its turbines and panels show, and the data's credit. */
+.dnote {
+  margin: 0;
+  padding: 5px 11px 6px;
+  background: rgb(255 250 240 / 0.94);
+  color: var(--ink);
+  border: 2px solid #1f2433;
+  border-radius: 8px;
+  text-align: center;
+  white-space: nowrap;
+}
+.dnote[hidden] {
+  display: none;
+}
+.dnote__now {
+  display: block;
+  font: 600 14px / 1.25 var(--cond);
+}
+.dnote__credit {
+  display: block;
+  font: 500 11.5px / 1.3 var(--cond);
+  color: var(--ink-3);
+}
+.desk-spine__title {
+  display: block;
+  font: 700 15px / 1.2 var(--cond);
+}
+.desk-spine__by,
+.desk-spine__fed {
+  display: block;
+  font: 500 12px / 1.3 var(--cond);
+  color: #c9cfdd;
+}
+.desk-spine__fed {
+  color: #ffc94a;
 }
 html[data-mode="room"] .grid-sign {
   width: 260px;
@@ -1165,25 +1220,6 @@ html[data-scene="desk"] :focus-visible {
 .dtag--card:focus-visible {
   background: #ffc94a;
 }
-/* The grid's credit: a slip of the same sticky paper, written in the same hand, stuck under the note. */
-.dtag--credit {
-  max-width: 158px;
-  margin-top: -9px;
-  padding: 4px 9px 5px;
-  border-radius: 1px;
-  background: #ffc94a;
-  color: #1f2433;
-  font:
-    700 15px / 1.05 "Caveat",
-    cursive;
-  text-align: left;
-  white-space: normal;
-  rotate: -3deg;
-  cursor: default;
-  box-shadow:
-    0 1px 0 rgb(31 36 51 / 0.18),
-    0 3px 6px rgb(31 36 51 / 0.12);
-}
 .desk__labels .obj--cover:focus-visible,
 .desk__labels .obj--drawer:focus-visible {
   outline: 3px solid #ffc94a;
@@ -1191,7 +1227,8 @@ html[data-scene="desk"] :focus-visible {
 
 /* Where you are decides what shows. */
 html[data-scene="desk"][data-station="office"] .room__back,
-html[data-scene="desk"][data-station="notebook"] .room__back {
+html[data-scene="desk"][data-station="notebook"] .room__back,
+html[data-scene="desk"][data-station="room"] .room__back {
   display: block;
 }
 html[data-scene="desk"] .room__back {
@@ -1486,72 +1523,36 @@ html[data-mode="room"][data-entrance="door"] :is(.front, .desk__labels, .room__b
   width: 100%;
   height: 100%;
 }
-/* The brass plate's words: one box, sized to the door view, either way. Over the poster it is a brass
-   badge in its own right, set on the door; once the 3D door is up it is laid onto the brass plate there
-   (door.ts) and only its paint changes, so nothing inside it moves. */
+/* The brass plate's words are engraved on the plate in the scene and in its poster (desk/lettering.ts);
+   these are the same words in the page, for screen readers and search, visually hidden. */
 .entrance__plate {
-  position: absolute;
-  left: 0;
-  top: 0;
-  z-index: 2;
-  box-sizing: border-box;
-  display: grid;
-  place-content: center;
-  width: 20cqh;
-  height: 6.6cqh;
-  margin: 0;
-  padding: 0;
-  background: linear-gradient(#f0c766, #d9a63b);
-  border: 2px solid #a9791f;
-  border-radius: 3px;
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.5);
-  font: 700 2.3cqh / 1.05 var(--cond);
-  text-align: center;
-  transform: translate(calc(50cqw - 50%), calc(40.2cqh - 50%));
-  transform-origin: 0 0;
-}
-.entrance__plate[data-placed] {
-  background: none;
-  border-color: transparent;
-  box-shadow: none;
-}
-.entrance__plate[data-away] {
-  opacity: 0;
-}
-.entrance__name {
-  display: block;
-  letter-spacing: 0.01em;
-}
-.entrance__comma {
   position: absolute;
   width: 1px;
   height: 1px;
+  margin: 0;
   overflow: hidden;
   clip-path: inset(50%);
-}
-.entrance__role {
-  display: block;
-  margin-top: 0.12em;
-  font-weight: 600;
-  font-size: 0.62em;
-  color: #5b4413;
-}
-.entrance__ways {
-  position: absolute;
-  left: 50%;
-  bottom: 5cqh;
-  z-index: 3;
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  margin: 0;
-  translate: -50% 0;
   white-space: nowrap;
 }
-.entrance[data-walking] .entrance__ways {
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s;
+/* Knock and Skip, one above the other. One anchor (the corner), placed by transform alone: at the foot,
+   centred, until the door is measured; beside it, at the handle, where there is room (main.ts). A
+   transform moves nothing on the page. */
+.entrance__ways {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  white-space: nowrap;
+  transform: translate(calc(50cqw - 50%), calc(95cqh - 100%));
+}
+/* Walking in, Skip stays (a cut to the desk at any moment); Knock has gone. */
+.entrance[data-walking] .entrance__in {
+  visibility: hidden;
 }
 /* Knocking, the Knock button steps aside (its place kept); Skip stays until the door opens. */
 .entrance[data-knocking] .entrance__in {
@@ -1560,15 +1561,44 @@ html[data-mode="room"][data-entrance="door"] :is(.front, .desk__labels, .room__b
 /* One width whatever it says (Come in, Knock, Opening…), so nothing beside it moves. */
 .entrance__in {
   box-sizing: border-box;
-  min-width: 9.2em;
+  min-width: 7.4em;
   text-align: center;
-  padding: 11px 26px 12px;
+  padding: 9px 22px 10px;
   background: #1f2433;
   color: #f6f1e7;
   border-radius: 999px;
-  font: 700 20px / 1 var(--cond);
+  font: 700 19px / 1 var(--cond);
   text-decoration: none;
   box-shadow: 0 3px 0 rgb(31 36 51 / 0.3);
+}
+.entrance__in:focus-visible,
+.entrance__skip:focus-visible {
+  outline: 3px solid #ffc94a;
+  outline-offset: 2px;
+}
+/* Beside the door, at the handle (JS places it there when there is room). */
+/* A knuckle over the door: it is the thing to knock on. */
+.entrance[data-hover] {
+  cursor:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M9 22c-2-2-3-5-2-8l2-6c1-2 3-2 4 0l1 3 1-4c1-2 3-2 4 0l1 4 1-2c1-2 3-1 3 1l-1 8c0 4-3 7-7 7h-2c-2 0-4-1-5-3z' fill='%23f6f1e7' stroke='%231f2433' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E")
+    10 6,
+    pointer;
+}
+/* A gentle vignette round the door view, gone as you walk in. */
+.entrance::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: radial-gradient(ellipse 75% 70% at 50% 48%, transparent 55%, rgb(31 36 51 / 0.26) 100%);
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+}
+.entrance[data-walking]::after {
+  opacity: 0;
+}
+html[data-photo] .entrance::after {
+  content: none;
 }
 .entrance__in:hover {
   background: #2f3650;
@@ -1580,8 +1610,7 @@ html[data-mode="room"][data-entrance="door"] :is(.front, .desk__labels, .room__b
   border-radius: 6px;
   font: 600 15px / 1.2 var(--cond);
 }
-html[data-photo] .entrance__ways,
-html[data-photo] .entrance__plate {
+html[data-photo] .entrance__ways {
   /* biome-ignore lint/complexity/noImportantStyles: the stills show the bare door. */
   display: none !important;
 }
@@ -1698,6 +1727,17 @@ html[data-mode="room"][data-scene="desk"] .masthead__speak {
   display: none;
 }
 
+/* Words that are in the scene, kept in the page for screen readers and search. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 /* The knock: "knock" popping beside the door, in the desk's comic line; the voice's words in a speech
    bubble from behind the door; and a small speaker to turn the sound off. */
 .entrance__knock {
@@ -1774,22 +1814,42 @@ html[data-mode="room"][data-scene="desk"] .masthead__speak {
     700 25px / 1.15 "Caveat",
     cursive;
 }
+/* The speaker: an ink chip, its icon and its state in words. */
 .entrance__sound {
   position: absolute;
   right: 18px;
   top: 16px;
   z-index: 3;
-  padding: 6px 12px;
-  background: rgb(246 241 231 / 0.88);
-  color: #1f2433;
-  border: 2px solid #1f2433;
-  border-radius: 999px;
-  font: 600 14px / 1.2 var(--cond);
-  cursor: pointer;
-}
-.entrance__sound[aria-pressed="false"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 13px 7px 10px;
   background: #1f2433;
   color: #f6f1e7;
+  border: 0;
+  border-radius: 999px;
+  font: 600 14px / 1.2 var(--cond);
+  box-shadow: 0 2px 0 rgb(31 36 51 / 0.25);
+  cursor: pointer;
+}
+.entrance__speaker {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.entrance__cone {
+  fill: currentColor;
+}
+.entrance__off,
+.entrance__sound[aria-pressed="false"] .entrance__waves {
+  display: none;
+}
+.entrance__sound[aria-pressed="false"] .entrance__off {
+  display: inline;
 }
 .entrance__sound:focus-visible {
   outline: 3px solid #ffc94a;

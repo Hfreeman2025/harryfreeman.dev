@@ -38,7 +38,7 @@ on paths to review. The things on the desk are the site's parts (`src/desk/`):
 
 - **The door.** Every fresh visit and every reload starts outside Harry's office door: a corridor, the
   door with its frosted pane lit warm from inside, a brass plate reading "Harry Freeman, Head of AI"
-  (real text laid onto the plate), a handle and a doormat. The way in is a **knock** (the door, the button
+  (engraved on the plate in the scene), a handle and a doormat. The way in is a **knock** (the door, the button
   or Enter): two knocks, synthesised in WebAudio (a filtered-noise rap over a resonant woody body, 180
   ms apart), the door jolting and "knock" popping beside it on each; then a voice from inside, "Hello,
   welcome! ... Come and explore." (Kokoro, generated offline; `public/NOTICES.txt`), its words in a
@@ -54,17 +54,42 @@ on paths to review. The things on the desk are the site's parts (`src/desk/`):
   cuts. Back and Forward (and the back-forward cache) return to the desk, and a deep link
   (`#folder-<tool>`, `#ask`), `?in`, a style or a still never show the door; `?door` always does. On
   phones (until the phone diorama) and without WebGL or script, the door is a hero above the page: a
-  light door (`src/entrance/door.ts`) that opens onto warm light, or its poster, with the plate's words
-  as real text and Come in a link to the content.
+  light door (`src/entrance/door.ts`) that opens onto warm light, or its poster (the plate engraved in
+  it), with Come in a link to the content.
+- **The office.** The room the walk crosses is furnished in the same cartoon language
+  (`src/desk/furnish.ts`): a two-pane window over the desk onto a calm UK roofline, lit for the visitor's
+  own time of day (morning, day, evening, night), with wind turbines on the hill that turn at a pace set
+  by the grid's current wind share and solar panels on a near roof that glint while solar is a fifth of
+  the grid or more (the same NESO data as the sticky note, its `/generation` mix; without a reading the
+  scene is still and neutral). A walnut bookshelf holds the sources behind the tools as plain titled
+  spines (semantic entropy, induction heads, SummaC, in-toto, the GUM and the rest, from the tools'
+  READMEs), with the radio from the kit on it, the same Listen to the Grid radio and card as in the model.
+  A whiteboard sketches the ten tools round "the briefs", arrows to "review", in marker. A rug, a desk
+  lamp (lit after dark), a radiator under the window, a coat stand with a jacket, plants, a print, a
+  cable run, a dado rail, a chair pushed back, contact shadows, and light through the window on the
+  floor, coloured by the time of day. The walk in is paced like a person (about 6.6 s): the door swings open, a step to the
+  threshold and a pause there (0.4 s) to take the room in, an unhurried walk that slows while it looks at
+  the shelf and the whiteboard, then a gentle slow-in down into the seat. Skip and Esc cut to the desk
+  at any moment of it. Seated, the view is all desk; **The room** (a tag at the top of the desk view) stands you up
+  to look round the back wall, where a spine under the pointer gives its title, authors and the tool it
+  fed, the shelf's tag lists them all for keyboards and screen readers, and the radio opens the radio's
+  card. Sit back down, Esc or the wheel return to the desk.
 - **The Speak to me mic.** A podcast mic by the nameplate, with a printed tag. It never listens: no
   microphone is asked for, no permission, no audio. Clicking it (or Enter) lights its ON AIR lamp and
   opens a contact card: Harry's email with a Copy button (which says Copied only once the clipboard has
   it), LinkedIn and the CV. Esc or a click away closes it. The flat page has a plain Speak to me link in
   its header.
 - **The nameplate and the card.** Harry's name and role are on a nameplate, his one-line intro and his
-  CV, Email and LinkedIn links on a card beside it. Both are the page's real header text
-  (`.masthead`), mapped in perspective onto the 3D faces (`room/quad.ts`), so it reads, selects, focuses
-  and is in the HTML before any script. A quiet index along the foot lists the ten tools, Ask, the
+  CV, Email and LinkedIn links on a card beside it. **Everything lettered on a thing is printed in the
+  scene** (`src/desk/lettering.ts`): the nameplate, the card, the door's brass plate, the grid's credit
+  slip and the mic's tag are drawn into their own textures, so whatever stands in front of them hides
+  their words as it would hide paint, and they stay sharp through the tilt-shift (their faces mark the
+  render's alpha, depth-tested, and the blur leaves those pixels alone). The page keeps the same words
+  as real HTML, visually hidden (clipped, not removed), in reading order: the header (`.masthead`), the
+  door plate and the credit, before any script. Tab to a card link and the printed link is ringed on
+  the card; a click on a printed link is a click on the real one. The tags, notes, bubbles and panels
+  that float over the scene go when what they name is out of sight behind something (sight lines from
+  the camera). The index box stands clear of the nameplate at every window shape. A quiet index along the foot lists the ten tools, Ask, the
   briefs and the CV, the directory for keyboards, screen readers and phones. Without WebGL the same
   header and index are a plain editorial header.
 
@@ -206,7 +231,16 @@ Automation is silent and offline from the world: every browser gets a device-fre
 (`scripts/silent.mjs`), the Carbon Intensity API is always mocked, and any request off the machine fails
 the check.
 
-- **Unit tests (Vitest, 61):**
+- **Unit tests (Vitest, 69):**
+  - no employer or client named in the CV, the pieces or the page, checked against the denylist kept
+    outside every repository (`~/Personal/.site-gate/denylist.txt`; skipped where it is absent, a hit
+    reported by its line, never by name); the browser suite checks the served CV the same way;
+  - the window: the `/generation` mix for the current half-hour only (old, wrong-length, out-of-range
+    and wind-or-solar-less mixes refused; HTTP errors explicit); the time of day by hour; the turbines'
+    pace from the wind share (slow at none, full at 60% and over), the glint at a fifth solar by day and
+    never at night, and stillness without a reading; the shelf's sources each once, each naming tools
+    that exist;
+  - the index along the desk's foot: every tool once as a real link, in drawer order;
   - Reception's printout: an answer's first two quotations with their sections, a long one shortened
     with the cut marked, a refusal with its reason, and nothing printed for a result it cannot read;
   - the scale figures: about 1.75 m standing and 1.4 m seated, and at every 0.1 s step of both the
@@ -224,7 +258,16 @@ the check.
   - the room's tags: only the cabinet, Reception and the credit at rest, every object a tabbable link
     or button, and each drawer followed by its folders;
   - the earlier suites: the timeline, replay, rendering, config, CV, filing, cabinet and floor plan.
-- **Browser checks (52 per browser, all passing in Chromium, WebKit and Firefox on 5 November):**
+- **Browser checks (71 per browser):**
+  - lettering (`scripts/desk-checks.mjs`): the nameplate's, card's and credit's printed faces fully in
+    sight from the seat (sight lines to a grid on each); a plain board stood in front of the nameplate
+    hides its words completely (no dark pixels of them left in its place); no DOM text over the scene
+    seated, standing in the room, in the office or at a desk, but the floating tags, notes, bubbles,
+    panels, index and buttons; the page's hidden copies of the name, role, intro, door plate and credit
+    with the configured hrefs, clipped rather than removed; Tab from the name rings each printed card
+    link in turn (the ring seen in the pixels), and a click on a printed link clicks the real one; the
+    index box clear of the nameplate at six window shapes; without WebGL the plate engraved in the
+    poster;
   - the desk (`scripts/desk-checks.mjs`): it opens at real scale in tilt-shift with the credit on the
     note and zero layout shift; the swoop starts high and lands low (under 30°), still high part-way;
     Esc, the button and the wheel rise out; a card pull by keyboard reaches its desk square-on (within 3°),
@@ -234,18 +277,26 @@ the check.
     Reception presses one key per character and an answer prints its quotes before the desk opens with
     the line marked; a refusal prints a refusal; reduced motion cuts and nobody waves;
   - the door (`scripts/door-checks.mjs`): a fresh visit lands outside it with the plate's text, title
-    unchanged, and Come in swings it open (mid-walk the door is open and the camera walking) and sits at
-    the desk in 2.5 to 7 s with focus on the name, no layout shift and no audio device; the seated frame
-    after the walk matches the desk loaded directly (mean difference under 2%), and at every sample of
-    the walk the scene holds the real desk and no stand-ins; Come in before the desk has loaded says
-    Opening… and waits; Skip and Esc go
-    straight in; a reload starts at the door again and Back from the CV restores the desk; deep links
+    unchanged, and Knock opens it (mid-walk the door is open and the camera walking) and sits at the
+    desk 6 to 14 s after the knock (the knock and the voice take about four), with focus on the name, no
+    layout shift and no audio device; the walk itself, timed in the page, takes 6 to 7.5 s (6.6 s by design); the seated frame
+    after the walk matches the desk loaded directly (mean difference and share of pixels that differ
+    much both under 1%), and at three samples of the walk (on the threshold, mid-room, near the desk)
+    the scene holds the real desk and no stand-ins; Come in before the desk has loaded says
+    Opening… and waits; Skip and Esc go straight in before the knock, mid-knock and mid-walk (the walk
+    dropped, focus on the name); a reload starts at the door again and Back from the CV restores the desk; deep links
     skip it and the CV has none; reduced motion cuts; without WebGL it is the poster with the plate as
     text and Come in a link to the content; on a phone it is a hero above the page, no sideways scroll;
   - the knock: two hits 180 ms apart and the voice scheduled after them, nothing touching audio before
     the click (no AudioContext made); muted (and still muted after a reload) the words show on the same
     beat with no audio at all; Skip works mid-knock; with reduced motion the knock and the words stay,
     the door neither jolts nor swings, and it cuts in;
+  - the office: with the mocked grid (wind 38%, solar 4%) the turbines turn at exactly that pace and
+    the panels do not glint, and the window shows the hour's time of day; without the grid it is still;
+    The room stands up to the back wall with "Sit back down" as the way back; a spine under the pointer
+    names its source and the tool it fed (three books checked, the first word for word) and goes when the
+    pointer leaves the shelf; the shelf's tag opens the list of all 18 by keyboard, Esc gives focus back;
+    the shelf's radio opens the radio's card; back down, and no layout shift throughout;
   - the mic: click or Enter opens the card and lights the lamp; its three links are the configured email,
     LinkedIn and CV, each focusable; Copy puts exactly the email on a (mocked) clipboard; Esc and a click
     away close it and the lamp goes off; `getUserMedia` is never called;
@@ -295,12 +346,26 @@ shared machine (`shots/office-4/performance.json`). Medians:
 | Transferred on the phone         | 160 KB   | 159 KB | 160 KB  |
 | Layout shift (desktop, phone)    | 0, 0     | n/a    | n/a     |
 
+**The desk and its office (this branch, 5 November).** Chromium at 1440 × 900 and 2×, the branch's
+production build on loopback: 2.65 MB transferred by the time the desk is live (the furnished office
+adds the kit's coat stand, 14 KB, and its own code; the radio and plants share one fetch with the
+model's), within the 3 MB budget. Frame times 16.7 / 16.7 ms (median / 95th) at the
+door, through the knock and the walk, seated, standing up and looking round the room, with no frame
+over 20 ms. The window's view, the whiteboard and the spines are canvas textures drawn once (the view
+again only when the hour's light changes); the radiator's fins are one instanced mesh.
+
 Frame times (median / 95th percentile): Chromium, vsync-locked, 16.7 / 16.8 ms at the door, walking
 to the cabinet, opening a drawer and turning to a desk, with no frame over 20 ms in any run. Headless
 WebKit and Firefox run their frames unthrottled at about 6 / 7 ms, which shows headroom, not what a
 display would pace. WebKit and Firefox do not report layout shift; it is measured in Chromium.
 
 ## What is weak
+
+- **The desk's things are small against the room.** The desk view is a seated person's eyes on a
+  tabletop of miniatures, so the cabinet, keyboard and model are smaller than life; from the doorway
+  and the room view they read as a small cluster on a long desk.
+- **Seated, the room is out of sight.** At this scale the desk fills the seated view to its edges, so
+  the window, shelf and whiteboard show on the walk in and from The room, not behind the desk.
 
 - **Loopback numbers.** Paint and scene-ready times are from a local preview; over a network the
   three.js chunk (142 KB gzipped) and the baked textures add their transfer time.

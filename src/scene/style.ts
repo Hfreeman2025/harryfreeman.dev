@@ -102,7 +102,18 @@ export async function applyStyle(id: StyleId, ctx: StyleContext): Promise<StyleH
 // ---------- Loading ----------
 const ASSETS = '/assets/3d/';
 const loader = new GLTFLoader();
-export const loadGltf = (path: string): Promise<GLTF> => loader.loadAsync(ASSETS + path);
+const loads = new Map<string, Promise<GLTF>>();
+/** Loads a model once however many ask for it; the result is shared, so each use takes a copy of its scene. */
+export const loadGltf = (path: string): Promise<GLTF> => {
+  let load = loads.get(path);
+  if (!load) {
+    load = loader.loadAsync(ASSETS + path);
+    // A failed load can be asked for again.
+    load.catch(() => loads.delete(path));
+    loads.set(path, load);
+  }
+  return load;
+};
 
 /** Loads named models once; each use takes a fresh copy, and a missing one fails loudly. */
 export async function kit(names: readonly string[], path: (name: string) => string): Promise<(name: string) => Object3D> {

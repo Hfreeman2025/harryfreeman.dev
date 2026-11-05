@@ -466,7 +466,7 @@ export async function miniature(ctx: StyleContext): Promise<StyleHandle> {
   ctx.signFace.visible = false;
 
   // The radio, on the model's Reception counter.
-  const radio = (await loadGltf('kenney-furniture-kit/radio.glb')).scene;
+  const radio = (await loadGltf('kenney-furniture-kit/radio.glb')).scene.clone(true);
   fitBox(radio, RECEPTION.x - 0.6, RECEPTION.z, { x: 0.46, y: 0.28, z: 0.2 }, 0.3, RECEPTION.height + 0.04);
   radio.traverse((o) => {
     if ((o as Mesh).isMesh) (o as Mesh).castShadow = true;

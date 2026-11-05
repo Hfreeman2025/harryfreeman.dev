@@ -5,7 +5,8 @@
 //   node scripts/e2e.mjs [chromium|webkit|firefox ...]
 // Writes shots/e2e-<browser>.json and prints a summary. Exit code 1 if any check fails.
 
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { homedir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium, firefox, webkit } from 'playwright';
@@ -17,6 +18,10 @@ import { silenceLiveAudio } from './silent.mjs';
 import { stampChecks } from './stamp-checks.mjs';
 
 const site = join(dirname(fileURLToPath(import.meta.url)), '..');
+/** Names that must never appear on the site, kept outside every repository (one per line, # comments). */
+const DENYLIST = join(homedir(), 'Personal', '.site-gate', 'denylist.txt');
+/** Thrown by a check that cannot run here, with why; reported as SKIP, not as a pass. */
+export class Skip extends Error {}
 const BASE = process.env.STUDIO_URL ?? 'http://127.0.0.1:4400';
 const config = JSON.parse(readFileSync(join(site, 'site.config.json'), 'utf8'));
 const shots = join(site, 'shots', process.env.SHOTS_DIR ?? 'desk');
@@ -152,6 +157,11 @@ async function run(name) {
       results.push({ check: label, ok: true, ms: Date.now() - started, ...(detail ? { detail } : {}) });
       console.log(`  ok   ${label}${detail ? ` (${JSON.stringify(detail)})` : ''}`);
     } catch (error) {
+      if (error instanceof Skip) {
+        results.push({ check: label, ok: true, skipped: error.message });
+        console.log(`  SKIP ${label}: ${error.message}`);
+        return;
+      }
       results.push({ check: label, ok: false, error: String(error instanceof Error ? error.message : error) });
       console.log(`  FAIL ${label}: ${error instanceof Error ? error.message : error}`);
     }
@@ -165,12 +175,18 @@ async function run(name) {
   await officeChecks(context);
   await stampChecks(context);
 
-  await check('the CV page holds only confirmed claims', {}, async (page, problems) => {
+  await check('the CV page holds only confirmed claims and none of the denylisted names', {}, async (page, problems) => {
     await page.goto(`${BASE}/cv.html`, { waitUntil: 'load' });
-    const text = await page.locator('main').textContent();
+    const text = (await page.locator('main').textContent()) ?? '';
     expect(text.includes('Head of AI') && text.includes('EU AI Act'), 'CV content missing');
-    for (const bad of ['redacted-term', 'redacted-term', 'Simply']) expect(!text.includes(bad), `found ${bad}`);
     expect(problems.length === 0, problems.join(' | '));
+    // The names are read from outside the repository and never printed: a hit names only its line.
+    if (!existsSync(DENYLIST)) throw new Skip(`no denylist at ${DENYLIST.replace(homedir(), '~')} in this checkout`);
+    const lower = text.toLowerCase();
+    for (const [i, raw] of readFileSync(DENYLIST, 'utf8').split('\n').entries()) {
+      const entry = raw.trim().toLowerCase();
+      if (entry && !entry.startsWith('#')) expect(!lower.includes(entry), `the CV holds the name on denylist line ${i + 1}`);
+    }
   });
 
   await check('a terminal piece plays its recording', { viewport: { width: 1440, height: 900 } }, async (page, problems) => {
@@ -183,7 +199,8 @@ async function run(name) {
 
   await browser.close();
   writeFileSync(
-    join(site, 'shots', `e2e-${name}.json`),
+    // A partial run (ONLY) reports beside the full one, never over it.
+    join(site, 'shots', `e2e-${name}${process.env.ONLY ? '-only' : ''}.json`),
     `${JSON.stringify({ browser: name, base: BASE, at: new Date().toISOString(), results }, null, 2)}\n`,
   );
   return results;

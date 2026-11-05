@@ -71,6 +71,48 @@ export async function fetchReading(fetcher: typeof fetch = fetch, now = Date.now
   return parseReading(await response.json(), now);
 }
 
+/** The generation mix for the current half-hour: the shares the office window shows (wind, solar). */
+export interface GridMix {
+  readonly wind: number;
+  readonly solar: number;
+  readonly from: number;
+  readonly to: number;
+}
+const MixSchema = v.object({
+  data: v.object({
+    from: Instant,
+    to: Instant,
+    generationmix: v.pipe(
+      v.array(v.object({ fuel: v.string(), perc: v.pipe(v.number(), v.minValue(0), v.maxValue(100)) })),
+      v.minLength(1),
+    ),
+  }),
+});
+
+/** Parse a /generation response; throws unless it is for the half-hour around `now` and names wind and solar. */
+export function parseMix(json: unknown, now: number): GridMix {
+  const parsed = v.safeParse(MixSchema, json);
+  if (!parsed.success) throw new Error('the grid service sent an unexpected generation mix');
+  const { from, to, generationmix } = parsed.output.data;
+  if (to - from !== HALF_HOUR) throw new Error('the generation mix is not for a half-hour');
+  if (from > now || to < now - HALF_HOUR) throw new Error('the generation mix is not current');
+  const share = (fuel: string) => generationmix.find((g) => g.fuel === fuel)?.perc;
+  const wind = share('wind');
+  const solar = share('solar');
+  if (wind === undefined || solar === undefined) throw new Error('the generation mix names no wind or solar');
+  return { wind, solar, from, to };
+}
+
+export async function fetchMix(fetcher: typeof fetch = fetch, now = Date.now(), timeoutMs = 8000): Promise<GridMix> {
+  const response = await fetcher('https://api.carbonintensity.org.uk/generation', {
+    signal: AbortSignal.timeout(timeoutMs),
+    cache: 'no-store',
+    headers: { Accept: 'application/json' },
+  });
+  if (!response.ok) throw new Error(`the grid service returned HTTP ${response.status}`);
+  return parseMix(await response.json(), now);
+}
+
 const time = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/London', timeZoneName: 'short' });
 const clock = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/London' });
 

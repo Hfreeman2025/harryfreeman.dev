@@ -8,12 +8,13 @@
 // closed box, and from anywhere else back up to the desk.
 
 import { DRAWERS, drawerOf } from '../content/drawers';
-import { isPieceId, PIECES, type PieceId } from '../content/pieces';
+import { isPieceId, PIECES, type PieceId, pieceById } from '../content/pieces';
 import { fillFolder, loopSource, scrollToMark } from '../folder';
-import type { RoomLight, SignText } from '../room/grid';
+import type { GridMix, RoomLight, SignText } from '../room/grid';
 import { popovers } from '../room/popover';
 import type { Timeline } from '../timeline/schema';
 import type { DeskEngine, Station } from './engine';
+import { SOURCES } from './furnish';
 import { ROUNDS, type Round } from './objects';
 import { placeSlip, printResult } from './printout';
 import { speakCard } from './speak';
@@ -25,10 +26,13 @@ export interface DeskControl {
   cutIn(): void;
   hitsDoor(x: number, y: number): boolean;
   knock(): void;
+  hoverDoor(on: boolean): void;
   doorRect(): { x: number; y: number; width: number; height: number } | null;
   source(piece: PieceId): void;
   setLight(light: RoomLight): void;
   setSign(text: SignText): void;
+  /** The grid's wind and solar shares, for the window's turbines and panels; null keeps them still. */
+  setMix(mix: GridMix | null): void;
   pull(piece: PieceId): void;
 }
 
@@ -38,6 +42,7 @@ const nextFrame = () => new Promise<void>((r) => requestAnimationFrame(() => r()
 /** What the back button says, by where you are and where you came from. */
 const BACK: Record<string, string> = {
   office: 'Rise to the desk',
+  room: 'Sit back down',
   cabinet: 'Back to the desk',
   notebook: 'Back to the desk',
   reception: 'Back to the desk',
@@ -77,8 +82,13 @@ export async function startDesk(timeline: Timeline): Promise<DeskControl> {
   const engine: DeskEngine = await mountDesk({
     stage,
     labels: labelsRoot,
-    // Harry's name and role on the nameplate, his intro and links on the card: real text, laid onto them.
-    onto: [...document.querySelectorAll<HTMLElement>('.masthead [data-place="quad"], #entrance-plate')],
+    // What is printed on things in the scene, from the page's own words (kept in the HTML, visually hidden):
+    // the name and role on the nameplate, the intro and links on the card, the door's plate, the credit.
+    lettering: {
+      masthead: document.querySelector<HTMLElement>('.masthead'),
+      door: document.getElementById('entrance-plate'),
+      credit: document.getElementById('desk-credit'),
+    },
     // Outside the office door on a fresh visit or a reload (the head script's call).
     entrance: root.dataset.entrance === 'door',
     timeline,
@@ -191,6 +201,16 @@ export async function startDesk(timeline: Timeline): Promise<DeskControl> {
     label(focus ?? 'drawer:inside', 'cabinet')?.focus();
   }
 
+  /** Up from the desk, standing back to look round the room. */
+  async function toRoom(): Promise<void> {
+    hideFolder();
+    engine.openDrawer(null);
+    syncDrawers();
+    setStation('room');
+    await engine.go('room');
+    backButton?.focus({ preventScroll: true });
+  }
+
   async function toNotebook(): Promise<void> {
     hideFolder();
     setStation('notebook');
@@ -249,6 +269,7 @@ export async function startDesk(timeline: Timeline): Promise<DeskControl> {
     if (s === 'office') return toDoor('office');
     if (s === 'notebook') return toDoor('notebook');
     if (s === 'reception') return toDoor('reception');
+    if (s === 'room') return toDoor('room');
   }
 
   function choose(action: string): void {
@@ -257,6 +278,7 @@ export async function startDesk(timeline: Timeline): Promise<DeskControl> {
     if (kind === 'office') void run(() => toOffice(null));
     else if (kind === 'cabinet' || kind === 'stamp') void run(() => toCabinet(null, null));
     else if (kind === 'notebook') void run(toNotebook);
+    else if (kind === 'room') void run(toRoom);
     else if (kind === 'reception') void run(toReceptionDesk);
     else if (kind === 'radio') document.getElementById('radio-button')?.click();
     else if (kind === 'mic') speak?.toggle();
@@ -279,7 +301,7 @@ export async function startDesk(timeline: Timeline): Promise<DeskControl> {
   labelsRoot.addEventListener('click', (event) => {
     const el = (event.target as Element | null)?.closest<HTMLElement>('[data-action]');
     const action = el?.dataset.action ?? '';
-    if (!el || action === 'sign' || action === 'radio' || action === 'mic' || !action) return;
+    if (!el || action === 'sign' || action === 'radio' || action === 'shelf' || action === 'mic' || !action) return;
     event.preventDefault();
     choose(action);
   });
@@ -322,22 +344,21 @@ export async function startDesk(timeline: Timeline): Promise<DeskControl> {
     }
     if (card && !card.hidden) cycleTab([screen, card], event);
   });
-  // Scrolling up over the scene rises a step, as Esc does; scrolling down over the desk dives in.
+  // Scrolling over the scene: at the desk, down dives into the office and up looks up at the room; looking
+  // round the room, down sits back down; anywhere else, up rises a step, as Esc does.
   let wheelAt = 0;
   stage.addEventListener(
     'wheel',
     (event) => {
       const now = performance.now();
       if (now - wheelAt < 900 || Math.abs(event.deltaY) < 4) return;
-      if (event.deltaY < 0 && engine.station() !== 'door') {
-        wheelAt = now;
-        event.preventDefault();
-        void run(stepBack);
-      } else if (event.deltaY > 0 && engine.station() === 'door') {
-        wheelAt = now;
-        event.preventDefault();
-        void run(() => toOffice(null));
-      }
+      const s = engine.station();
+      const up = event.deltaY < 0;
+      const move = s === 'room' ? (up ? null : stepBack) : s === 'door' ? (up ? toRoom : () => toOffice(null)) : up ? stepBack : null;
+      if (!move) return;
+      wheelAt = now;
+      event.preventDefault();
+      void run(move);
     },
     { passive: false },
   );
@@ -393,18 +414,76 @@ export async function startDesk(timeline: Timeline): Promise<DeskControl> {
           // Every thing on the desk, and every label shown over it.
           avoid: () => [
             ...engine.objectRects(),
-            ...[...document.querySelectorAll<HTMLElement>('.desk__labels > :not([hidden]), .masthead [data-placed]:not([data-away])')]
+            ...[...document.querySelectorAll<HTMLElement>('.desk__labels > :not([hidden])')]
               .filter((el) => el !== micCover)
               .map((el) => el.getBoundingClientRect()),
           ],
         })
       : null;
 
-  // ---------- The grid's and the radio's cards ----------
+  // ---------- The grid's, the radio's and the shelf's cards ----------
+  /** What a source fed, in the tools' own names. */
+  const fedBy = (fed: readonly PieceId[]) => fed.map((id) => pieceById(id).title).join(', ');
+  const shelf = document.getElementById('shelf');
+  const shelfList = shelf?.querySelector('.shelf-card__list');
+  if (shelf && shelfList) {
+    shelfList.replaceChildren(
+      ...SOURCES.map((source) => {
+        const item = document.createElement('li');
+        const title = document.createElement('span');
+        title.className = 'shelf-card__book';
+        title.textContent = source.title;
+        const by = document.createElement('span');
+        by.className = 'shelf-card__by';
+        by.textContent = `${source.by} · fed ${fedBy(source.fed)}`;
+        item.append(title, by);
+        return item;
+      }),
+    );
+    shelf.hidden = false;
+  }
   popovers(hall, [
     [label('sign', 'door'), document.getElementById('grid-sign')],
     [label('radio', 'office'), document.getElementById('radio')],
+    [label('radio', 'room'), document.getElementById('radio')],
+    [label('shelf', 'room'), shelf],
   ]);
+
+  // Looking round the room, the shelf's spines say what they are and which tool they fed. A new book is new
+  // lines (made afresh, so nothing in the tip moves), and the tip follows the pointer by transform.
+  const spine = document.getElementById('desk-spine');
+  let spineAt: number | null = null;
+  const line = (className: string, text: string) => {
+    const el = document.createElement('span');
+    el.className = className;
+    el.textContent = text;
+    return el;
+  };
+  stage.addEventListener('pointermove', (event) => {
+    if (!spine) return;
+    const i = engine.station() === 'room' ? engine.pickBook(event.clientX, event.clientY) : null;
+    const source = i === null ? undefined : SOURCES[i];
+    if (!source) {
+      spine.hidden = true;
+      spineAt = null;
+      return;
+    }
+    if (i !== spineAt) {
+      spineAt = i;
+      spine.replaceChildren(
+        line('desk-spine__title', source.title),
+        line('desk-spine__by', source.by),
+        line('desk-spine__fed', `fed ${fedBy(source.fed)}`),
+      );
+    }
+    spine.hidden = false;
+    const r = hall.getBoundingClientRect();
+    spine.style.transform = `translate(${(event.clientX - r.left + 14).toFixed(0)}px, ${(event.clientY - r.top + 16).toFixed(0)}px)`;
+  });
+  stage.addEventListener('pointerleave', () => {
+    if (spine) spine.hidden = true;
+    spineAt = null;
+  });
   document.addEventListener('radio:state', (event) => engine.setRadio((event as CustomEvent<{ on: boolean }>).detail.on));
 
   if (params.has('debug')) Object.assign(window, { deskDebug: { ...engine.debug, objectRects: () => engine.objectRects() } });
@@ -443,6 +522,7 @@ export async function startDesk(timeline: Timeline): Promise<DeskControl> {
     cutIn: () => engine.cutIn(),
     hitsDoor: (x, y) => engine.hitsDoor(x, y),
     knock: () => engine.knock(),
+    hoverDoor: (on) => engine.hoverDoor(on),
     doorRect: () => engine.doorRect(),
     source(piece) {
       void run(() => toDesk(piece, engine.station()));
@@ -452,6 +532,14 @@ export async function startDesk(timeline: Timeline): Promise<DeskControl> {
     },
     setSign(text) {
       engine.setSign(text);
+    },
+    setMix(mix) {
+      engine.setMix(mix);
+      const now = document.getElementById('window-now');
+      if (now)
+        now.textContent = mix
+          ? `Outside: wind ${Math.round(mix.wind)}% and solar ${Math.round(mix.solar)}% of Great Britain’s power this half-hour`
+          : 'Outside: the grid’s wind and sun are unavailable, so the turbines stand still';
     },
     pull(piece) {
       void run(() => toDesk(piece, 'cabinet'));

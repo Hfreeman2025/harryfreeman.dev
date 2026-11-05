@@ -9,7 +9,7 @@ import type { DeskControl } from './desk/main';
 import { startEntrance } from './entrance/main';
 import { loadLines, showLines } from './folder';
 import { type OfficeControl, startOffice } from './office/main';
-import { NEUTRAL_LIGHT, type RoomLight, type SignText } from './room/grid';
+import { type GridMix, NEUTRAL_LIGHT, type RoomLight, type SignText } from './room/grid';
 import type { RoomControl } from './room/main';
 import { setupRadio } from './room/radio';
 import { startGridSign } from './room/sign';
@@ -19,7 +19,12 @@ const root = document.documentElement;
 let control: OfficeControl | RoomControl | DeskControl | null = null;
 let light: RoomLight = NEUTRAL_LIGHT;
 let sign: SignText | null = null;
+/** The grid's wind and solar shares, for the desk's window: undefined until asked, null if it could not be read. */
+let mix: GridMix | null | undefined;
 let mark: Range | null = null;
+
+/** The control, if it is the desk's. */
+const deskOf = (c: typeof control): DeskControl | null => (c && 'walkIn' in c ? (c as DeskControl) : null);
 
 function say(text: string): void {
   const status = document.getElementById('room-status');
@@ -61,6 +66,10 @@ startGridSign({
     sign = text;
     if (control && 'setSign' in control) control.setSign(text);
   },
+  mix(next) {
+    mix = next;
+    deskOf(control)?.setMix(next);
+  },
 });
 setupRadio();
 
@@ -82,6 +91,7 @@ async function startRoomMode(): Promise<void> {
     room.setLight(light);
     if (sign) room.setSign(sign);
     control = room;
+    if (mix !== undefined) deskOf(control)?.setMix(mix);
     root.dataset.stage = 'live';
     performance.mark('scene-ready');
     const piece = /^#folder-(.+)$/.exec(location.hash)?.[1] ?? '';
@@ -102,4 +112,4 @@ else {
   control = startOffice();
   isReady();
 }
-startEntrance({ ready, desk: () => (control && 'walkIn' in control ? control : null) });
+startEntrance({ ready, desk: () => deskOf(control) });

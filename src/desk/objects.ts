@@ -29,6 +29,7 @@ import { DRAWERS } from '../content/drawers';
 import { PIECES, type PieceId, pieceById } from '../content/pieces';
 import type { SignText } from '../room/grid';
 import { canvasTexture, cond, fitFont } from '../scene/style';
+import { type CardLink, type FaceBox, inBox, Printed, paintCard, paintCredit, paintNameplate, printedMaterial } from './lettering';
 import { BIRCH, BLUE, CORAL, CREAM, INK, PAPER, SUN } from './palette';
 
 /** The desk's top, where the model's base and everything else stand. */
@@ -616,7 +617,7 @@ export function stickyTexture(text: SignText): CanvasTexture {
     }
     fitFont(c, text.detail.replace('Great Britain, ', 'GB, '), hand(500), 52, 680);
     c.fillText(text.detail.replace('Great Britain, ', 'GB, '), 44, 600);
-    // The credit is a slip stuck under the note: real text on the page (#desk-credit), not paint.
+    // The credit is a slip stuck under the note (creditSlip), printed from the page's #desk-credit.
   });
 }
 
@@ -626,6 +627,19 @@ export function sticky(text: SignText): Mesh {
   mesh.receiveShadow = true;
   mesh.userData.target = 'sign';
   return mesh;
+}
+
+/** The grid's credit, written on a slip stuck under the sticky note's lower edge, a little askew. */
+export function creditSlip(note: Mesh, credit: string): Mesh {
+  const print = new Printed(900, 300);
+  print.draw(paintCredit(credit, '#ffc94a'));
+  const slip = new Mesh(new PlaneGeometry(4.0, 1.333), printedMaterial(print.texture));
+  slip.position.set(-0.7, -2.45, 0.025);
+  slip.rotation.z = -0.05;
+  slip.receiveShadow = true;
+  slip.userData.lettering = 'credit';
+  note.add(slip);
+  return slip;
 }
 
 /** A tiny receipt printer for the model's Reception counter: answers print out of it. */
@@ -641,12 +655,30 @@ export function printer(): Group {
 }
 
 /**
- * Harry's nameplate: a wedge on the desk, its slanted face turned up to the door camera. The name is real
- * text laid over the face (#masthead's plate), so the face is a plain cream plate in an ink frame.
+ * Harry's nameplate: a wedge on the desk, its slanted face turned up to the door camera, the name and role
+ * printed on it (desk/lettering.ts) from the page's own header.
  */
 export const PLATE = { width: 9.6, depth: 2.6, height: 1.9, inset: 0.22 } as const;
 export class Nameplate {
   readonly group = new Group();
+  readonly faceMesh: Mesh;
+  // The face's aspect, about 3.55 to 1.
+  readonly #print = new Printed(1536, 432);
+  #words = { name: '', role: '' };
+  /** Print the name and the role; `focused` rings the plate. */
+  print(name: string, role: string, focused = false): void {
+    this.#words = { name, role };
+    this.#print.draw(paintNameplate(name, role, focused));
+  }
+  #ringed = false;
+  ring(focused: boolean): void {
+    if (focused === this.#ringed) return;
+    this.#ringed = focused;
+    this.print(this.#words.name, this.#words.role, focused);
+  }
+  ringed(): boolean {
+    return this.#ringed;
+  }
   constructor() {
     const { width: w, depth: d, height: h } = PLATE;
     // The wedge's side profile, in (−z, y) because turning the extrusion maps the shape's x to −z: flat on
@@ -656,10 +688,12 @@ export class Nameplate {
     // Extruded along z; turned so the length runs along x.
     body.rotation.y = Math.PI / 2;
     body.position.set(-w / 2, 0, 0);
-    const face = new Mesh(new PlaneGeometry(w - 2 * PLATE.inset, this.#slope() - 2 * PLATE.inset), flat(CREAM));
+    const face = new Mesh(new PlaneGeometry(w - 2 * PLATE.inset, this.#slope() - 2 * PLATE.inset), printedMaterial(this.#print.texture));
     face.position.copy(this.#faceCentre(0.012));
     face.rotation.x = -Math.atan2(d - 0.25, h);
     face.userData.noEdge = true;
+    face.userData.lettering = 'nameplate';
+    this.faceMesh = face;
     this.group.add(body, face);
     this.group.position.y = DESK_Y;
     shadows(this.group);
@@ -704,16 +738,60 @@ export class Nameplate {
   }
 }
 
-/** Harry's card, lying on the desk by the nameplate: the intro and his links are real text laid over it. */
+/** Harry's card, lying on the desk by the nameplate: his intro and his links printed on it. */
 export const BCARD = { width: 12.8, depth: 7.0, inset: 0.55 } as const;
 export class BusinessCard {
   readonly group = new Group();
+  readonly faceMesh: Mesh;
+  /** Where each link is printed on the face, from its top left (0 to 1). */
+  readonly links: FaceBox[] = [];
+  // The text area's aspect, about 2.03 to 1.
+  readonly #print = new Printed(1300, 640);
+  #words: { intro: string; links: readonly CardLink[] } = { intro: '', links: [] };
+  #focus: number | null = null;
+  #hover: number | null = null;
+  print(intro: string, links: readonly CardLink[]): void {
+    this.#words = { intro, links };
+    this.#redraw();
+  }
+  focused(): number | null {
+    return this.#focus;
+  }
+  /** Ring a link (the keyboard is on it), or none. */
+  focus(i: number | null): void {
+    if (i === this.#focus) return;
+    this.#focus = i;
+    this.#redraw();
+  }
+  /** Underline a link more heavily (the pointer is on it), or none. */
+  hover(i: number | null): void {
+    if (i === this.#hover) return;
+    this.#hover = i;
+    this.#redraw();
+  }
+  /** Which link is printed at this point of the face (its texture coordinates), if any. */
+  linkAt(u: number, v: number): number | null {
+    const i = this.links.findIndex((b) => inBox(b, u, 1 - v));
+    return i === -1 ? null : i;
+  }
+  #redraw(): void {
+    this.#print.draw(paintCard(this.#words.intro, this.#words.links, PAPER, this.#focus, this.#hover, this.links));
+  }
   constructor() {
     const card = new Mesh(new BoxGeometry(BCARD.width, 0.08, BCARD.depth), flat(PAPER));
     card.position.y = 0.04;
     const rule = new Mesh(new BoxGeometry(BCARD.width, 0.082, 0.18), flat(CORAL));
     rule.position.set(0, 0.041, -BCARD.depth / 2 + 0.09);
-    this.group.add(card, rule);
+    // The printed face over the text area (the same corners as face()).
+    const x = BCARD.width / 2 - BCARD.inset;
+    const z = BCARD.depth / 2 - BCARD.inset;
+    const face = new Mesh(new PlaneGeometry(2 * x, 2 * z - 0.15), printedMaterial(this.#print.texture));
+    face.rotation.x = -Math.PI / 2;
+    face.position.set(0, 0.0815, 0.075);
+    face.userData.noEdge = true;
+    face.userData.lettering = 'business-card';
+    this.faceMesh = face;
+    this.group.add(card, rule, face);
     this.group.position.y = DESK_Y;
     shadows(this.group);
   }
@@ -767,24 +845,22 @@ export class Microphone {
     this.#lamp = new Mesh(new BoxGeometry(1.5, 0.42, 0.55), new MeshLambertMaterial({ color: '#4a2a2a', emissive: new Color('#000000') }));
     this.#lamp.position.set(0, 0.62, 1.55);
     // The printed tag, hung on the arm.
-    const tag = new Mesh(
-      new PlaneGeometry(3.0, 1.1),
-      new MeshLambertMaterial({
-        map: canvasTexture(600, 220, (c) => {
-          c.fillStyle = PAPER;
-          c.fillRect(0, 0, 600, 220);
-          c.strokeStyle = INK;
-          c.lineWidth = 10;
-          c.strokeRect(5, 5, 590, 210);
-          c.fillStyle = INK;
-          c.textAlign = 'center';
-          c.textBaseline = 'middle';
-          fitFont(c, 'Speak to me', cond(700), 110, 540);
-          c.fillText('Speak to me', 300, 112);
-        }),
-        side: DoubleSide,
+    const printed = printedMaterial(
+      canvasTexture(600, 220, (c) => {
+        c.fillStyle = PAPER;
+        c.fillRect(0, 0, 600, 220);
+        c.strokeStyle = INK;
+        c.lineWidth = 10;
+        c.strokeRect(5, 5, 590, 210);
+        c.fillStyle = INK;
+        c.textAlign = 'center';
+        c.textBaseline = 'middle';
+        fitFont(c, 'Speak to me', cond(700), 110, 540);
+        c.fillText('Speak to me', 300, 112);
       }),
     );
+    printed.side = DoubleSide;
+    const tag = new Mesh(new PlaneGeometry(3.0, 1.1), printed);
     tag.position.set(1.9, 3.2, 0.3);
     tag.rotation.set(-0.35, -0.25, 0.08);
     const lampText = new Mesh(

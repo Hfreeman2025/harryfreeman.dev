@@ -12,8 +12,11 @@ DATA
     https://creativecommons.org/licenses/by/4.0/
     Used by the grid sign and the room's light (the current national
     half-hour, /intensity, one request when the page opens and again after
-    each half-hour), and by the radio while it plays (/intensity and
-    /generation). Shown as published; nothing is cached as current.
+    each half-hour), by the office window (the current half-hour's
+    /generation mix, read with it: the turbines' pace from the wind share,
+    the solar panels' glint from the solar share), and by the radio while
+    it plays (/intensity and /generation). Shown as published; nothing is
+    cached as current.
 
 AUDIO
 

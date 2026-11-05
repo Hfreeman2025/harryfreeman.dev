@@ -24,6 +24,7 @@ interface Desk {
   cutIn(): void;
   hitsDoor(x: number, y: number): boolean;
   knock(): void;
+  hoverDoor(on: boolean): void;
   doorRect(): Rect | null;
 }
 
@@ -61,7 +62,7 @@ export function startEntrance({ ready, desk }: EntranceOptions): void {
   const mountFlat = (): void => {
     if (overDesk() || typeof WebGLRenderingContext !== 'function') return;
     void import('./door')
-      .then(({ mountDoor }) => mountDoor({ stage, plate, lite: true, reduced, photo }))
+      .then(({ mountDoor }) => mountDoor({ stage, plate, lite: true, reduced }))
       .then((scene) => {
         door = scene;
         entrance.dataset.door = 'live';
@@ -79,7 +80,8 @@ export function startEntrance({ ready, desk }: EntranceOptions): void {
   const showSound = (on: boolean) => {
     if (!sound) return;
     sound.setAttribute('aria-pressed', String(on));
-    sound.textContent = on ? 'Sound on' : 'Sound off';
+    const state = sound.querySelector('.entrance__sound-state');
+    if (state) state.textContent = on ? 'Sound: on' : 'Sound: off';
   };
   if (sound) {
     sound.hidden = false;
@@ -99,6 +101,40 @@ export function startEntrance({ ready, desk }: EntranceOptions): void {
     return { x: r.left + r.width * 0.39, y: r.top + r.height * 0.09, width: r.width * 0.22, height: r.height * 0.8 };
   };
   const jolt = () => (overDesk() ? desk()?.knock() : door?.knock());
+
+  /** Knock and Skip beside the door, at the height of its handle, where there is room; at the foot if not. */
+  const ways = entrance.querySelector<HTMLElement>('.entrance__ways');
+  const placeWays = () => {
+    if (!ways) return;
+    const d = doorRect();
+    const r = entrance.getBoundingClientRect();
+    const left = d.x + d.width - r.left + 34;
+    if (left + ways.offsetWidth > r.width - 16) {
+      ways.style.transform = '';
+      return;
+    }
+    ways.style.transform = `translate(${left.toFixed(0)}px, ${(d.y - r.top + d.height * 0.5 - ways.offsetHeight / 2).toFixed(0)}px)`;
+  };
+  /** Walking in, Skip waits in the corner, out of the way of the room (a transform: nothing moves on the page). */
+  const cornerWays = () => {
+    if (!ways) return;
+    const r = entrance.getBoundingClientRect();
+    ways.style.transform = `translate(${(r.width - ways.offsetWidth - 24).toFixed(0)}px, ${(r.height - ways.offsetHeight - 24).toFixed(0)}px)`;
+  };
+  new ResizeObserver(() => (entrance.dataset.walking === undefined ? placeWays() : cornerWays())).observe(entrance);
+  void ready.then(() => requestAnimationFrame(placeWays));
+
+  // Over the door, it brightens a touch and the pointer becomes a knuckle.
+  entrance.addEventListener('pointermove', (event) => {
+    const over = overDesk()
+      ? event.target === entrance && Boolean(desk()?.hitsDoor(event.clientX, event.clientY))
+      : Boolean(door?.hitsDoor(event.clientX, event.clientY));
+    if (over === (entrance.dataset.hover !== undefined)) return;
+    if (over) entrance.dataset.hover = '';
+    else delete entrance.dataset.hover;
+    if (overDesk()) desk()?.hoverDoor(over);
+    else door?.brighten(over);
+  });
 
   /** "knock", popping beside the door: the first on the hinge side, the second on the handle side. */
   const pop = (i: number) => {
@@ -197,6 +233,7 @@ export function startEntrance({ ready, desk }: EntranceOptions): void {
         if (!still()) return;
       }
       entrance.dataset.walking = '';
+      cornerWays();
       const d = desk();
       if (d && overDesk()) {
         if (reduced) d.cutIn();
@@ -207,9 +244,12 @@ export function startEntrance({ ready, desk }: EntranceOptions): void {
       }
     } else {
       entrance.dataset.walking = '';
+      cornerWays();
       hush();
       await door?.walk();
     }
+    // Skip or Esc mid-walk has already cut in and arrived.
+    if (!still()) return;
     arrive();
   };
   const skipNow = (): void => {

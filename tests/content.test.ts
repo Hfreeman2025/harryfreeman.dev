@@ -8,6 +8,7 @@ import { esc, openLabel, renderList, renderRoomLabels } from '../src/content/ren
 import { parseCast } from '../src/terminal-cast';
 import placeholder from '../src/timeline/placeholder.json' with { type: 'json' };
 import { parseTimeline } from '../src/timeline/schema';
+import { denylisted, haveDenylist } from './denylist';
 
 const config = parseConfig(JSON.parse(readFileSync(new URL('../site.config.json', import.meta.url), 'utf8')));
 
@@ -21,17 +22,16 @@ describe('content', () => {
     }
   });
 
-  it('names no employer and no client anywhere a visitor reads', () => {
+  it.skipIf(!haveDenylist)('names no employer and no client anywhere a visitor reads (the denylist outside the repository)', () => {
     const text = [
       readFileSync(new URL('../src/content/cv.md', import.meta.url), 'utf8'),
       JSON.stringify(PIECES),
       readFileSync(new URL('../index.html', import.meta.url), 'utf8'),
     ].join('\n');
-    expect(text).not.toMatch(/Simply\s*(Sustainable|Carbon)/i);
-    expect(text).not.toMatch(/redacted-term|redacted-term|redacted-term|redacted-term/);
+    expect(denylisted(text), 'denylist lines found').toEqual([]);
   });
 
-  it('carries the CV’s once-unconfirmed claims, made generic, with nothing that identifies a client', () => {
+  it('carries the CV’s once-unconfirmed claims, made generic', () => {
     const cv = readFileSync(new URL('../src/content/cv.md', import.meta.url), 'utf8');
     for (const generic of [
       'a large listed company',
@@ -46,7 +46,6 @@ describe('content', () => {
     ]) {
       expect(cv).toContain(generic);
     }
-    for (const identifying of ['redacted-term', 'redacted-term', 'Simply', 'redacted-term']) expect(cv).not.toContain(identifying);
   });
 
   it('validates the config and rejects a dead URL', () => {
