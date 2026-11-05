@@ -44,12 +44,18 @@ CODE, VENDORED AS BUILT
     from the receipts project's exports/site-stamps at the commit recorded in
     public/vendor/stamps/SOURCE.json, with its docs/site-stamps.md.
 
-  ask-the-record (served from its own folder at /vendor/ask-the-record/)
-    Harry Freeman, MIT licence.
-  transformers.js, Apache License 2.0, © Hugging Face.
-  ONNX Runtime Web, MIT licence, © Microsoft Corporation.
+  ask-the-record (Reception, at /vendor/ask-the-record/)
+    Harry Freeman, MIT licence (public/vendor/ask-the-record/LICENSE). Its two
+    built files are vendored as built at the commit recorded with their
+    hashes in public/vendor/ask-the-record/SOURCE.json.
+  transformers.js, Apache License 2.0, © Hugging Face
+    (/vendor/transformers/LICENSE on the public site).
+  ONNX Runtime Web, MIT licence, © Microsoft Corporation
+    (/vendor/ort/LICENSE on the public site).
   all-MiniLM-L6-v2 (the meaning model, ONNX export by Xenova), Apache
-    License 2.0, from sentence-transformers.
+    License 2.0, from sentence-transformers. On the public site it is
+    downloaded from Hugging Face, where it is published, the first time a
+    visitor asks a question of their own; it is not part of this site.
 
 CODE, BUNDLED
 

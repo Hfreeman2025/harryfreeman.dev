@@ -4,6 +4,7 @@
 
 import * as v from 'valibot';
 import type { PieceId } from './content/pieces';
+import { HOSTED } from './hosting/mode';
 import { renderStamp } from './room/stamp';
 
 const Report = v.record(v.string(), v.looseObject({ recordedAt: v.optional(v.string()), url: v.optional(v.string()) }));
@@ -29,7 +30,8 @@ const dateFormat = new Intl.DateTimeFormat('en-GB', {
 export function recordedLine(piece: PieceId): string {
   const at = report[piece]?.recordedAt;
   const when = at && Number.isFinite(Date.parse(at)) ? ` on ${dateFormat.format(Date.parse(at))}` : '';
-  return `Recorded${when} from the real tool, in a silent headless browser: 8 seconds, looped. Open it to use it live.`;
+  // Hosted, the tools cannot be opened live from here (src/hosting/open.ts).
+  return `Recorded${when} from the real tool, in a silent headless browser: 8 seconds, looped.${HOSTED ? '' : ' Open it to use it live.'}`;
 }
 
 export function loopSource(video: HTMLVideoElement, piece: PieceId): string {

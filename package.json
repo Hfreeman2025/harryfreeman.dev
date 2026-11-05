@@ -12,6 +12,7 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1 --port 4400 --strictPort",
     "build": "tsc --noEmit && vite build",
+    "build:hosted": "npm run record:hosted && tsc --noEmit && VITE_HOSTED=1 vite build",
     "preview": "vite preview --host 127.0.0.1 --port 4400 --strictPort",
     "typecheck": "tsc --noEmit",
     "lint": "biome check .",
@@ -20,13 +21,18 @@
     "bake": "tsx scripts/bake-lightmap.ts",
     "record:loops": "node scripts/record-loops.mjs",
     "record:ask": "tsx scripts/build-record.ts",
+    "record:hosted": "VITE_HOSTED=1 tsx scripts/build-record.ts",
     "shots": "node scripts/e2e.mjs",
     "vendor": "node scripts/vendor.mjs",
+    "vendor:reception": "node scripts/vendor-reception.mjs",
     "perf": "node scripts/perf.mjs",
     "licences": "node scripts/licences.mjs",
     "gate": "npm run typecheck && npm run lint && npm test && npm run build && npm run licences",
     "stills": "node scripts/stills.mjs",
-    "placeholder": "node scripts/make-placeholder.mjs"
+    "placeholder": "node scripts/make-placeholder.mjs",
+    "check:hosted": "node scripts/hosted-checks.mjs",
+    "check:predeploy": "tsx scripts/predeploy-check.mjs",
+    "deploy": "tsx scripts/deploy.mjs"
   },
   "dependencies": {
     "@xterm/xterm": "^6.0.0",

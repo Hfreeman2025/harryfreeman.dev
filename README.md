@@ -110,8 +110,7 @@ live reload. The server binds to loopback only.
   folder first. The two terminal tools, gridtop and dreaming, open their recorded sessions.
 - **Reception** loads ask-the-record from its own folder, `~/Personal/oss/ask-the-record`: its built
   element, its transformers.js runtime, ONNX Runtime's WebAssembly and the all-MiniLM-L6-v2 model in
-  its cache. `STUDIO_COPY_VENDOR=1 npm run build` copies those files into `dist/` for hosting later
-  (about 50 MB).
+  its cache. The public site carries its own copies instead (`npm run build:hosted`; Hosting).
 - **The radio** is Listen to the Grid's own embeddable build, vendored as built into
   `public/vendor/radio/` by `npm run vendor radio`, which copies it from
   `~/Personal/lab/listen-to-the-grid/dist-radio` only from a clean commit and writes `SOURCE.json`
@@ -315,10 +314,105 @@ display would pace. WebKit and Firefox do not report layout shift; it is measure
   them; the directory's plain links follow Safari's setting (Option-Tab), as on any site.
 - The timeline's times are inferred from file times; three hand-ins come from pane DONE lines.
 - Meaning search is heavy (about 50 MB on first use, mostly ONNX Runtime's WebAssembly).
-- Not hosted, and no Content-Security-Policy yet. If one is added it needs `connect-src
-  https://api.carbonintensity.org.uk`, `worker-src 'self'` (the radio's loudness worker) and
-  `'wasm-unsafe-eval'` (Reception).
+- Not deployed yet. The hosted build, its headers, the gate and the deploy script are ready (Hosting).
 - Not tested with a real screen reader, or in real Safari: Harry will try it.
+
+## Hosting
+
+The public site is the hosted build of this folder on Cloudflare Pages, on Harry's personal Cloudflare
+account, project `harryfreeman-studio`, served at **https://harryfreeman.dev**. Where it lives, and the
+one indexing switch, are in [hosting.config.json](hosting.config.json). The code for it is in
+`src/hosting/`; the site's own files change only at a few guarded call sites.
+
+**What is public.** Everything in `dist/` after `npm run build:hosted`: the pages, the loops and stills,
+the casts, the vendored radio and stamps, Reception's record (redacted, below) and its runtime, the
+fonts, `NOTICES.txt`. Nothing else: no source, no source maps, nothing from Harry's machine.
+
+**What hosted mode changes** (`VITE_HOSTED=1`, set by `npm run build:hosted`):
+
+- **The tools on local ports.** Eight of the ten tools run on Harry's machine (`site.config.json`). Their
+  folders say "Runs on Harry’s machine; this is a recording of the real tool." where Open was, with no
+  link, and the recorded loop keeps playing on the screen (`src/hosting/open.ts`). gridtop and dreaming
+  keep Open: their recorded sessions are on this site. The colophon, the footer and the cabinet's line
+  say the same (`src/hosting/html.ts`), and each of those changes must apply exactly or the build fails.
+- **Reception.** The element is vendored in `public/vendor/ask-the-record/` with its MIT licence and
+  `SOURCE.json` (commit `138597c`), by `npm run vendor:reception`: it clones that commit, installs it
+  from its lockfile, builds it, and refuses unless the result is byte for byte ask-the-record's own
+  `dist/`. transformers.js 4.3.2 and ONNX Runtime Web's WebAssembly are copied into the build from
+  ask-the-record's install only if they match their pins (version, npm integrity, SHA-256) in
+  `src/hosting/reception.json`, with their licences. The model, all-MiniLM-L6-v2, comes from Hugging
+  Face, where it is published, as ask-the-record does off loopback (no `model-host`). ONNX Runtime's
+  WebGPU-capable build is 25.6 MiB, over Pages' 25 MiB a file, so it is served in two parts that
+  `/vendor/transformers/runtime-hosted.js` joins and runs only if the result has the pinned length and
+  SHA-256; it runs whichever build transformers.js itself picks for the browser.
+- **The record.** `npm run record:hosted` rebuilds Reception's record from exactly the sources the
+  committed one was built from (each found by its SHA-256 in `public/record/sources.json`: the file, or
+  its version in its repository's history), with local addresses and `~/Personal` paths replaced by
+  "(local setup)" (`src/hosting/redact.ts`). Only those spans change, so every fact keeps its line and
+  every citation still lands on it; the build compares the two records (same sources, sections, lines
+  and fact positions; a changed fact must carry the marker) before it uses the hosted one. Today: 17
+  spans.
+- **`loops/report.json`** keeps when each loop was recorded, not the local address it was recorded
+  from. Pages, canonical links, `og:url` and the social card use `https://harryfreeman.dev`. A missing
+  path gets a 404 page (Pages would otherwise answer with the studio).
+
+**Headers** ([public/_headers](public/_headers), filled by the build): a Content-Security-Policy that
+allows exactly what was measured (below), with the inline script's hash filled from the built pages;
+`Referrer-Policy: strict-origin-when-cross-origin`; `X-Content-Type-Options: nosniff`; a
+`Permissions-Policy` denying camera, microphone and geolocation and allowing the accelerometer and
+gyroscope for this site only; `frame-ancestors 'none'`; HSTS (the `.dev` domain is preloaded anyway); no
+`Access-Control-Allow-Origin` (Pages adds `*` by default); and immutable caching for Vite's hashed
+`/assets/`.
+
+**Indexing.** `SITE_INDEXABLE` in `hosting.config.json` is the one switch. While it is `false`, every
+response carries `X-Robots-Tag: noindex, nofollow` and `robots.txt` disallows everything; set it to
+`true` at launch, commit and redeploy, and both go. (A crawler that obeys `robots.txt` never fetches a
+page to see its noindex, so after launch the two must change together, which the switch ensures.)
+
+**The gate** (`npm run check:predeploy`, `scripts/predeploy-check.mjs`, rules in `src/hosting/gate.ts`,
+unit-tested) reads every file in `dist/` and fails closed on: a name from the denylist, which lives
+outside every repository (`~/Personal/.site-gate/denylist.txt`, or `SITE_GATE_DENYLIST`; one name per
+line, `#` comments, case-insensitive whole words; the gate stops if it is missing, empty or inside a
+repository, and reports only how many names it checked and which files hit); home paths, localhost and
+127.0.0.1, plain `http://` URLs, source maps, `.env` files and key-shaped strings; any email but the
+personal one in `site.config.json`; a file over 25 MiB or more than 20,000 files; `_headers` missing,
+unfilled, out of step with `SITE_INDEXABLE` or not allowing every inline script, and `robots.txt` out of
+step; and a build that is not the hosted one. Binary files are read as their printable text (runs of six
+or more characters, as `strings` reads metadata). Each reviewed exception is an exact string in an
+exact file (`EXCEPTIONS` in `gate.ts`): JSON Schema ids and an IPv6 template literal in the radio's
+bundle; the capture path inside dreaming's signed stamps (redacting it would break the signatures);
+Emscripten's virtual `/home/web_user` in ONNX Runtime; dreaming's synthetic `/home/sam` in its cast;
+licence texts' own `http://` addresses. Then it runs the typecheck, the lint and the unit tests.
+
+**Checked in a browser** (`npm run check:hosted`, `scripts/hosted-checks.mjs`). The hosted build is served
+by wrangler's own Pages emulation with its `_headers`, behind a TLS front with a throwaway certificate
+for harryfreeman.dev, and each browser reaches it through a local proxy: the page runs at
+`https://harryfreeman.dev`, in a secure context, off loopback. The proxy lets only Hugging Face out to
+the network; the Carbon Intensity API is mocked; anything else is refused. Every station is driven: the
+door and its knock (audio device-free, as in every check), the desk, the dive, the notebook, the grid
+note, the mic, a card with its loop and its recording line, its stamp checked, Reception answering a
+question of its own by meaning search, the radio playing, the flat office on a phone, the CV, the stamps
+page, both terminal sessions and a missing page. `measure` runs the policy report-only and records every
+origin and kind of request; the default runs it enforced and fails on any violation.
+
+**Deploy** (`npm run deploy`, `scripts/deploy.mjs`): refuses uncommitted changes; builds the hosted site
+and runs the gate; asks wrangler who it is logged in as and refuses unless the email is exactly the
+personal one in `site.config.json` with one account (it prints the account); creates the Pages project,
+production branch `main`, if it is missing; deploys `dist/` to production; prints the URLs. wrangler
+4.158.0 is pinned exactly in `tools/deploy/` with its own lockfile, apart from the site's dependencies,
+because it brings LGPL-3.0 and CC0 packages that `npm run licences` does not allow; none of it reaches
+`dist/`. Its telemetry is off. `npm run deploy -- --check` does everything but create and deploy.
+
+**Attach the domain** (once): Cloudflare dashboard → Workers & Pages → `harryfreeman-studio` → Custom
+domains → Set up a custom domain → `harryfreeman.dev`. The domain is in the same account, so Pages adds
+the DNS record itself. Then check it: `curl -sI https://harryfreeman.dev/` shows the headers above, and
+`curl -sI -H 'Range: bytes=0-99' https://harryfreeman.dev/loops/gridtop.webm` answers 206 (Safari needs
+ranges for video; wrangler's local emulation does not do them, so only the real site can show this).
+
+**Take it down**: remove the custom domain (same page → Custom domains → Remove), then delete the
+project (Settings → Delete project), or `npx --prefix tools/deploy wrangler pages project delete
+harryfreeman-studio`. A single bad deployment can be rolled back instead: Deployments → an earlier one →
+Rollback.
 
 ## Credits and licences
 

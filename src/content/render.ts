@@ -1,6 +1,7 @@
 // Server-side HTML for the room's labels and the full list of folders. Rendered into index.html at
 // build time, so every tool is a real link before any script runs.
 
+import { hostedOpenLine } from '../hosting/open';
 import type { Timeline } from '../timeline/schema';
 import { pieceRecord } from '../timeline/schema';
 import type { SiteConfig } from './config';
@@ -82,8 +83,10 @@ function crossLink(piece: Piece): string {
   return `<p class="work__elsewhere"><a href="#folder-${piece.id}" data-piece="${piece.id}">Pull its folder from the cabinet</a></p>`;
 }
 
-function renderPiece(piece: Piece, config: SiteConfig, timeline: Timeline): string {
+function renderPiece(piece: Piece, config: SiteConfig, timeline: Timeline, hosted: boolean): string {
   const url = config.pieces[piece.id];
+  // Hosted: a tool on a local port has no link, and says it is a recording (src/hosting/open.ts).
+  const recording = hosted ? hostedOpenLine(url) : null;
   const record = recordLine(timeline, piece);
   const placeholder = timeline.placeholder
     ? '<p class="work__placeholder">Builder, reviewer and rounds come from the placeholder timeline, not the real record.</p>'
@@ -93,7 +96,7 @@ function renderPiece(piece: Piece, config: SiteConfig, timeline: Timeline): stri
   return `<li class="work" id="work-${piece.id}" data-piece="${piece.id}">
   <figure class="work__still"><img src="/loops/${piece.id}.webp" width="640" height="400" alt="${esc(piece.title)}, a frame from its loop" loading="lazy" decoding="async"></figure>
   <div class="work__text">
-    <h3 class="work__title"><a href="${esc(url)}">${esc(piece.title)}</a></h3>
+    <h3 class="work__title">${recording ? esc(piece.title) : `<a href="${esc(url)}">${esc(piece.title)}</a>`}</h3>
     <p class="work__line">${esc(piece.line)}</p>
     <p class="work__technique">${esc(piece.technique)}${citation}</p>
     <dl class="work__record">
@@ -107,14 +110,14 @@ function renderPiece(piece: Piece, config: SiteConfig, timeline: Timeline): stri
       <div><h4>Checks, as its README reports them</h4><ul class="work__checks">${piece.checks.map((c) => `<li>${esc(c)}</li>`).join('')}</ul></div>
     </div>
     ${run}
-    <p class="work__open"><a class="open" href="${esc(url)}">Open ${esc(piece.title)}</a><span class="work__where">${esc(openLabel(piece, url))}</span></p>
+    ${recording ?? `<p class="work__open"><a class="open" href="${esc(url)}">Open ${esc(piece.title)}</a><span class="work__where">${esc(openLabel(piece, url))}</span></p>`}
     ${crossLink(piece)}
   </div>
 </li>`;
 }
 
-export function renderList(config: SiteConfig, timeline: Timeline): string {
-  return PIECES.map((p) => renderPiece(p, config, timeline)).join('\n');
+export function renderList(config: SiteConfig, timeline: Timeline, hosted = false): string {
+  return PIECES.map((p) => renderPiece(p, config, timeline, hosted)).join('\n');
 }
 
 /** The timeline goes into the page as inert JSON for the replay; the page re-validates it. */

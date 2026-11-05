@@ -1,0 +1,7 @@
+{
+  "$comment": "The public site (README, Hosting). SITE_INDEXABLE is the one indexing switch: false sends X-Robots-Tag noindex, nofollow on every response and a robots.txt that disallows everything; true drops both. Flip it at launch, commit, and redeploy.",
+  "origin": "https://harryfreeman.dev",
+  "project": "harryfreeman-studio",
+  "branch": "main",
+  "SITE_INDEXABLE": false
+}
