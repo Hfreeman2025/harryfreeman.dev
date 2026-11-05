@@ -9,6 +9,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium, firefox, webkit } from 'playwright';
+import { deskChecks } from './desk-checks.mjs';
 import { officeChecks } from './office-checks.mjs';
 import { roomChecks } from './room-checks.mjs';
 import { silenceLiveAudio } from './silent.mjs';
@@ -17,7 +18,7 @@ import { stampChecks } from './stamp-checks.mjs';
 const site = join(dirname(fileURLToPath(import.meta.url)), '..');
 const BASE = process.env.STUDIO_URL ?? 'http://127.0.0.1:4400';
 const config = JSON.parse(readFileSync(join(site, 'site.config.json'), 'utf8'));
-const shots = join(site, 'shots', process.env.SHOTS_DIR ?? 'office-4');
+const shots = join(site, 'shots', process.env.SHOTS_DIR ?? 'desk');
 mkdirSync(shots, { recursive: true });
 
 const wanted = process.argv.slice(2).length ? process.argv.slice(2) : ['chromium', 'webkit', 'firefox'];
@@ -146,6 +147,7 @@ async function run(name) {
   const shot = (page, state, size = 'desktop') => page.screenshot({ path: join(shots, `${name}-${size}-${state}.png`) });
   const context = { check, expect, BASE, config, shots, shot, name };
 
+  await deskChecks(context);
   await roomChecks(context);
   await officeChecks(context);
   await stampChecks(context);

@@ -70,3 +70,7 @@ TYPE
 
   IBM Plex Sans, Sans Condensed and Mono, © IBM Corp., SIL Open Font
   Licence 1.1 (public/fonts/plex/OFL.txt), from @fontsource 5.3.0.
+
+  Caveat, a handwriting face, © The Caveat Project Authors, SIL Open Font Licence 1.1
+  (public/fonts/caveat/OFL.txt), from @fontsource 5. Used for the notebook
+  and the sticky note on the desk.

@@ -644,6 +644,7 @@ html[data-photo] .lobby {
 }
 html[data-photo] .board,
 html[data-photo] .room__labels,
+html[data-photo] .desk__labels,
 html[data-photo] .room__poster,
 html[data-photo] .room__caption,
 html[data-photo] .grid-sign,
@@ -923,4 +924,251 @@ html[data-mode="room"] .readme {
 html[data-style] .room__labels > .tag,
 html[data-style] .room__caption {
   display: none;
+}
+
+/* ---------- The desk (branch design/desk-miniature) ---------- */
+html[data-scene="desk"] .room__labels,
+html[data-scene="room"] .desk__labels,
+html[data-scene="room"] .desk__notebook,
+html[data-scene="room"] .desk__printout,
+html:not([data-mode="room"]) .desk__labels,
+html:not([data-mode="room"]) .desk__notebook,
+html:not([data-mode="room"]) .desk__printout {
+  display: none;
+}
+html[data-scene="desk"] .hall {
+  background: #f6f1e7;
+}
+.desk__labels {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.desk__labels > * {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 2;
+  pointer-events: auto;
+  will-change: transform;
+}
+/* Tags in the sim's own style: ink pills with cream type. */
+.dtag {
+  display: block;
+  margin: 0;
+  padding: 3px 9px 4px;
+  background: #1f2433;
+  color: #f6f1e7;
+  border: 0;
+  border-radius: 999px;
+  font: 600 13px / 1.2 var(--cond);
+  text-align: left;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: 0 2px 0 rgb(31 36 51 / 0.25);
+}
+.dtag--place {
+  border-radius: 8px;
+  padding: 5px 11px 6px;
+}
+.dtag__name {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+}
+.dtag__note {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: #c9cfdd;
+}
+.dtag:hover,
+.dtag[data-hot="true"],
+.dtag:focus-visible {
+  background: #3a6fd8;
+}
+html[data-scene="desk"] :focus-visible {
+  outline: 3px solid #ffc94a;
+  outline-offset: 2px;
+}
+.dtag--name {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px 4px 7px;
+  font-size: 12.5px;
+}
+.dtag__dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #8b93a7;
+  box-shadow: 0 0 0 2px #1f2433;
+}
+.dtag--name[data-status="building"] .dtag__dot {
+  background: #3a86ff;
+}
+.dtag--name[data-status="returned"] .dtag__dot {
+  background: #ef4f4f;
+}
+.dtag--name[data-status="accepted"] .dtag__dot {
+  background: #22b45f;
+}
+.dtag--card {
+  border-radius: 3px;
+  background: #fffdf8;
+  color: #1f2433;
+  box-shadow: 0 0 0 2px #1f2433;
+}
+.dtag--card:hover,
+.dtag--card:focus-visible {
+  background: #ffc94a;
+}
+.dtag--credit {
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgb(255 253 248 / 0.92);
+  color: #1f2433;
+  font: 500 11px / 1.3 var(--mono);
+  cursor: default;
+  box-shadow: none;
+}
+.desk__labels .obj--cover:focus-visible,
+.desk__labels .obj--drawer:focus-visible {
+  outline: 3px solid #ffc94a;
+}
+
+/* Where you are decides what shows. */
+html[data-scene="desk"][data-station="office"] .room__back,
+html[data-scene="desk"][data-station="notebook"] .room__back {
+  display: block;
+}
+html[data-scene="desk"] .room__back {
+  background: #1f2433;
+  color: #f6f1e7;
+  border: 0;
+  border-radius: 8px;
+  font: 700 15px var(--cond);
+  padding: 7px 14px;
+}
+html[data-scene="desk"] .room__caption {
+  display: none;
+}
+html[data-scene="desk"][data-station="office"] .room__caption {
+  display: block;
+  background: linear-gradient(rgb(246 241 231 / 0), rgb(246 241 231 / 0.94) 38%);
+}
+
+/* The notebook's rounds, beside the notebook. */
+.desk__notebook {
+  position: absolute;
+  left: 24px;
+  top: 76px;
+  z-index: 4;
+  width: min(380px, 38%);
+  max-height: calc(100% - 100px);
+  overflow: auto;
+  padding: 16px 18px 18px;
+  background: #fffdf8;
+  color: #1f2433;
+  border-radius: 10px;
+  box-shadow:
+    0 0 0 2px #1f2433,
+    0 14px 30px -18px rgb(31 36 51 / 0.6);
+}
+.desk__notebook-title {
+  font:
+    700 22px / 1.1 "Caveat",
+    var(--cond);
+  font-size: 30px;
+}
+.desk__notebook-about {
+  margin: 4px 0 12px;
+  font-size: 14px;
+  color: #464c51;
+}
+.desk__rounds {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.desk__rounds button {
+  padding: 5px 12px;
+  font: 700 14px var(--cond);
+  color: #1f2433;
+  background: #f6f1e7;
+  border: 2px solid #1f2433;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.desk__rounds button[aria-selected="true"] {
+  background: #ffc94a;
+}
+.desk__asks {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+  font-size: 14px;
+}
+.desk__asks strong {
+  display: block;
+  font: 700 15px var(--cond);
+}
+
+/* The card beside a builder's desk: an index card from the box, with the tool's loop on it. */
+html[data-scene="desk"] .folder-card__open {
+  background: #fffdf8;
+  border: 0;
+  border-radius: 6px;
+  box-shadow:
+    0 0 0 2px #1f2433,
+    0 18px 40px -20px rgb(31 36 51 / 0.65);
+}
+html[data-scene="desk"] .folder-card__nav {
+  background: #fffdf8;
+  border-bottom: 3px solid #ef6f6c;
+}
+html[data-scene="desk"] #card-body,
+html[data-scene="desk"] .readme,
+html[data-scene="desk"] #card-stamp {
+  background: #fffdf8;
+  border: 0;
+}
+html[data-scene="desk"] .folder-card__video {
+  display: block;
+  order: 0;
+  border: 2px solid #1f2433;
+  border-radius: 4px;
+}
+html[data-scene="desk"] .folder-card__leaf--loop {
+  order: 1;
+}
+html[data-scene="desk"] .room__screen {
+  display: none;
+}
+
+/* Reception's printout: an answer, printed by the model's tiny printer. */
+.desk__printout {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 5;
+  width: 300px;
+  max-height: 46%;
+  overflow: auto;
+  padding: 12px 14px;
+  background: #fffdf8;
+  color: #1f2433;
+  border-radius: 2px;
+  box-shadow:
+    0 0 0 2px #1f2433,
+    0 14px 28px -16px rgb(31 36 51 / 0.7);
+  font: 500 13px / 1.45 var(--mono);
+}
+/* A raised card is always in front of the dividers behind it. */
+.desk__labels > .obj--card {
+  z-index: 3;
 }

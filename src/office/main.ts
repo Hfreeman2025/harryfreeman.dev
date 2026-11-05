@@ -9,7 +9,7 @@ import { parseTimeline } from '../timeline/schema';
 import { startPlanReplay } from './plan-replay';
 
 export interface OfficeControl {
-  answer(pieces: readonly PieceId[], mark: () => Range | null): void;
+  answer(pieces: readonly PieceId[], mark: () => Range | null, result?: unknown): void;
   source(piece: PieceId): void;
 }
 

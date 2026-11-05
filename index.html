@@ -24,7 +24,12 @@
       const large = matchMedia('(min-width: 1000px) and (min-height: 620px)').matches;
       const webgl = typeof WebGLRenderingContext === 'function';
       root.dataset.motion = reduce ? 'reduce' : 'full';
-      root.dataset.mode = webgl && !query.has('flat') && (query.has('room') || (large && !reduce)) ? 'room' : 'office';
+      const lessData = matchMedia('(prefers-reduced-data: reduce)').matches;
+      // The desk is the way in on large screens with WebGL, reduced motion included (it cuts instead of
+      // moving); ?style= picks the classic room or a direction. The flat office is for small screens
+      // (until the phone diorama), no WebGL, no script, reduced data, and ?flat.
+      root.dataset.mode = webgl && !query.has('flat') && !lessData && (large || query.has('room')) ? 'room' : 'office';
+      root.dataset.scene = query.has('style') ? 'room' : 'desk';
       if (query.has('photo')) root.dataset.photo = '';
     })();
   </script>
@@ -59,6 +64,20 @@
           <div class="room__labels">
             <!--room:labels-->
           </div>
+          <div class="desk__labels">
+            <!--desk:labels-->
+          </div>
+          <section class="desk__notebook" id="notebook-panel" aria-labelledby="notebook-title" hidden>
+            <h2 class="desk__notebook-title" id="notebook-title">The briefs</h2>
+            <p class="desk__notebook-about">Turn to a round to replay it in the office: the work goes to review and comes back red, or moves on green.</p>
+            <div class="desk__rounds" role="tablist" aria-label="Rounds">
+              <button type="button" role="tab" data-round="BRIEF.md" aria-selected="true">BRIEF.md</button>
+              <button type="button" role="tab" data-round="V2.md" aria-selected="false">V2.md</button>
+              <button type="button" role="tab" data-round="V3.md" aria-selected="false">V3.md</button>
+            </div>
+            <ul class="desk__asks" id="notebook-asks" role="tabpanel" aria-live="polite"></ul>
+          </section>
+          <div class="desk__printout" id="printout" role="status" hidden></div>
           <video class="room__screen" id="room-screen" muted loop playsinline preload="none" aria-hidden="true" hidden></video>
           <button type="button" class="room__back" id="room-back" tabindex="0">Back to the door</button>
           <div class="room__caption"></div>

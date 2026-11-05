@@ -11,11 +11,12 @@ import { fillFolder, loopSource, scrollToMark, trapTab } from '../folder';
 import type { RoomEngine, Station } from '../scene/engine';
 import type { Timeline } from '../timeline/schema';
 import type { RoomLight, SignText } from './grid';
+import { popovers } from './popover';
 import { quadTransform } from './quad';
 
 export interface RoomControl {
   /** A Reception answer quoted these tools' READMEs (empty for the CV or a refusal). */
-  answer(pieces: readonly PieceId[], mark: () => Range | null): void;
+  answer(pieces: readonly PieceId[], mark: () => Range | null, result?: unknown): void;
   /** A quote's source link was followed. */
   source(piece: PieceId): void;
   setLight(light: RoomLight): void;
@@ -264,84 +265,10 @@ export async function startRoom(timeline: Timeline): Promise<RoomControl> {
   });
 
   // ---------- The sign's and the radio's cards ----------
-  // Each opens beside its object on hover or focus, stays open when clicked, and always fits inside
-  // the part of the room that is on screen. Esc closes it and returns to the object.
-  /** One card at a time: opening one closes the others. */
-  const closers = new Map<string, () => void>();
-  for (const [target, cardId] of [
-    ['sign', 'grid-sign'],
-    ['radio', 'radio'],
-  ] as const) {
-    const trigger = label(target);
-    const pop = document.getElementById(cardId);
-    if (!trigger || !pop) continue;
-    let pinned = false;
-    let closing: ReturnType<typeof setTimeout> | undefined;
-    const place = () => {
-      const t = trigger.getBoundingClientRect();
-      const hr = hall.getBoundingClientRect();
-      const view = {
-        top: Math.max(hr.top, 0),
-        bottom: Math.min(hr.bottom, window.innerHeight),
-        left: Math.max(hr.left, 0),
-        right: Math.min(hr.right, window.innerWidth),
-      };
-      const w = pop.offsetWidth;
-      const h = pop.offsetHeight;
-      const margin = 12;
-      let x = t.left + t.width / 2 - w / 2;
-      let y = t.bottom + 10;
-      if (y + h > view.bottom - margin) y = t.top - h - 10;
-      x = Math.min(Math.max(x, view.left + margin), view.right - w - margin);
-      y = Math.min(Math.max(y, view.top + margin), view.bottom - h - margin);
-      pop.style.transform = `translate(${(x - hr.left).toFixed(1)}px, ${(y - hr.top).toFixed(1)}px)`;
-    };
-    const open = () => {
-      clearTimeout(closing);
-      for (const [other, closeOther] of closers) if (other !== target) closeOther();
-      pop.dataset.open = 'true';
-      trigger.setAttribute('aria-expanded', 'true');
-      place();
-    };
-    const close = () => {
-      clearTimeout(closing);
-      pinned = false;
-      delete pop.dataset.open;
-      trigger.setAttribute('aria-expanded', 'false');
-    };
-    closers.set(target, close);
-    const later = () => {
-      clearTimeout(closing);
-      closing = setTimeout(() => {
-        if (!pinned && !pop.contains(document.activeElement) && document.activeElement !== trigger) close();
-      }, 220);
-    };
-    trigger.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape' && pop.dataset.open) close();
-    });
-    trigger.addEventListener('pointerenter', open);
-    trigger.addEventListener('pointerleave', later);
-    pop.addEventListener('pointerenter', open);
-    pop.addEventListener('pointerleave', later);
-    trigger.addEventListener('focus', open);
-    trigger.addEventListener('blur', later);
-    pop.addEventListener('focusout', later);
-    trigger.addEventListener('click', (event) => {
-      event.preventDefault();
-      pinned = !pinned || pop.dataset.open !== 'true';
-      if (!pinned) return close();
-      open();
-      // Into the card: the radio's switch, or the sign's reading for a screen reader.
-      (pop.querySelector<HTMLElement>('button') ?? pop).focus();
-    });
-    pop.addEventListener('keydown', (event) => {
-      if (event.key !== 'Escape') return;
-      event.stopPropagation();
-      close();
-      trigger.focus();
-    });
-    new ResizeObserver(() => pop.dataset.open && place()).observe(pop);
-  }
+  popovers(hall, [
+    [label('sign'), document.getElementById('grid-sign')],
+    [label('radio'), document.getElementById('radio')],
+  ]);
   document.addEventListener('radio:state', (event) => engine.setRadio((event as CustomEvent<{ on: boolean }>).detail.on));
 
   // For the checks: where each monitor is on screen (?debug only).

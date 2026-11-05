@@ -56,3 +56,20 @@
   font-display: optional;
   src: url("/fonts/plex/ibm-plex-sans-condensed-latin-600-normal.woff2") format("woff2");
 }
+
+/* Caveat, a hand for the notebook and the sticky note (SIL Open Font Licence 1.1,
+   public/fonts/caveat/OFL.txt), latin subset, from @fontsource 5. Loaded only when the desk draws it. */
+@font-face {
+  font-family: "Caveat";
+  font-style: normal;
+  font-weight: 500;
+  font-display: optional;
+  src: url("/fonts/caveat/caveat-latin-500-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Caveat";
+  font-style: normal;
+  font-weight: 700;
+  font-display: optional;
+  src: url("/fonts/caveat/caveat-latin-700-normal.woff2") format("woff2");
+}

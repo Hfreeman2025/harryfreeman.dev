@@ -6,13 +6,15 @@ import { marked } from 'marked';
 import { defineConfig, type Plugin } from 'vite';
 import { BRIEFS_HTML } from './src/content/briefs';
 import { parseConfig } from './src/content/config';
-import { renderList, renderRoomLabels, renderTimelineJson } from './src/content/render';
+import { renderDeskLabels, renderList, renderRoomLabels, renderTimelineJson } from './src/content/render';
 import { renderCabinet, renderDirectory, renderPlan } from './src/office/render';
 import placeholder from './src/timeline/placeholder.json' with { type: 'json' };
 import { parseTimeline, type Timeline } from './src/timeline/schema';
 
 const root = dirname(fileURLToPath(import.meta.url));
-const personal = resolve(root, '..');
+// A git worktree (.worktrees/<name>) shares the repository's siblings: look beside the main checkout.
+const checkout = root.includes('/.worktrees/') ? root.slice(0, root.indexOf('/.worktrees/')) : root;
+const personal = resolve(checkout, '..');
 /** ask-the-record is used from its own folder, read-only: its built element, runtime and model. */
 const atr = join(personal, 'oss', 'ask-the-record');
 
@@ -124,6 +126,7 @@ function studio(): Plugin {
           : '';
         return html
           .replace('<!--room:labels-->', renderRoomLabels())
+          .replace('<!--desk:labels-->', renderDeskLabels())
           .replace('<!--studio:briefs-->', BRIEFS_HTML)
           .replace('<!--office:directory-->', renderDirectory())
           .replace('<!--office:cabinet-->', renderCabinet())

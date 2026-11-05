@@ -16,11 +16,11 @@ const mode = (page) => page.evaluate(() => document.documentElement.dataset.mode
 export async function officeChecks({ check, expect, BASE, config, shot, name }) {
   const FLAT = `${BASE}/?flat`;
 
-  await check('office: a phone, reduced motion and ?flat all get the flat office, with no canvas', desk, async (page) => {
+  await check('office: ?flat and reduced data get the flat office, with no canvas', desk, async (page) => {
     const seen = {};
     for (const [label, url, options] of [
       ['?flat', FLAT, {}],
-      ['reduced motion', BASE, { reducedMotion: 'reduce' }],
+      ['?flat, reduced motion', FLAT, { reducedMotion: 'reduce' }],
     ]) {
       await page.emulateMedia({ reducedMotion: options.reducedMotion ?? 'no-preference' });
       await page.goto(url, { waitUntil: 'load' });
@@ -218,16 +218,15 @@ export async function officeChecks({ check, expect, BASE, config, shot, name }) 
   });
 
   await check(
-    'office: reduced motion opens drawers without sliding, holds the replay, and offers the 3D room',
+    'office: with reduced motion the flat office opens drawers without sliding and holds the replay',
     { ...desk, reducedMotion: 'reduce' },
     async (page, problems) => {
-      await page.goto(BASE, { waitUntil: 'load' });
+      await page.goto(FLAT, { waitUntil: 'load' });
       expect((await page.evaluate(() => document.documentElement.dataset.motion)) === 'reduce', 'motion not reduced');
       await page.click('.drawer[data-drawer="sources"] .drawer__front', { position: { x: 20, y: 20 } });
       const duration = await page.$eval('.drawer[data-drawer="sources"]', (d) => getComputedStyle(d).transitionDuration);
       expect(duration === '0s', `drawer transition ${duration}`);
       expect((await page.locator('#replay-toggle').textContent())?.trim() === 'Play', 'replay not held');
-      expect(await page.locator('.board__row--3d a').isVisible(), 'no way into the 3D room');
       expect(problems.length === 0, problems.join(' | '));
     },
   );

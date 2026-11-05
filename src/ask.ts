@@ -57,7 +57,8 @@ export function sourceOf(quote: unknown): { piece: PieceId } | { cv: string } | 
 export interface AskOptions {
   /** Runs before the element loads: whatever an answer will be marked in must be in the page first. */
   readonly prepare?: () => Promise<unknown>;
-  readonly onAnswer: (pieces: PieceId[]) => void;
+  /** The tools an answer quoted, and the whole result (for a page that prints it). */
+  readonly onAnswer: (pieces: PieceId[], result?: unknown) => void;
   /** The first quote found in the page, as a range, once an answer has been marked. */
   readonly onLocated?: (range: Range | null) => void;
   readonly onSource: (piece: PieceId) => void;
@@ -131,7 +132,7 @@ export function setupAsk(options: AskOptions): void {
 
   box.addEventListener('ask-the-record:answer', (event) => {
     const detail = (event as CustomEvent<{ result?: unknown }>).detail;
-    options.onAnswer(piecesQuoted(detail?.result));
+    options.onAnswer(piecesQuoted(detail?.result), detail?.result);
   });
   box.addEventListener('ask-the-record:clear', () => options.onAnswer([]));
   box.addEventListener('ask-the-record:located', (event) => {

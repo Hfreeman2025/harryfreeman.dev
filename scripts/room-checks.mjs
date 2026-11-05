@@ -34,6 +34,8 @@ async function waitLive(page) {
 
 export async function roomChecks({ check, expect, BASE, config, shot }) {
   const ids = Object.keys(config.pieces);
+  // The classic room, kept on this branch behind ?style=classic; the desk has its own checks.
+  const ROOM = (query = '', hash = '') => `${BASE}/?style=classic${query ? `&${query}` : ''}${hash}`;
 
   await check('room: the HTML carries the directory, every object and every folder before any script', {}, async () => {
     const html = await (await fetch(`${BASE}/`)).text();
@@ -80,7 +82,7 @@ export async function roomChecks({ check, expect, BASE, config, shot }) {
       },
     },
     async (page, problems) => {
-      await page.goto(BASE, { waitUntil: 'commit' });
+      await page.goto(ROOM(), { waitUntil: 'commit' });
       await page.waitForSelector('.board__name', { timeout: 5000 });
       await waitLive(page);
       await page.waitForTimeout(2000);
@@ -109,7 +111,7 @@ export async function roomChecks({ check, expect, BASE, config, shot }) {
   );
 
   await check('room: keyboard: cabinet → drawer → folder → the desk turn → Esc back, step by step', desk, async (page, problems) => {
-    await live(page, BASE);
+    await live(page, ROOM());
     await page.focus('[data-target="cabinet"]');
     await page.keyboard.press('Enter');
     await waitStation(page, 'cabinet');
@@ -155,7 +157,7 @@ export async function roomChecks({ check, expect, BASE, config, shot }) {
   });
 
   await check('room: Tab reaches every object at the door', desk, async (page) => {
-    await live(page, BASE);
+    await live(page, ROOM());
     await page.focus('.board__more a[href="#brief"]');
     const seen = new Set();
     for (let i = 0; i < 40; i++) {
@@ -169,7 +171,7 @@ export async function roomChecks({ check, expect, BASE, config, shot }) {
   });
 
   await check('room: the pointer picks the cabinet, a drawer front and a folder in the model', desk, async (page) => {
-    await live(page, BASE);
+    await live(page, ROOM());
     // Just under each label is the object itself, drawn in WebGL.
     let b = await box(page, '[data-target="cabinet"]');
     await page.mouse.click(b.x + b.width / 2, b.y - 50);
@@ -197,7 +199,7 @@ export async function roomChecks({ check, expect, BASE, config, shot }) {
   });
 
   await check('room: clicking a desk in the model turns to it', desk, async (page) => {
-    await live(page, `${BASE}/?debug`);
+    await live(page, ROOM('debug'));
     const sourced = (await page.evaluate(() => window.roomDebug.monitorRects()))[6];
     // Pointing at a desk (here, its monitor) shows its tag; clicking turns to it.
     await page.mouse.move(sourced.x + sourced.width / 2, sourced.y + sourced.height / 2);
@@ -218,7 +220,7 @@ export async function roomChecks({ check, expect, BASE, config, shot }) {
     'room: Reception’s answer turns the camera to the desk, opens its folder and marks the quoted line',
     desk,
     async (page, problems) => {
-      await live(page, BASE);
+      await live(page, ROOM());
       await page.focus('[data-target="reception"]');
       await page.keyboard.press('Enter');
       await waitStation(page, 'reception');
@@ -270,7 +272,7 @@ export async function roomChecks({ check, expect, BASE, config, shot }) {
   );
 
   await check('room: a refusal says so and moves nothing', desk, async (page) => {
-    await live(page, BASE);
+    await live(page, ROOM());
     await page.focus('[data-target="reception"]');
     await page.keyboard.press('Enter');
     await waitStation(page, 'reception');
@@ -292,7 +294,7 @@ export async function roomChecks({ check, expect, BASE, config, shot }) {
     'room: the grid sign shows the mocked half-hour, its time and its source, and the light follows it',
     desk,
     async (page, problems, requests) => {
-      await live(page, BASE);
+      await live(page, ROOM());
       await page.waitForFunction(() => document.getElementById('grid-sign')?.dataset.state === 'live', null, { timeout: 8000 });
       const value = await page.locator('#grid-value').textContent();
       const detail = await page.locator('#grid-detail').textContent();
@@ -311,7 +313,7 @@ export async function roomChecks({ check, expect, BASE, config, shot }) {
     'room: when the grid API fails, the sign says unavailable and the light stays neutral',
     { ...desk, grid: 'fail' },
     async (page) => {
-      await live(page, BASE);
+      await live(page, ROOM());
       await page.waitForFunction(() => document.getElementById('grid-sign')?.dataset.state === 'unavailable', null, { timeout: 8000 });
       const text = await page.locator('#grid-sign').textContent();
       expect(text.includes('Grid data unavailable'), `sign: ${text}`);
@@ -323,7 +325,7 @@ export async function roomChecks({ check, expect, BASE, config, shot }) {
   );
 
   await check('room: the radio is silent until pressed, opens no audio device, and stops when you leave', desk, async (page, problems) => {
-    await live(page, BASE);
+    await live(page, ROOM());
     await page.waitForTimeout(1500);
     expect((await page.evaluate(() => window.__audio.made)) === 0, 'an audio context was made before the press');
     // The radio is an object on the shelf; its card opens on hover, with the switch in it.
@@ -353,14 +355,14 @@ export async function roomChecks({ check, expect, BASE, config, shot }) {
     return { playing: state, audio };
   });
 
-  await check('room: arriving at /#folder-receipts turns to that desk', desk, async (page) => {
-    await live(page, `${BASE}/#folder-receipts`);
+  await check('room: arriving at ?style=classic#folder-receipts turns to that desk', desk, async (page) => {
+    await live(page, ROOM('', '#folder-receipts'));
     await cardOpen(page);
     expect((await cardTitle(page)) === 'receipts', `opened ${await cardTitle(page)}`);
   });
 
   await check('room: a directory row pulls its folder from wherever you stand', desk, async (page) => {
-    await live(page, BASE);
+    await live(page, ROOM());
     await page.click('.board__row a[data-piece="real-or-hallucinated"]');
     await cardOpen(page);
     expect((await cardTitle(page)) === 'Real or Hallucinated?', `opened ${await cardTitle(page)}`);
@@ -369,7 +371,7 @@ export async function roomChecks({ check, expect, BASE, config, shot }) {
   });
 
   await check('room: the replay pauses and plays', desk, async (page) => {
-    await live(page, BASE);
+    await live(page, ROOM());
     await page.click('#replay-toggle');
     const a = await page.locator('#replay-time').textContent();
     await page.waitForTimeout(2500);
@@ -381,7 +383,7 @@ export async function roomChecks({ check, expect, BASE, config, shot }) {
   });
 
   await check('room: reaching for the question box at Reception moves nothing', desk, async (page) => {
-    await live(page, BASE);
+    await live(page, ROOM());
     await page.click('[data-target="reception"]');
     await waitStation(page, 'reception');
     const where = () => page.$eval('.ask__try button', (b) => Math.round(b.getBoundingClientRect().top));
@@ -394,7 +396,7 @@ export async function roomChecks({ check, expect, BASE, config, shot }) {
   });
 
   await check('room: at rest no label covers a monitor, and a desk’s tag never does when shown', desk, async (page) => {
-    await live(page, `${BASE}/?debug`);
+    await live(page, ROOM('debug'));
     const monitors = await page.evaluate(() => window.roomDebug.monitorRects());
     const covering = (r) =>
       monitors.some((m) => r.x < m.x + m.width && m.x < r.x + r.width && r.y < m.y + m.height && m.y < r.y + r.height);
@@ -436,7 +438,7 @@ export async function roomChecks({ check, expect, BASE, config, shot }) {
   });
 
   await check('room: the grid credit is visible at rest', desk, async (page) => {
-    await live(page, BASE);
+    await live(page, ROOM());
     const credit = await page.evaluate(() => {
       const el = document.getElementById('grid-credit');
       const r = el.getBoundingClientRect();
@@ -456,7 +458,7 @@ export async function roomChecks({ check, expect, BASE, config, shot }) {
     ['1280×720', { width: 1280, height: 720 }],
   ]) {
     await check(`room (${size}): every card stays fully inside the viewport`, { viewport }, async (page, problems) => {
-      await live(page, BASE);
+      await live(page, ROOM());
       const inside = (selector) =>
         page.evaluate((sel) => {
           const r = document.querySelector(sel).getBoundingClientRect();
@@ -504,7 +506,7 @@ export async function roomChecks({ check, expect, BASE, config, shot }) {
       },
     },
     async (page) => {
-      await page.goto(BASE, { waitUntil: 'load' });
+      await page.goto(ROOM(), { waitUntil: 'load' });
       await page.waitForFunction(() => document.documentElement.dataset.mode === 'office', null, { timeout: 15000 });
       const status = await page.locator('#room-status').textContent();
       expect(/could not start/.test(status ?? ''), `status: ${status}`);

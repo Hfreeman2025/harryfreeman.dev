@@ -121,3 +121,43 @@ export function renderList(config: SiteConfig, timeline: Timeline): string {
 export function renderTimelineJson(timeline: Timeline): string {
   return `<script type="application/json" id="timeline-data">${JSON.stringify(timeline).replace(/</g, '\\u003c')}</script>`;
 }
+
+/**
+ * The tags over the desk (branch design/desk-miniature): real buttons and links laid over the desk's
+ * objects, the builders' name tags in the office, and the index box's dividers and cards. They use
+ * `data-desk-target` (where it sits) and `data-action` (what choosing it does), so the classic room
+ * ignores them; `data-at` is the station they show at.
+ */
+export function renderDeskLabels(): string {
+  const tag = (key: string, name: string, note: string) =>
+    `<button type="button" class="dtag dtag--place" data-desk-target="${key}" data-action="${key}" data-at="door"><span class="dtag__name">${name}</span><span class="dtag__note">${note}</span></button>`;
+  const door = [
+    tag('office', 'The office', 'dive in: ten builders at work'),
+    tag('cabinet', 'Filing cabinet', 'ten tools, one card each'),
+    tag('notebook', 'The briefs', 'three rounds, turn a page'),
+    tag('reception', 'Reception', 'type a question'),
+    tag('stamp', 'Receipts', 'stamp a card to check it'),
+    `<button type="button" class="obj obj--cover" data-desk-target="sign" data-action="sign" data-at="door" data-place="cover" aria-expanded="false" aria-controls="grid-sign" aria-describedby="desk-credit"><span class="obj__name">The sticky note: the current carbon intensity of Great Britain’s grid</span></button>`,
+  ];
+  const office = [
+    ...PIECES.map(
+      (p) =>
+        `<a class="dtag dtag--name" href="#folder-${p.id}" data-desk-target="desk:${p.id}" data-action="desk:${p.id}" data-at="office" data-place="nametag" data-piece="${p.id}" data-status="idle"><span class="dtag__dot" aria-hidden="true"></span>${esc(p.title)}</a>`,
+    ),
+    `<button type="button" class="dtag" data-desk-target="office-reception" data-action="reception" data-at="office" data-place="over">Reception</button>`,
+    `<button type="button" class="dtag" data-desk-target="office-cabinet" data-action="cabinet" data-at="office" data-place="over">Filing</button>`,
+    `<button type="button" class="obj obj--cover" data-desk-target="radio" data-action="radio" data-at="office" data-place="cover" aria-expanded="false" aria-controls="radio"><span class="obj__name">The radio: Listen to the Grid</span></button>`,
+  ];
+  // Each divider, then its cards, so Tab goes from a divider into its cards.
+  const filed = DRAWERS.flatMap((d) => [
+    `<button type="button" class="obj obj--drawer" data-desk-target="drawer:${d.id}" data-action="drawer:${d.id}" data-at="cabinet" data-place="cover" aria-expanded="false"><span class="obj__name">${esc(d.label)}</span><span class="obj__note">${esc(d.position)} divider</span></button>`,
+    ...d.pieces.map(
+      (id) =>
+        `<a class="obj obj--cover obj--card" href="#folder-${id}" data-desk-target="folder:${id}" data-action="folder:${id}" data-at="cabinet" data-place="cover" data-piece="${id}"><span class="obj__name">${esc(pieceById(id).title)}</span></a>`,
+    ),
+  ]);
+  const controls = [...door, ...office, ...filed].map((html) => html.replace(/^<(a|button) /, '<$1 hidden tabindex="0" '));
+  const credit =
+    '<p class="dtag dtag--credit" id="desk-credit" hidden data-desk-target="credit" data-at="door" data-place="tag">Data: Carbon Intensity API, © NESO, CC BY 4.0</p>';
+  return [...controls, credit].join('\n');
+}
