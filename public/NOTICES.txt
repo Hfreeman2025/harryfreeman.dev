@@ -41,6 +41,27 @@ CODE, BUNDLED
   valibot, MIT licence, © Fabian Hiller.
   xterm.js, MIT licence, © The xterm.js authors.
 
+
+3D ASSETS (style frames, branch design/sim-cartoon only)
+
+  Furniture Kit 1.0, by Kenney, CC0 1.0
+    https://kenney.nl/assets/furniture-kit
+    Archive kenney_furniture-kit.zip, SHA-256 e67652d0932cee41683f74711c03d3e192a2af9979ef8e6b237711f5482d46b0.
+    13 files used, in public/assets/3d/kenney-furniture-kit/ (hashes in SOURCES.json).
+
+  Mini Characters 1.0, by Kenney, CC0 1.0
+    https://kenney.nl/assets/mini-characters
+    Archive kenney_mini-characters.zip, SHA-256 9e1d48e6d7b8479ebbe84df71eb5bd8e1b3f0da546dea641890dccc8a02d0999.
+    15 files used, in public/assets/3d/kenney-mini-characters/ (hashes in SOURCES.json).
+
+  KayKit Furniture Bits 1.0, by Kay Lousberg, CC0 1.0
+    https://github.com/KayKit-Game-Assets/KayKit-Furniture-Bits-1.0
+    Archive kaykit_furniture-bits.zip, SHA-256 973ba87b154d7e734531253314df07e8b1bf2d76cda2a79dc63ee9bc07af9a02.
+    17 files used, in public/assets/3d/kaykit-furniture-bits/ (hashes in SOURCES.json).
+
+  Downloaded, not used: Kenney Blocky Characters 2.0 (CC0 1.0), https://kenney.nl/assets/blocky-characters,
+    archive SHA-256 5e123859aa0c1598342b600c6db197024a1d63eb9ec531398b310725f589887e.
+  Raw downloads stay in the site's git-ignored .cache/assets.
 TYPE
 
   IBM Plex Sans, Sans Condensed and Mono, © IBM Corp., SIL Open Font

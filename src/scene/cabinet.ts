@@ -36,21 +36,25 @@ const manilaTab = new MeshLambertMaterial({ color: '#efd8a6' });
 const cavity = new MeshBasicMaterial({ color: '#23251f' });
 
 function labelTexture(text: string): CanvasTexture {
+  // Large enough to read from the door: the card in each drawer's holder, in Plex Sans Condensed.
   const canvas = document.createElement('canvas');
-  canvas.width = 512;
-  canvas.height = 112;
+  canvas.width = 1024;
+  canvas.height = 200;
   const ctx = canvas.getContext('2d');
   if (ctx) {
     ctx.fillStyle = '#f8f7f1';
-    ctx.fillRect(0, 0, 512, 112);
-    ctx.strokeStyle = '#8b9086';
-    ctx.lineWidth = 6;
-    ctx.strokeRect(3, 3, 506, 106);
+    ctx.fillRect(0, 0, 1024, 200);
+    ctx.strokeStyle = '#7d8277';
+    ctx.lineWidth = 10;
+    ctx.strokeRect(5, 5, 1014, 190);
     ctx.fillStyle = '#1e2225';
-    ctx.font = '600 46px "IBM Plex Sans Condensed", "Arial Narrow", sans-serif';
+    let size = 120;
+    const font = (px: number) => `600 ${px}px "IBM Plex Sans Condensed", "Arial Narrow", sans-serif`;
+    ctx.font = font(size);
+    while (size > 40 && ctx.measureText(text).width > 960) ctx.font = font(--size);
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(text, 256, 58, 480);
+    ctx.fillText(text, 512, 106);
   }
   const t = new CanvasTexture(canvas);
   t.colorSpace = SRGBColorSpace;
@@ -77,12 +81,30 @@ interface DrawerObject {
 }
 
 export class Cabinet {
+  /** Stands at the cabinet's middle, turned to its facing; everything else hangs off `#body`. */
   readonly group = new Group();
+  readonly #body = new Group();
   readonly drawers: DrawerObject[] = [];
   /** Meshes a pointer can hit, each tagged with what it stands for. */
   readonly pickables: Mesh[] = [];
+  /** The angle it is turned through, about its middle: 0 faces the front of the room. */
+  readonly facing: number;
 
-  constructor() {
+  /**
+   * `facing` turns the whole cabinet in its corner (a style frame turns it to the view from the door);
+   * `carcass` draws its body live, when the baked box (which cannot turn) is left out.
+   */
+  constructor(facing = 0, carcass = false) {
+    this.facing = facing;
+    this.group.position.set(CABINET.x, 0, CABINET.z);
+    this.group.rotation.y = facing;
+    this.#body.position.set(-CABINET.x, 0, -CABINET.z);
+    this.group.add(this.#body);
+    if (carcass) {
+      const body = new Mesh(new BoxGeometry(CABINET.width, CABINET.height, CABINET.depth), steel);
+      body.position.set(CABINET.x, CABINET.height / 2, CABINET.z);
+      this.#body.add(body);
+    }
     DRAWERS.forEach((d, i) => {
       const top = CABINET.height - GAP - i * (DRAWER_H + GAP);
       const centreY = top - DRAWER_H / 2;
@@ -90,7 +112,7 @@ export class Cabinet {
       const opening = new Mesh(new PlaneGeometry(FRONT_W, DRAWER_H), cavity);
       opening.position.set(CABINET.x, centreY, FRONT_Z + 0.002);
       opening.visible = false;
-      this.group.add(opening);
+      this.#body.add(opening);
 
       const group = new Group();
       group.position.set(CABINET.x, centreY, 0);
@@ -98,13 +120,13 @@ export class Cabinet {
       front.position.set(0, 0, FRONT_Z + 0.015);
       front.userData.target = `drawer:${d.id}`;
       const plate = new Mesh(
-        new PlaneGeometry(FRONT_W * 0.62, DRAWER_H * 0.3),
+        new PlaneGeometry(FRONT_W * 0.92, DRAWER_H * 0.58),
         new MeshBasicMaterial({ map: labelTexture(d.label), toneMapped: false }),
       );
-      plate.position.set(0, DRAWER_H * 0.17, FRONT_Z + 0.031);
+      plate.position.set(0, DRAWER_H * 0.1, FRONT_Z + 0.031);
       plate.userData.target = `drawer:${d.id}`;
       const handle = new Mesh(new BoxGeometry(FRONT_W * 0.34, 0.035, 0.035), chrome);
-      handle.position.set(0, -DRAWER_H * 0.2, FRONT_Z + 0.05);
+      handle.position.set(0, -DRAWER_H * 0.33, FRONT_Z + 0.05);
       // The tray behind the front: floor, sides and back.
       const floorY = -DRAWER_H / 2 + 0.012;
       const trayZ = FRONT_Z - TRAY_DEPTH / 2;
@@ -136,7 +158,7 @@ export class Cabinet {
         this.pickables.push(body, tab);
         return { piece, group: folderGroup, tab, lift: 0, liftTarget: 0 };
       });
-      this.group.add(group);
+      this.#body.add(group);
       this.pickables.push(front, plate);
       this.drawers.push({ id: d.id, group, front, opening, folders, out: 0, outTarget: 0 });
     });
@@ -185,7 +207,23 @@ export class Cabinet {
       new Vector3(CABINET.x + w, y - h, z),
       new Vector3(CABINET.x + w, y + h, z),
       new Vector3(CABINET.x - w, y + h, z),
-    ];
+    ].map((v) => this.world(v));
+  }
+
+  /** The corners of a drawer's label plate (top-left, top-right, bottom-right, bottom-left). */
+  plateCorners(id: string): Vector3[] {
+    const d = this.drawers.find((x) => x.id === id);
+    if (!d) return [];
+    const y = d.group.position.y + DRAWER_H * 0.1;
+    const z = FRONT_Z + 0.032 + d.group.position.z;
+    const w = (FRONT_W * 0.92) / 2;
+    const h = (DRAWER_H * 0.58) / 2;
+    return [
+      new Vector3(CABINET.x - w, y + h, z),
+      new Vector3(CABINET.x + w, y + h, z),
+      new Vector3(CABINET.x + w, y - h, z),
+      new Vector3(CABINET.x - w, y - h, z),
+    ].map((v) => this.world(v));
   }
 
   isOpen(id: string): boolean {
@@ -197,12 +235,18 @@ export class Cabinet {
     const [kind, id] = target.split(':');
     for (const d of this.drawers) {
       if (kind === 'drawer' && d.id === id)
-        return new Vector3(CABINET.x, d.group.position.y + DRAWER_H * 0.17, FRONT_Z + d.group.position.z + 0.04);
+        return this.world(new Vector3(CABINET.x, d.group.position.y + DRAWER_H * 0.17, FRONT_Z + d.group.position.z + 0.04));
       for (const f of d.folders) {
         if (kind === 'folder' && f.piece === id) return f.tab.getWorldPosition(new Vector3());
       }
     }
-    if (kind === 'cabinet') return new Vector3(CABINET.x, CABINET.height + 0.12, CABINET.z);
+    if (kind === 'cabinet') return this.world(new Vector3(CABINET.x, CABINET.height + 0.12, CABINET.z));
     return null;
+  }
+
+  /** A point given as if the cabinet faced the front of the room, where it really is. */
+  world(point: Vector3): Vector3 {
+    this.group.updateMatrixWorld(true);
+    return this.#body.localToWorld(point);
   }
 }

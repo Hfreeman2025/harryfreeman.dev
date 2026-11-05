@@ -1,0 +1,83 @@
+{
+  "about": "CC0 3D assets used by the style frames; raw downloads stay in .cache/assets.",
+  "packs": [
+    {
+      "id": "kenney-furniture-kit",
+      "name": "Furniture Kit 1.0",
+      "by": "Kenney",
+      "url": "https://kenney.nl/assets/furniture-kit",
+      "licence": "CC0 1.0",
+      "archive": "kenney_furniture-kit.zip",
+      "archiveSha256": "e67652d0932cee41683f74711c03d3e192a2af9979ef8e6b237711f5482d46b0",
+      "files": {
+        "desk.glb": "0164fe828f028b321730fb8c74502e353583f751be74da1682d42fff7d3c5a42",
+        "chairDesk.glb": "46406619186034cbe92b19b79a5f1a8e3f442a17a70a7524ef2c0ad0f35095c6",
+        "computerKeyboard.glb": "9d9135789de2120e9f41ce3f0a56dd1b15f40adcc7888739bb842a2d820da322",
+        "plantSmall1.glb": "2b9c022feb47be857b2c4fdc29f36522766ba9b70c578c31d7c05d71b4377d15",
+        "plantSmall2.glb": "d7c8ff42c66dd4f9238a73570549813d1ca6c5f6f661d7af9cb764c4fce314b9",
+        "plantSmall3.glb": "1aa38b1b22bd19fa4f9f3abd8c4cbf50da2d6fa721cf1f9aa4d80bb89b1bef94",
+        "pottedPlant.glb": "5b760eda2766f75fda36b2c5df652a1662f82981ef64cd8fa7fe7bcd386b3a15",
+        "lampRoundTable.glb": "75bb644caaa3da003b4fcad7a931722dd61cd2858aab70cf660021d5061fa1b2",
+        "books.glb": "b8dc56e5d29f6fc1f4727fccb1b9642627fee9942c48060a00034e98df02701c",
+        "rugRectangle.glb": "a989d2d59c04e3071e0c90388b113a9a8f339ce1814ef984c51cb6dcd7c8e0eb",
+        "radio.glb": "1ba93d6ba6f049750853b4652b92f286f2898e527695a0705b75cc7615897fed",
+        "trashcan.glb": "e0ccc1fe50cbd05386477fdff527171d1cf7c0de2ba7ff3233f8d9561feb2561",
+        "coatRackStanding.glb": "d8231c22dab63ceb9fc8678f6c8ceafc62afa8726b51a73b4ce349043d3cdc91"
+      }
+    },
+    {
+      "id": "kenney-mini-characters",
+      "name": "Mini Characters 1.0",
+      "by": "Kenney",
+      "url": "https://kenney.nl/assets/mini-characters",
+      "licence": "CC0 1.0",
+      "archive": "kenney_mini-characters.zip",
+      "archiveSha256": "9e1d48e6d7b8479ebbe84df71eb5bd8e1b3f0da546dea641890dccc8a02d0999",
+      "files": {
+        "character-female-a.glb": "8cfcff43460da8b421f2a7fdfb43ec177321cad2746db9497cbf128d5806e2a8",
+        "character-male-a.glb": "77572792bfe2773b715b8cd8e18644b52b3e1f155fe10450254b50f9c364382a",
+        "character-female-b.glb": "2288438e7baf9acc91a870c82dc00d66710bb486592cfc3474ef8ed93a03863a",
+        "character-male-b.glb": "791fc0c203924c175c0a3d5b60d030daf36797b039506689cf7cd01ef5253b3c",
+        "character-female-c.glb": "3cd9e1b5d6409fce0ba1af617d9e008c3069493185a4c100f49fb99a2626a055",
+        "character-male-c.glb": "672a6506f7475bbd655da1d7ff712c1729a430f134c62385a4e5d3c1378acb40",
+        "character-female-d.glb": "67f61708743bd34f91a4c2ba8160b61bf2e7d4ec2ca6647dfe99873422561410",
+        "character-male-d.glb": "dd12b2e75ffb1cdb45aaec3916c3d6e732929ccb4a8b89b946f69baaabfa64da",
+        "character-female-e.glb": "3ee3939f80d718945fcb9199f909a92c39669e38aeec7f544536b5dce6e79f98",
+        "character-male-e.glb": "cd76681090ce29861b055b0f8b2bdcf84bfccc4ca816f428df42a9bb76d6e1b6",
+        "character-female-f.glb": "2ff4311897bfaf99be80d2fa13918db30f506607da0291640b2609d82b70e0ca",
+        "character-male-f.glb": "ed151fc47c5cd6be9693c524e92f045170c965819f4f81b28ed66dcc3c1085bf",
+        "wheelchair.glb": "cb7b6cbebc7bbe238ae926b26305661eb66e17659fafa8fa0c098f5e7955fabe",
+        "aid-glasses.glb": "adb8bb84ba24413068e28a800ccb8cc50060c77dc28df4cdddaee6c4d30b6289",
+        "Textures/colormap.png": "0d4947d34ff32acf4a359c7f22ca784e057e7e72f622170a9a77b6fc88fdb70e"
+      }
+    },
+    {
+      "id": "kaykit-furniture-bits",
+      "name": "KayKit Furniture Bits 1.0",
+      "by": "Kay Lousberg",
+      "url": "https://github.com/KayKit-Game-Assets/KayKit-Furniture-Bits-1.0",
+      "licence": "CC0 1.0",
+      "archive": "kaykit_furniture-bits.zip",
+      "archiveSha256": "973ba87b154d7e734531253314df07e8b1bf2d76cda2a79dc63ee9bc07af9a02",
+      "files": {
+        "cactus_small_A.gltf": "4e2d93fb22b7f6097f3726b1fc513647873428224c01b17abdbe79c01c1e959b",
+        "cactus_small_A.bin": "43dae3699635f54fb84199b7a998c1144690c3e54d6c3fc3c045c38aa54f7fdc",
+        "cactus_small_B.gltf": "f3f9555486151b309d682a94dc120d893167bd8f506f61c20264a23c8b54d38d",
+        "cactus_small_B.bin": "84b85293ba5ede54f1c970531e679bb181c584adb65bf96ad94c52122319edb3",
+        "cactus_medium_A.gltf": "902c48a87bf8e48a2d72055485eaaeae3aefd91224e5af914aeb42fca99759a8",
+        "cactus_medium_A.bin": "be9378a1328b82751ac651de9387d7b20db4ffbb5e1c087b0e634a00ebf7cc0f",
+        "lamp_table.gltf": "7cc2e9f24145551bfc919247e74a414bbd40bc2fde1fb9a1ac33e16cb9d0497b",
+        "lamp_table.bin": "c3d4cc2fea09cfb3037b9ece861abf6126cae3226858f18de37bd8cf87a06145",
+        "book_set.gltf": "437bfaba3f3413a0b825627a1cb905765a191f4708be51838c9b60c8132cbe61",
+        "book_set.bin": "3aa3fcc774b46c7ffe2b1a3109bf006749163bbb392cfca930b34bfba4b67853",
+        "pictureframe_large_A.gltf": "b12aadc4e0179aa9c27a18cd31f5a980159188a20d11cc62b9c5a97e4381c59f",
+        "pictureframe_large_A.bin": "85368442c0af0cc12cd32fa512284391905219dd7a88e3360d69a1a25db2262c",
+        "pictureframe_large_B.gltf": "1ee9d4842d9f4626e08ffce88e34293a7a8b11ffdc1cd0340eb934c209a97cdc",
+        "pictureframe_large_B.bin": "ff87db23fa7e1b9c7e55c8a25bbb9b5d37f11bf94c36e1d97b104fa8d9b22660",
+        "rug_rectangle_stripes_A.gltf": "daeafdd3efd5c2d3781426d1bb48ac6dc31893dea30abd3e6f2b22ff70890c55",
+        "rug_rectangle_stripes_A.bin": "4ce28e95c940d486b3bb94e91b79a8ad9633b3628dbd6f07be03a6ec6b3ac579",
+        "furniturebits_texture.png": "de62db37a80d1801c3d9eb674890ae04b04469e0c149481a51fa250562c628dc"
+      }
+    }
+  ]
+}

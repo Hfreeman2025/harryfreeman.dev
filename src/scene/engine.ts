@@ -28,12 +28,31 @@ import {
 import { drawerOf } from '../content/drawers';
 import { isPieceId, PIECES, type PieceId } from '../content/pieces';
 import { NEUTRAL_LIGHT, type RoomLight, type SignText, signFor } from '../room/grid';
+import { quadTransform } from '../room/quad';
 import type { Timeline } from '../timeline/schema';
 import { Cabinet } from './cabinet';
 import { Crew } from './crew';
-import { BOARD, BRIEF, CABINET, DESK, DESKS, deskFor, KEY, LAMP, RADIO, RECEPTION, REVIEW, ROOM, SCREEN, SHELF, SIGN } from './layout';
+import {
+  BOARD,
+  BRIEF,
+  CABINET,
+  DESK,
+  DESKS,
+  deskFor,
+  KEY,
+  LAMP,
+  RADIO,
+  RECEPTION,
+  REVIEW,
+  ROOM,
+  SCREEN,
+  SHELF,
+  SIGN,
+  WALL,
+} from './layout';
 import { BOUNCE, PALETTE } from './light';
 import { atlasRect, buildModel } from './model';
+import { applyStyle, doorFor, type StyleHandle, styleFromUrl, swapsFurniture } from './style';
 
 export type Station = 'door' | 'cabinet' | 'reception' | `desk:${PieceId}`;
 
@@ -78,7 +97,8 @@ const TAN = Math.tan(((FOV / 2) * Math.PI) / 180);
  * The view from the door: low and a little to the right of the doorway, as you would look into a
  * model on a table, so the cabinet is near and large in the left third and the room runs back.
  */
-const DOOR = { fov: 40, elevation: 17, azimuth: 5, target: new Vector3(0.5, 0.8, -0.4) };
+const STYLE = styleFromUrl();
+const DOOR = STYLE ? doorFor(STYLE) : { fov: 40, elevation: 17, azimuth: 5, target: new Vector3(0.5, 0.8, -0.4) };
 
 const smooth = (t: number) => {
   const c = Math.max(0, Math.min(1, t));
@@ -146,9 +166,17 @@ export async function mountRoom({
 
   const scene = new Scene();
   scene.background = new Color(PALETTE.surround);
-  const model = buildModel(floor, ground, poster ?? colourAtlas());
+  // A style frame may swap the box desks and chairs for models of them.
+  const model = buildModel(
+    floor,
+    ground,
+    poster ?? colourAtlas(),
+    // A style frame turns the cabinet to the view from the door, so the baked carcass (which cannot
+    // turn) is left out; it may also swap the box desks and chairs for models of them.
+    STYLE ? (b) => b.material === 'steel' || (swapsFurniture(STYLE) && (b.part === 'desk' || b.part === 'chair')) : undefined,
+  );
   scene.add(model.group);
-  const cabinet = new Cabinet();
+  const cabinet = STYLE ? new Cabinet((DOOR.azimuth * Math.PI) / 180, true) : new Cabinet();
   scene.add(cabinet.group);
 
   // The lamps, live for everything that is not baked, matched to the bake's units: the work lamp over
@@ -166,11 +194,14 @@ export async function mountRoom({
   };
   const lamps = [spotOf(LAMP, 1), spotOf(KEY, KEY.strength)];
   const fill = new HemisphereLight(PALETTE.lamp, PALETTE.paper, BOUNCE * Math.PI);
-  const baseFill = fill.intensity;
+  let baseFillOverride: number | null = null;
+  const baseFill = () => baseFillOverride ?? BOUNCE * Math.PI;
   scene.add(fill);
   const lampColour = new Color(PALETTE.lamp);
   let light = { ...NEUTRAL_LIGHT, colour: [...NEUTRAL_LIGHT.colour] as [number, number, number] };
   let lightTarget: RoomLight = NEUTRAL_LIGHT;
+  /** A style frame's own colour for the baked floor and paper, under the grid's tint. */
+  const baseTint = new Color(1, 1, 1);
   const applyLight = () => {
     const [r, g, b] = light.colour;
     const [nr, ng, nb] = NEUTRAL_LIGHT.colour;
@@ -180,8 +211,8 @@ export async function mountRoom({
       l.intensity = intensity;
     }
     fill.color.copy(lampColour).multiply(tint);
-    fill.intensity = baseFill;
-    for (const m of model.baked) m.color.copy(tint);
+    fill.intensity = baseFill();
+    for (const m of model.baked) m.color.copy(tint).multiply(baseTint);
   };
 
   // The radio on its shelf: a grille, and a small lamp that is green while it plays.
@@ -255,6 +286,26 @@ export async function mountRoom({
   // With reduced motion nothing travels: the replay holds at its end, each desk showing its state.
   const crew = new Crew({ scene, model, timeline, startAt });
   if (reduced) crew.s = Math.max(0, crew.replay.duration - 0.01);
+  // A style frame brings its own people, props, palette and line.
+  let look: StyleHandle | null = null;
+  if (STYLE) {
+    crew.people = false;
+    look = await applyStyle(STYLE, {
+      scene,
+      model,
+      renderer,
+      lamps: lamps.map((l) => l.light),
+      fill,
+      replay: crew.replay,
+      now: () => crew.s,
+      setBaseTint: (c) => baseTint.copy(c),
+      holdSheet: (piece) => {
+        crew.held = piece;
+      },
+    });
+    lampColour.copy(lamps[0]?.light.color ?? lampColour);
+    baseFillOverride = fill.intensity;
+  }
 
   const camera = new PerspectiveCamera(FOV, 1, 0.1, 200);
   // What the view from the door must hold: the back wall's top corners, the cabinet and Reception
@@ -268,7 +319,21 @@ export async function mountRoom({
     ...DESKS.flatMap((d) => [new Vector3(d.x - 0.3, DESK.height, d.z), new Vector3(d.x + 0.3, DESK.height, d.z)]),
   ];
 
+  // A style frame keeps the whole room in view, corners and all, centred, filling the frame.
+  if (STYLE) {
+    keep.length = 0;
+    keep.push(
+      new Vector3(ROOM.x0 - 0.15, WALL.back, ROOM.z0 - 0.15),
+      new Vector3(ROOM.x1 + 0.15, WALL.back, ROOM.z0 - 0.15),
+      new Vector3(ROOM.x0 - 0.15, 0, ROOM.z1 + 0.25),
+      new Vector3(ROOM.x1 + 0.15, 0, ROOM.z1 + 0.25),
+      new Vector3(ROOM.x0 - 0.15, WALL.side, ROOM.z1 + 0.15),
+      new Vector3(ROOM.x1 + 0.15, WALL.side, ROOM.z1 + 0.15),
+    );
+  }
+
   function doorView(aspect: number): View {
+    if (STYLE) return centredView(aspect);
     const el = (DOOR.elevation * Math.PI) / 180;
     const az = (DOOR.azimuth * Math.PI) / 180;
     const dir = new Vector3(Math.sin(az) * Math.cos(el), Math.sin(el), Math.cos(az) * Math.cos(el));
@@ -294,14 +359,61 @@ export async function mountRoom({
     // The next frame puts back the lens of wherever the camera is (applyCamera).
     return { pos: DOOR.target.clone().addScaledVector(dir, hi), look: DOOR.target.clone(), fov: DOOR.fov };
   }
+  /** The nearest camera along the door's direction that holds every kept point, with the room centred. */
+  function centredView(aspect: number): View {
+    const el = (DOOR.elevation * Math.PI) / 180;
+    const az = (DOOR.azimuth * Math.PI) / 180;
+    const dir = new Vector3(Math.sin(az) * Math.cos(el), Math.sin(el), Math.cos(az) * Math.cos(el));
+    camera.aspect = aspect;
+    camera.fov = DOOR.fov;
+    camera.updateProjectionMatrix();
+    const target = DOOR.target.clone();
+    const p = new Vector3();
+    const right = new Vector3();
+    const up = new Vector3();
+    const tan = Math.tan(((DOOR.fov / 2) * Math.PI) / 180);
+    // The caption takes the bottom of the frame: the room fits between it and a slim margin above.
+    const top = 0.94;
+    const bottom = -0.74;
+    const bounds = (distance: number) => {
+      camera.position.copy(target).addScaledVector(dir, distance);
+      camera.lookAt(target);
+      camera.updateMatrixWorld();
+      let x0 = Infinity;
+      let x1 = -Infinity;
+      let y0 = Infinity;
+      let y1 = -Infinity;
+      for (const c of keep) {
+        p.copy(c).project(camera);
+        x0 = Math.min(x0, p.x);
+        x1 = Math.max(x1, p.x);
+        y0 = Math.min(y0, p.y);
+        y1 = Math.max(y1, p.y);
+      }
+      return { x0, x1, y0, y1 };
+    };
+    let distance = 30;
+    for (let pass = 0; pass < 16; pass++) {
+      // Centre the room, then scale to fit; the two settle in a few passes.
+      const b = bounds(distance);
+      right.setFromMatrixColumn(camera.matrixWorld, 0);
+      up.setFromMatrixColumn(camera.matrixWorld, 1);
+      const cx = (b.x0 + b.x1) / 2;
+      const cy = (b.y0 + b.y1) / 2 - (top + bottom) / 2;
+      target.addScaledVector(right, cx * distance * tan * aspect).addScaledVector(up, cy * distance * tan);
+      const span = Math.max((b.x1 - b.x0) / (2 * 0.97), (b.y1 - b.y0) / (top - bottom));
+      distance *= span;
+    }
+    return { pos: target.clone().addScaledVector(dir, distance), look: target.clone(), fov: DOOR.fov };
+  }
   const fitDistance = (height: number) => height / 2 / TAN;
   function viewOf(s: Station): View {
     if (s === 'door') return door;
     if (s === 'cabinet') {
       const d = fitDistance(CABINET.height + 0.5);
       return {
-        pos: new Vector3(CABINET.x + 0.45, 1.05 + d * 0.42, CABINET.z + d * 0.9),
-        look: new Vector3(CABINET.x + 0.15, 0.72, CABINET.z + 0.35),
+        pos: cabinet.world(new Vector3(CABINET.x + 0.45, 1.05 + d * 0.42, CABINET.z + d * 0.9)),
+        look: cabinet.world(new Vector3(CABINET.x + 0.15, 0.72, CABINET.z + 0.35)),
         fov: FOV,
       };
     }
@@ -336,6 +448,24 @@ export async function mountRoom({
 
   let door = doorView(1);
   let station: Station = 'door';
+  // Stills only (?close=desk:<tool> or ?close=cabinet): a close view of a desk at work, or the cabinet
+  // with a drawer out, for the style frames.
+  const close = new URLSearchParams(location.search).get('close') ?? '';
+  const closeDesk = close.startsWith('desk:') && isPieceId(close.slice(5)) ? deskFor(close.slice(5) as PieceId) : null;
+  const closeUp: View | null = closeDesk
+    ? (() => {
+        const target = new Vector3(closeDesk.x - 0.1, 0.95, closeDesk.z + 0.5);
+        const dir = new Vector3(-0.42, 0.62, 0.66).normalize();
+        return { pos: target.clone().addScaledVector(dir, 6.2), look: target, fov: 30 };
+      })()
+    : close === 'cabinet'
+      ? (() => {
+          const target = new Vector3(CABINET.x + 0.1, 0.8, CABINET.z + 0.6);
+          const dir = new Vector3(0.45, 0.42, 0.79).normalize();
+          return { pos: cabinet.world(target.clone().addScaledVector(dir, 4.6)), look: cabinet.world(target), fov: 30 };
+        })()
+      : null;
+  if (close === 'cabinet') cabinet.open('grid');
   const current = { pos: door.pos.clone(), look: door.look.clone(), fov: DOOR.fov };
   let glide: { from: View; to: View; start: number; ms: number; done: () => void } | null = null;
   let labelsDirty = true;
@@ -345,9 +475,11 @@ export async function mountRoom({
     const h = stage.clientHeight;
     if (w === 0 || h === 0) return;
     renderer.setSize(w, h, false);
+    const buffer = renderer.getDrawingBufferSize(new Vector2());
+    look?.resize?.(buffer.x, buffer.y);
     door = doorView(w / h);
     if (!glide) {
-      const v = viewOf(station);
+      const v = closeUp ?? viewOf(station);
       current.pos.copy(v.pos);
       current.look.copy(v.look);
       current.fov = v.fov;
@@ -360,7 +492,7 @@ export async function mountRoom({
   // the wall under the board or above the sign; never at monitor height. Desks choose their own spot.
   const anchorOf = (target: string): Vector3 | null => {
     const [kind] = target.split(':');
-    if (kind === 'cabinet') return new Vector3(CABINET.x, 0, CABINET.z + CABINET.depth / 2 + 0.1);
+    if (kind === 'cabinet') return cabinet.world(new Vector3(CABINET.x, 0, CABINET.z + CABINET.depth / 2 + 0.1));
     if (kind === 'reception') return new Vector3(RECEPTION.x, RECEPTION.height - 0.06, RECEPTION.z + RECEPTION.depth / 2 + 0.035);
     // On the wall just above the sign, clear of the monitors below it.
     if (kind === 'credit') return new Vector3(SIGN.x, SIGN.y + SIGN.height / 2 + 0.03, ROOM.z0 + 0.03);
@@ -368,6 +500,22 @@ export async function mountRoom({
     if (kind === 'reviewer') return new Vector3(REVIEW.table.x, REVIEW.table.height, REVIEW.table.z + REVIEW.table.depth / 2 + 0.005);
     if (kind === 'board') return new Vector3(BOARD.x, BOARD.bottom - 0.03, BOARD.z + 0.02);
     return cabinet.anchor(target);
+  };
+  /** The corners of a printed plate: a drawer's label card, or the sign's face. */
+  const plateOf = (target: string): Vector3[] => {
+    const id = target.slice(6);
+    if (id === 'sign') {
+      const w = (SIGN.width - 0.05) / 2;
+      const hh = (SIGN.height - 0.05) / 2;
+      const z = ROOM.z0 + 0.03;
+      return [
+        new Vector3(SIGN.x - w, SIGN.y + hh, z),
+        new Vector3(SIGN.x + w, SIGN.y + hh, z),
+        new Vector3(SIGN.x + w, SIGN.y - hh, z),
+        new Vector3(SIGN.x - w, SIGN.y - hh, z),
+      ];
+    }
+    return cabinet.plateCorners(id);
   };
   /** The corners of what a covering button lies over: a drawer's front, the sign, the radio. */
   const coverOf = (target: string): Vector3[] => {
@@ -436,6 +584,26 @@ export async function mountRoom({
       const target = el.dataset.target ?? '';
       const place = el.dataset.place ?? 'tag';
       const show = shownAt(el) && !glide;
+      if (place === 'plate') {
+        // Only from the door with every drawer shut: a print knows nothing of what stands in front of it,
+        // and close up the cabinet's own cards read well enough.
+        const clear = show && STYLE && !closeUp && !cabinet.drawers.some((d) => d.out > 0.01);
+        const corners = clear ? plateOf(target).map((c) => c.clone().project(camera)) : [];
+        const onScreen = corners.length === 4 && corners.every((c) => c.z < 1);
+        if (el.hidden === onScreen) el.hidden = !onScreen;
+        if (!onScreen) continue;
+        const px = corners.map((c) => [(c.x * 0.5 + 0.5) * w, (-c.y * 0.5 + 0.5) * h] as const);
+        const [a, b, c, d] = px;
+        if (!a || !b || !c || !d) continue;
+        // Sized near its size on screen, so the browser draws the text sharp rather than scaling it.
+        const pw = Math.max(20, Math.hypot(b[0] - a[0], b[1] - a[1]));
+        const ph = Math.max(8, Math.hypot(d[0] - a[0], d[1] - a[1]));
+        el.style.width = `${pw.toFixed(1)}px`;
+        el.style.height = `${ph.toFixed(1)}px`;
+        el.style.setProperty('--h', `${ph.toFixed(1)}px`);
+        el.style.transform = quadTransform(pw, ph, [a, b, c, d]);
+        continue;
+      }
       if (place === 'cover') {
         const corners = show ? coverOf(target).map((c) => c.project(camera)) : [];
         const onScreen = corners.length > 0 && corners.every((c) => c.z < 1);
@@ -493,8 +661,15 @@ export async function mountRoom({
   }
 
   function applyCamera(): void {
-    if (camera.fov !== current.fov) {
+    // Depth range follows the camera: a long lens stands far back, and a near plane of 0.1 m there
+    // would leave too little depth precision for the sign's face and the screens.
+    const reach = current.pos.distanceTo(current.look);
+    const near = Math.max(0.1, reach * 0.5 - 10);
+    const far = reach + 60;
+    if (camera.fov !== current.fov || camera.near !== near || camera.far !== far) {
       camera.fov = current.fov;
+      camera.near = near;
+      camera.far = far;
       camera.updateProjectionMatrix();
     }
     camera.position.copy(current.pos);
@@ -512,6 +687,7 @@ export async function mountRoom({
     last = now;
     if (!paused) crew.s = (crew.s + dt) % crew.replay.duration;
     crew.update(dt, now / 1000);
+    look?.update(dt, now / 1000);
     if (cabinet.update(dt, reduced)) labelsDirty = true;
     const k = reduced ? 1 : 1 - Math.exp(-dt * 1.8);
     for (let i = 0; i < 3; i++) light.colour[i] = (light.colour[i] ?? 1) + ((lightTarget.colour[i] ?? 1) - (light.colour[i] ?? 1)) * k;
@@ -532,7 +708,8 @@ export async function mountRoom({
       }
     }
     applyCamera();
-    renderer.render(scene, camera);
+    if (look?.render) look.render(scene, camera);
+    else renderer.render(scene, camera);
     if (labelsDirty) placeLabels();
     requestAnimationFrame(frame);
   }

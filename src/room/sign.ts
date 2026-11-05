@@ -22,6 +22,8 @@ export function startGridSign(on: { light: (light: RoomLight) => void; sign: (te
     set('grid-value', text.headline);
     set('grid-detail', text.detail);
     set('grid-light', text.light);
+    for (const el of document.querySelectorAll<HTMLElement>('[data-print="value"]')) el.textContent = text.headline;
+    for (const el of document.querySelectorAll<HTMLElement>('[data-print="detail"]')) el.textContent = text.detail;
     on.sign(text);
     on.light(reading ? lightFor(reading) : NEUTRAL_LIGHT);
   };

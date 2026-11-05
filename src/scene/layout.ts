@@ -11,6 +11,8 @@ export interface Box {
   readonly min: Vec3;
   readonly max: Vec3;
   readonly material: Material;
+  /** What it is part of, so a style can swap a desk or a chair for a model of one. */
+  readonly part?: 'desk' | 'chair' | 'monitor';
 }
 
 export const ROOM = { x0: -7, x1: 7, z0: -4.5, z1: 4.5 } as const;
@@ -78,15 +80,15 @@ export const BOARD = { x: 4.1, z: ROOM.z0 + 0.03, width: 2.0, height: 0.95, bott
  * The filing cabinet, the room's hero: a lateral file just inside the door on the left, facing it,
  * with room in front for its drawers to come out short of the front wall.
  */
-export const CABINET = { x: -2.5, z: 3.5, width: 1.4, height: 1.75, depth: 0.8, drawers: 4, plinth: 0.08 } as const;
+export const CABINET = { x: -2.5, z: 3.2, width: 1.6, height: 2.0, depth: 0.8, drawers: 4, plinth: 0.08 } as const;
 
 /** Reception: a counter just inside the door on the right. */
 export const RECEPTION = { x: 3.7, z: 3.45, width: 2.1, depth: 0.72, height: 1.02 } as const;
 
 /** The grid sign: a printed board on the back wall, left; the radio on a shelf beside it. */
-export const SIGN = { x: -4.45, y: 1.78, width: 1.9, height: 1.05 } as const;
-export const SHELF = { x: -2.55, y: 1.35, width: 0.9, depth: 0.3 } as const;
-export const RADIO = { x: -2.55, width: 0.52, height: 0.32, depth: 0.22 } as const;
+export const SIGN = { x: -4.5, y: 1.72, width: 2.3, height: 1.25 } as const;
+export const SHELF = { x: -2.35, y: 1.35, width: 0.8, depth: 0.3 } as const;
+export const RADIO = { x: -2.35, width: 0.52, height: 0.32, depth: 0.22 } as const;
 
 /** A soft key light on the cabinet, so the eye lands there first. Baked into the floor like the lamp. */
 export const KEY = {
@@ -121,8 +123,8 @@ export function boardSlot(piece: PieceId): Vec3 {
   return [x, y, BOARD.z + 0.035];
 }
 
-function box(min: Vec3, max: Vec3, material: Material): Box {
-  return { min, max, material };
+function box(min: Vec3, max: Vec3, material: Material, part?: Box['part']): Box {
+  return part ? { min, max, material, part } : { min, max, material };
 }
 
 function deskBoxes(d: DeskPlan): Box[] {
@@ -131,22 +133,23 @@ function deskBoxes(d: DeskPlan): Box[] {
   const top = DESK.height;
   const leg = 0.05;
   const boxes: Box[] = [
-    box([d.x - hw, top - DESK.top, d.z - hd], [d.x + hw, top, d.z + hd], 'card'),
+    box([d.x - hw, top - DESK.top, d.z - hd], [d.x + hw, top, d.z + hd], 'card', 'desk'),
     // Two panel legs, as a model maker would cut them.
-    box([d.x - hw, 0, d.z - hd + 0.04], [d.x - hw + leg, top - DESK.top, d.z + hd - 0.04], 'card'),
-    box([d.x + hw - leg, 0, d.z - hd + 0.04], [d.x + hw, top - DESK.top, d.z + hd - 0.04], 'card'),
+    box([d.x - hw, 0, d.z - hd + 0.04], [d.x - hw + leg, top - DESK.top, d.z + hd - 0.04], 'card', 'desk'),
+    box([d.x + hw - leg, 0, d.z - hd + 0.04], [d.x + hw, top - DESK.top, d.z + hd - 0.04], 'card', 'desk'),
     // Monitor: stand, then the screen's housing.
-    box([d.x - 0.12, top, d.z - 0.3], [d.x + 0.12, top + 0.02, d.z - 0.12], 'dark'),
-    box([d.x - 0.03, top, d.z - 0.24], [d.x + 0.03, SCREEN.bottom, d.z - 0.2], 'dark'),
+    box([d.x - 0.12, top, d.z - 0.3], [d.x + 0.12, top + 0.02, d.z - 0.12], 'dark', 'monitor'),
+    box([d.x - 0.03, top, d.z - 0.24], [d.x + 0.03, SCREEN.bottom, d.z - 0.2], 'dark', 'monitor'),
     box(
       [d.x - SCREEN.width / 2 - 0.02, SCREEN.bottom - 0.02, d.z - 0.21],
       [d.x + SCREEN.width / 2 + 0.02, SCREEN.bottom + SCREEN.height + 0.02, d.z - 0.17],
       'dark',
+      'monitor',
     ),
     // Chair: seat, stem, back.
-    box([d.seat[0] - 0.24, 0.42, d.seat[1] - 0.22], [d.seat[0] + 0.24, 0.47, d.seat[1] + 0.22], 'grey'),
-    box([d.seat[0] - 0.03, 0, d.seat[1] - 0.03], [d.seat[0] + 0.03, 0.42, d.seat[1] + 0.03], 'grey'),
-    box([d.seat[0] - 0.22, 0.47, d.seat[1] + 0.2], [d.seat[0] + 0.22, 0.74, d.seat[1] + 0.25], 'grey'),
+    box([d.seat[0] - 0.24, 0.42, d.seat[1] - 0.22], [d.seat[0] + 0.24, 0.47, d.seat[1] + 0.22], 'grey', 'chair'),
+    box([d.seat[0] - 0.03, 0, d.seat[1] - 0.03], [d.seat[0] + 0.03, 0.42, d.seat[1] + 0.03], 'grey', 'chair'),
+    box([d.seat[0] - 0.22, 0.47, d.seat[1] + 0.2], [d.seat[0] + 0.22, 0.74, d.seat[1] + 0.25], 'grey', 'chair'),
   ];
   return boxes;
 }

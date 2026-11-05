@@ -914,3 +914,45 @@ html[data-mode="room"] .readme {
   font-size: 13.5px;
   color: var(--ink-3);
 }
+
+/* Print laid over the drawer cards and the sign's face (style frames): decoration, mapped in perspective. */
+.room__labels > .print {
+  pointer-events: none;
+  transform-origin: 0 0;
+  will-change: auto;
+  margin: 0;
+  overflow: hidden;
+  color: #1e2225;
+}
+.print--drawer {
+  display: grid;
+  place-items: center;
+  background: #f8f7f1;
+  font: 600 calc(var(--h, 20px) * 0.74) / 1 var(--cond);
+  white-space: nowrap;
+}
+.print--sign {
+  display: grid;
+  align-content: start;
+  background: #f7f4ee;
+  font-family: var(--cond);
+}
+.print--sign .print__title {
+  margin: 0;
+  padding: calc(var(--h, 80px) * 0.03) calc(var(--h, 80px) * 0.07);
+  background: #1d5a44;
+  color: #fff;
+  font: 600 calc(var(--h, 80px) * 0.12) / 1.1 var(--cond);
+}
+.print--sign .print__value {
+  margin: calc(var(--h, 80px) * 0.06) calc(var(--h, 80px) * 0.07) 0;
+  font: 600 calc(var(--h, 80px) * 0.2) / 1.05 var(--mono);
+}
+.print--sign .print__detail {
+  margin: calc(var(--h, 80px) * 0.05) calc(var(--h, 80px) * 0.07) 0;
+  font: 500 calc(var(--h, 80px) * 0.095) / 1.2 var(--cond);
+  color: #464c51;
+}
+.room__labels > .tag--credit {
+  z-index: 3;
+}

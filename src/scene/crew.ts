@@ -52,6 +52,11 @@ export class Crew {
   readonly answering = new Set<PieceId>();
   /** The desk the camera stands at: its builder steps out of the picture. */
   away: PieceId | null = null;
+  /** False when a style frame brings its own people. */
+  people = true;
+  /** A piece whose sheet a style frame's builder is holding: its sheet is not drawn on its own. */
+  held: PieceId | null = null;
+  readonly #shadows: Mesh[] = [];
   readonly #builders = new Map<PieceId, Figure>();
   readonly #reviewer: Figure;
   readonly #sheets = new Map<PieceId, Mesh<PlaneGeometry, MeshLambertMaterial>>();
@@ -74,6 +79,7 @@ export class Crew {
       mesh.position.set(x, 0.003, z);
       mesh.renderOrder = 1;
       o.scene.add(mesh);
+      this.#shadows.push(mesh);
     };
     for (const d of DESKS) {
       const figure = seatedFigure();
@@ -109,12 +115,12 @@ export class Crew {
       // At most the builder at work turns a little, now and then, and looks down at the desk.
       const b = builderPose(phase.kind === 'building', t, i);
       pose(figure, b.turn, b.lean, b.nod);
-      figure.group.visible = this.away !== piece;
+      figure.group.visible = this.people && this.away !== piece;
 
       const sheet = this.#sheets.get(piece);
       if (sheet) {
         const p = sheetPose(piece, phase);
-        sheet.visible = p.visible;
+        sheet.visible = p.visible && this.held !== piece;
         if (p.visible) {
           sheet.position.set(p.x, p.y, p.z);
           // Flat on a desk or the table; turning upright as it reaches the board.
@@ -142,6 +148,8 @@ export class Crew {
 
     const r = reviewerPose(reviewing);
     pose(this.#reviewer, r.turn, r.lean, r.nod);
+    this.#reviewer.group.visible = this.people;
+    for (const shadow of this.#shadows) shadow.visible = this.people;
 
     let currentBrief: string | undefined;
     let briefAt = Number.NEGATIVE_INFINITY;

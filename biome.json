@@ -6,6 +6,8 @@
       "!node_modules",
       "!dist",
       "!.tmp",
+      "!.cache",
+      "!public/assets/3d",
       "!public/casts",
       "!public/record",
       "!public/vendor/radio",

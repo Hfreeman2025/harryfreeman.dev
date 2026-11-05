@@ -45,6 +45,8 @@ export interface Model {
   readonly briefGlow: ReadonlyMap<string, Mesh<PlaneGeometry, MeshBasicMaterial>>;
   /** The baked floor and workbench, tinted when the room's light changes. */
   readonly baked: readonly MeshBasicMaterial[];
+  /** The static boxes, one instanced mesh per material, for a style to restyle. */
+  readonly boxes: ReadonlyMap<Material, InstancedMesh>;
 }
 
 /** The atlas holds ten loops in a 5 × 2 grid, in desk order. */
@@ -114,7 +116,12 @@ function briefTexture(name: string): CanvasTexture {
   return texture;
 }
 
-export function buildModel(floor: Texture, ground: Texture, poster: Texture): Model {
+export function buildModel(
+  floor: Texture,
+  ground: Texture,
+  poster: Texture,
+  skip: (box: ReturnType<typeof staticBoxes>[number]) => boolean = () => false,
+): Model {
   const group = new Group();
 
   // The workbench and the mat, baked.
@@ -142,11 +149,13 @@ export function buildModel(floor: Texture, ground: Texture, poster: Texture): Mo
   const unit = new BoxGeometry(1, 1, 1);
   const byMaterial = new Map<Material, ReturnType<typeof staticBoxes>>();
   for (const box of staticBoxes()) {
+    if (skip(box)) continue;
     const list = byMaterial.get(box.material) ?? [];
     list.push(box);
     byMaterial.set(box.material, list);
   }
   const m = new Matrix4();
+  const boxMeshes = new Map<Material, InstancedMesh>();
   for (const [material, boxes] of byMaterial) {
     const mesh = new InstancedMesh(unit, new MeshLambertMaterial({ color: MATERIAL_COLOUR[material] }), boxes.length);
     boxes.forEach((b, i) => {
@@ -158,6 +167,7 @@ export function buildModel(floor: Texture, ground: Texture, poster: Texture): Mo
     });
     mesh.instanceMatrix.needsUpdate = true;
     group.add(mesh);
+    boxMeshes.set(material, mesh);
   }
 
   // Screens: one plane per desk, all showing tiles of the same atlas.
@@ -229,6 +239,7 @@ export function buildModel(floor: Texture, ground: Texture, poster: Texture): Mo
   return {
     group,
     baked: [groundMesh.material, floorMesh.material],
+    boxes: boxMeshes,
     screens: {
       meshes: screenMeshes,
       setTexture(texture: Texture) {

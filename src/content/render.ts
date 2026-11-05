@@ -69,13 +69,22 @@ export function renderRoomLabels(): string {
         `<a class="obj obj--folder" href="#folder-${id}" data-target="folder:${id}" data-at="cabinet" data-place="centre" data-piece="${id}"><span class="obj__name">${esc(pieceById(id).title)}</span></a>`,
     ),
   ]);
+  // Crisp print laid over the drawers' label cards and the sign's face, so both read from the door
+  // (style frames). Decoration: the drawer buttons and the sign's card carry the same words.
+  const prints = [
+    ...DRAWERS.map(
+      (d) =>
+        `<p class="print print--drawer" hidden aria-hidden="true" data-target="plate:${d.id}" data-at="door" data-place="plate">${esc(d.label)}</p>`,
+    ),
+    '<div class="print print--sign" hidden aria-hidden="true" data-target="plate:sign" data-at="door" data-place="plate"><p class="print__title">The grid, now</p><p class="print__value" data-print="value">Reading the grid…</p><p class="print__detail" data-print="detail"></p></div>',
+  ];
   // The grid's credit, always shown beside the sign and the radio.
   const credit =
     '<p class="tag tag--credit" id="grid-credit" hidden data-target="credit" data-at="door" data-place="over">Data: Carbon Intensity API, © NESO, CC BY 4.0</p>';
   // Hidden until the engine places them, so nothing shows or takes focus before the room is up. An
   // explicit tabindex puts them in Safari's Tab order too, which by default skips links and buttons.
   const controls = [...objects, ...desks, ...furniture, ...filed].map((html) => html.replace(/^<(a|button) /, '<$1 hidden tabindex="0" '));
-  return [...controls, credit].join('\n');
+  return [...controls, credit, ...prints].join('\n');
 }
 
 function crossLink(piece: Piece): string {
