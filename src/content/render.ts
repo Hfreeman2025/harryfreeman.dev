@@ -144,8 +144,8 @@ export function renderDeskLabels(): string {
       (p) =>
         `<a class="dtag dtag--name" href="#folder-${p.id}" data-desk-target="desk:${p.id}" data-action="desk:${p.id}" data-at="office" data-place="nametag" data-piece="${p.id}" data-status="idle"><span class="dtag__dot" aria-hidden="true"></span>${esc(p.title)}</a>`,
     ),
-    `<button type="button" class="dtag" data-desk-target="office-reception" data-action="reception" data-at="office" data-place="over">Reception</button>`,
-    `<button type="button" class="dtag" data-desk-target="office-cabinet" data-action="cabinet" data-at="office" data-place="over">Filing</button>`,
+    `<button type="button" class="dtag" data-desk-target="office-reception" data-action="reception" data-at="office" data-place="centre">Reception</button>`,
+    `<button type="button" class="dtag" data-desk-target="office-cabinet" data-action="cabinet" data-at="office" data-place="centre">Filing</button>`,
     `<button type="button" class="obj obj--cover" data-desk-target="radio" data-action="radio" data-at="office" data-place="cover" aria-expanded="false" aria-controls="radio"><span class="obj__name">The radio: Listen to the Grid</span></button>`,
   ];
   // Each divider, then its cards, so Tab goes from a divider into its cards.

@@ -7,6 +7,7 @@ import {
   BoxGeometry,
   type InstancedMesh,
   type Material,
+  Matrix4,
   Mesh,
   MeshBasicMaterial,
   MeshLambertMaterial,
@@ -14,12 +15,14 @@ import {
   type Object3D,
   OctahedronGeometry,
   PlaneGeometry,
+  Quaternion,
   RepeatWrapping,
   type Scene,
+  Vector3,
 } from 'three';
 import { PIECE_IDS, type PieceId } from '../content/pieces';
 import { Cabinet } from '../scene/cabinet';
-import { BRIEF, CABINET, DESK, DESKS, deskFor, RECEPTION, REVIEW, ROOM } from '../scene/layout';
+import { CABINET, DESK, DESKS, type DeskPlan, deskFor, RECEPTION, REVIEW, ROOM, WALL } from '../scene/layout';
 import type { Model } from '../scene/model';
 import { canvasTexture, cond, fitBox, fitFont, kit, loadGltf, moment, type Person, person, play, seatedClip } from '../scene/style';
 import { arc, boardSpot, deskSpot, tableSpot } from '../scene/work';
@@ -34,6 +37,28 @@ export const WHEELCHAIR_DESK = 3;
 type Point = readonly [number, number];
 
 /** A builder's path to the review table: out to the aisle, through a gap between desks, to its place. */
+/**
+ * The tiny filing cabinet: a little smaller than the classic room's and brought forward, so the low view
+ * sees the builder behind it, and its name sits on the floor in front of it.
+ */
+export const CABINET_AT = { x: CABINET.x, z: CABINET.z + 0.3, scale: 0.8 } as const;
+
+/**
+ * The zone names painted on the floor, each where the low view and the desk view both see all of it: the
+ * front strip of the room, which has no wall in this cutaway, and the corridor in front of the desks.
+ */
+export const ZONES = [
+  { text: 'STUDIO FLOOR', x: -4.95, z: 2.32, width: 2.1, colour: INK },
+  { text: 'FILING', x: CABINET_AT.x, z: ROOM.z1 - 0.38, width: 1.6, colour: CREAM },
+  { text: 'REVIEW', x: REVIEW.table.x, z: ROOM.z1 - 0.38, width: 1.6, colour: INK },
+  { text: 'RECEPTION', x: RECEPTION.x, z: ROOM.z1 - 0.38, width: 2.0, colour: INK },
+] as const;
+
+/** Where a builder stands when their card is pulled: beside the desk, so their monitor stays in view. */
+export function standAt(d: DeskPlan): [number, number] {
+  return [d.x + DESK.width / 2 + 0.38, d.z + 0.5];
+}
+
 export function pathFor(piece: PieceId): Point[] {
   const d = deskFor(piece);
   const i = PIECE_IDS.indexOf(piece);
@@ -153,6 +178,10 @@ export interface Office {
   stand(piece: PieceId | null, wave: boolean): void;
   /** Who is standing, and whether they wave (for the checks). */
   standing(): { piece: PieceId; wave: boolean } | null;
+  /** Opens the left side wall (the camera's side in a card view), so it never stands before a desk. */
+  openSide(open: boolean): void;
+  /** In a card view only its builder's status gem shows; null shows them all. */
+  solo(piece: PieceId | null): void;
   update(dt: number, t: number): void;
 }
 
@@ -167,6 +196,22 @@ export async function buildOffice(scene: Scene, model: Model, replay: Replay, no
     mesh.receiveShadow = true;
   }
   for (const pool of model.pools.values()) pool.visible = false;
+  // A cutaway: the low front wall goes, so the camera looks straight in at the monitors and the zone
+  // names along the front are never behind it.
+  const walls = model.boxes.get('card' as never) as InstancedMesh | undefined;
+  let side: { index: number; matrix: Matrix4 } | null = null;
+  if (walls) {
+    const m = new Matrix4();
+    const at = new Vector3();
+    const size = new Vector3();
+    for (let i = 0; i < walls.count; i++) {
+      walls.getMatrixAt(i, m);
+      m.decompose(at, new Quaternion(), size);
+      if (Math.abs(size.y - WALL.front) < 1e-3 && at.z > ROOM.z1 - 1e-3) walls.setMatrixAt(i, new Matrix4().makeScale(0, 0, 0));
+      else if (Math.abs(size.y - WALL.side) < 1e-3 && at.x < ROOM.x0) side = { index: i, matrix: m.clone() };
+    }
+    walls.instanceMatrix.needsUpdate = true;
+  }
 
   // ---------- Floors, zones, names, cables ----------
   scene.add(
@@ -214,12 +259,13 @@ export async function buildOffice(scene: Scene, model: Model, replay: Replay, no
       [6, 1],
       0.006,
     ),
-    // Tiles by Reception, slate by the filing cabinet, sun under the review table.
+    // Tiles by Reception (stopping short of its painted name), slate by the filing cabinet, sun under the
+    // review table, both out to the front.
     floor(
       RECEPTION.x - 1.7,
       2.45,
       ROOM.x1,
-      ROOM.z1,
+      ROOM.z1 - 0.72,
       (c) => {
         for (let y = 0; y < 4; y++)
           for (let x = 0; x < 4; x++) {
@@ -252,7 +298,7 @@ export async function buildOffice(scene: Scene, model: Model, replay: Replay, no
       REVIEW.table.x - 1.75,
       REVIEW.table.z - 0.95,
       REVIEW.table.x + 1.75,
-      REVIEW.table.z + 1.15,
+      ROOM.z1,
       (c) => {
         c.fillStyle = SUN;
         c.fillRect(0, 0, 256, 256);
@@ -264,13 +310,7 @@ export async function buildOffice(scene: Scene, model: Model, replay: Replay, no
       0.009,
     ),
   );
-  scene.add(
-    stencil('STUDIO FLOOR', ROOM.x0 + 1.45, -0.66, 2.4, CREAM),
-    stencil('FILING', CABINET.x, ROOM.z1 - 0.32, 2.0, SUN),
-    stencil('REVIEW', REVIEW.table.x - 2.3, REVIEW.reviewer[1] + 0.35, 2.0, INK),
-    stencil('RECEPTION', RECEPTION.x, ROOM.z1 - 0.3, 2.4, CORAL),
-    stencil('THE BRIEFS', BRIEF.table.x, BRIEF.table.z + 0.66, 2.2, CREAM),
-  );
+  scene.add(...ZONES.map((z) => stencil(z.text, z.x, z.z, z.width, z.colour)));
   const cable = new MeshLambertMaterial({ color: INK });
   for (const d of DESKS) {
     const run = new Mesh(new BoxGeometry(0.035, 0.012, d.z - 0.35 - (ROOM.z0 + 0.15)), cable);
@@ -284,6 +324,8 @@ export async function buildOffice(scene: Scene, model: Model, replay: Replay, no
 
   // ---------- The filing cabinet's model, a blue landmark in its corner ----------
   const cabinet = new Cabinet(0, true);
+  cabinet.group.position.set(CABINET_AT.x, 0, CABINET_AT.z);
+  cabinet.group.scale.setScalar(CABINET_AT.scale);
   cabinet.group.traverse((o) => {
     const mesh = o as Mesh;
     if (!mesh.isMesh) return;
@@ -335,7 +377,6 @@ export async function buildOffice(scene: Scene, model: Model, replay: Replay, no
   for (const [x, z] of [
     [ROOM.x0 + 0.5, ROOM.z0 + 0.5],
     [ROOM.x1 - 0.5, ROOM.z0 + 0.5],
-    [ROOM.x0 + 0.5, ROOM.z1 - 0.5],
   ] as const) {
     const plant = recolour(furniture('pottedPlant'), {});
     plant.scale.setScalar(2.6);
@@ -407,6 +448,7 @@ export async function buildOffice(scene: Scene, model: Model, replay: Replay, no
   const paths = new Map(PIECE_IDS.map((p) => [p, pathFor(p)] as const));
 
   let standing: { piece: PieceId; wave: boolean; since: number } | null = null;
+  let soloPiece: PieceId | null = null;
   let clock = 0;
   const seat = (p: Person, x: number, z: number, wheel: boolean) => {
     p.root.position.set(x, wheel ? 0.12 : 0.2, z - 0.05);
@@ -420,6 +462,14 @@ export async function buildOffice(scene: Scene, model: Model, replay: Replay, no
       standing = piece ? { piece, wave, since: clock } : null;
     },
     standing: () => (standing ? { piece: standing.piece, wave: standing.wave } : null),
+    solo(piece) {
+      soloPiece = piece;
+    },
+    openSide(open) {
+      if (!walls || !side) return;
+      walls.setMatrixAt(side.index, open ? new Matrix4().makeScale(0, 0, 0) : side.matrix);
+      walls.instanceMatrix.needsUpdate = true;
+    },
     update(dt, t) {
       clock += dt;
       const m = moment(replay, now());
@@ -436,8 +486,9 @@ export async function buildOffice(scene: Scene, model: Model, replay: Replay, no
             seat(p, d.seat[0], d.seat[1], true);
             play(p, waving ? 'wheelchairTyping' : 'wheelchair', 0);
           } else {
-            p.root.position.set(d.seat[0] + 0.45, 0, d.seat[1] + 0.35);
-            p.root.rotation.y = 0.6;
+            const [sx, sz] = standAt(d);
+            p.root.position.set(sx, 0, sz);
+            p.root.rotation.y = -0.55;
             play(p, waving ? 'cheer' : 'idle', 0);
           }
         } else {
@@ -455,14 +506,11 @@ export async function buildOffice(scene: Scene, model: Model, replay: Replay, no
                 : (phase.kind === 'building' && phase.returned) || (phase.kind === 'back' && phase.outcome === 'returned')
                   ? STATUS.returned
                   : STATUS.building;
-          gem.visible = colour !== null;
+          gem.visible = colour !== null && (soloPiece === null || soloPiece === piece);
           if (colour) gem.material.color.set(colour);
-          const up = standing?.piece === piece && !wheel ? 0.25 : 0;
-          gem.position.set(
-            standing?.piece === piece && !wheel ? d.seat[0] + 0.45 : d.seat[0],
-            2.35 + up + Math.sin(t * 2 + d.x) * 0.04,
-            standing?.piece === piece && !wheel ? d.seat[1] + 0.35 : d.seat[1],
-          );
+          const up = standing?.piece === piece && !wheel;
+          const [gx, gz] = up ? standAt(d) : [d.seat[0], d.seat[1]];
+          gem.position.set(gx, 2.35 + (up ? 0.25 : 0) + Math.sin(t * 2 + d.x) * 0.04, gz);
           gem.rotation.y = t * 1.3 + d.x;
         }
         const sheet = sheets.get(piece);

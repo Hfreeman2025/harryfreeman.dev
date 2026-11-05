@@ -22,7 +22,7 @@ import {
 import { DRAWERS } from '../content/drawers';
 import { PIECES, type PieceId, pieceById } from '../content/pieces';
 import type { SignText } from '../room/grid';
-import { canvasTexture, cond, fitFont, mono } from '../scene/style';
+import { canvasTexture, cond, fitFont } from '../scene/style';
 import { BIRCH, BLUE, CORAL, CREAM, INK, PAPER, SUN } from './palette';
 
 /** The desk's top, where the model's base and everything else stand. */
@@ -608,11 +608,8 @@ export function stickyTexture(text: SignText): CanvasTexture {
       c.fillText(text.headline, 44, 340);
     }
     fitFont(c, text.detail.replace('Great Britain, ', 'GB, '), hand(500), 52, 680);
-    c.fillText(text.detail.replace('Great Britain, ', 'GB, '), 44, 560);
-    // The credit, printed small and plain, as a credit should be.
-    c.fillStyle = '#4a4430';
-    fitFont(c, `Source: ${text.source}`, mono(500), 30, 680);
-    c.fillText(`Source: ${text.source}`, 44, 700);
+    c.fillText(text.detail.replace('Great Britain, ', 'GB, '), 44, 600);
+    // The credit is a slip stuck under the note: real text on the page (#desk-credit), not paint.
   });
 }
 

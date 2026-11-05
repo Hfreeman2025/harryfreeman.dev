@@ -29,6 +29,35 @@ content source, and the directory board is the plain, accessible list in both.
 
 The same moment of the replay before and after this redesign: [before](shots/office-4/chromium-moment-before.png), [after](shots/office-4/chromium-moment-after.png).
 
+## On this branch: the desk
+
+On `design/desk-miniature` the page opens on Harry's desk at real scale, with the studio as a living
+miniature on it, drawn as a management sim: zoned floors with their names painted where nothing stands
+in front of them, a status gem and a name tag per builder, and the work travelling on paths to review.
+The things on the desk are the site's parts (`src/desk/`):
+
+- **The model.** Click it (or scroll down) and the camera swoops in: high over the desk at first, then
+  levelling out late into a low three-quarter view across the office, at the monitors, each playing its
+  tool's recorded loop. The tilt-shift that makes the desk read as a miniature pulls to sharp on the way
+  down. Esc, scrolling up or the visible button rises back out.
+- **The index-card box** is the archive. Pull a card and its builder stands beside their desk while the
+  camera lands on their monitor, the screen the subject; the card shows the folder. In that view the
+  model's near wall and the giant things on the desk step aside, so nothing stands in front.
+- **The notebook** is the briefs: a page a round (BRIEF, V2, V3), each line one of the tools' curated
+  asks from `src/content/pieces.ts`, never the raw brief files. Turning to a round replays it.
+- **The stamp and ink pad** are the receipt stamps. The card's stamp runs the real `verifyStamp`; the
+  ink, PASSED, FAILED or NOT VALID, lands on the card only once the check has resolved, and a valid
+  signature over failed checks (dreaming) inks FAILED beside "Signature valid".
+- **The keyboard** is Reception. What you type goes into the real question box and presses the 3D keys;
+  the answer prints out of a tiny printer on the model's counter as a slip with its first two
+  quotations, the builder whose README answered stands, and the camera goes to their desk with the line
+  marked. A refusal prints a refusal and moves nothing.
+- **The sticky note** carries the grid's current half-hour in the same Caveat hand (OFL, self-hosted in
+  `public/fonts/caveat`), with the NESO credit as a slip stuck under it.
+
+`?style=classic` shows the study-model room above; the flat office is unchanged. Assets are the CC0
+packs recorded in `public/assets/3d/SOURCES.json`.
+
 ## See it
 
 Node 22.12 or later. From this folder:
@@ -143,7 +172,9 @@ Automation is silent and offline from the world: every browser gets a device-fre
 (`scripts/silent.mjs`), the Carbon Intensity API is always mocked, and any request off the machine fails
 the check.
 
-- **Unit tests (Vitest, 57):**
+- **Unit tests (Vitest, 61):**
+  - Reception's printout: an answer's first two quotations with their sections, a long one shortened
+    with the cut marked, a refusal with its reason, and nothing printed for a result it cannot read;
   - the scale figures: about 1.75 m standing and 1.4 m seated, and at every 0.1 s step of both the
     real and the placeholder replay, no two figures' bounding boxes intersect and no part of any figure
     intersects any piece of furniture (contact within 2 mm counts as sitting or resting, not
@@ -159,7 +190,16 @@ the check.
   - the room's tags: only the cabinet, Reception and the credit at rest, every object a tabbable link
     or button, and each drawer followed by its folders;
   - the earlier suites: the timeline, replay, rendering, config, CV, filing, cabinet and floor plan.
-- **Browser checks (43 per browser, all passing in Chromium, WebKit and Firefox on 5 November):**
+- **Browser checks (52 per browser, all passing in Chromium, WebKit and Firefox on 5 November):**
+  - the desk (`scripts/desk-checks.mjs`): it opens at real scale in tilt-shift with the credit on the
+    note and zero layout shift; the swoop starts high and lands low (under 30°), still high part-way;
+    Esc, the button and the wheel rise out; a card pull by keyboard reaches its desk, the monitor
+    framed clear of the card with the builder beside it; no name tag covers a screen, another tag or a
+    painted zone name, and every screen is in view; the notebook's V3 page replays V3; typing at
+    Reception presses one key per character and an answer prints its quotes before the desk opens with
+    the line marked; a refusal prints a refusal; reduced motion cuts and nobody waves;
+  - the stamps' ink: none while the check is held, then PASSED, NOT VALID for the one-byte change, and
+    FAILED for dreaming beside its valid signature;
   - the HTML before scripts;
   - the first screen (directory and poster), a clean console and zero layout shift;
   - by keyboard, cabinet → drawer → folder → the desk turn → Esc back, step by step, with focus

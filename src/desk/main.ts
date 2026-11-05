@@ -15,6 +15,7 @@ import { popovers } from '../room/popover';
 import type { Timeline } from '../timeline/schema';
 import type { DeskEngine, Station } from './engine';
 import { ROUNDS, type Round } from './objects';
+import { placeSlip, printResult } from './printout';
 
 export interface DeskControl {
   answer(pieces: readonly PieceId[], mark: () => Range | null, result?: unknown): void;
@@ -71,11 +72,14 @@ export async function startDesk(timeline: Timeline): Promise<DeskControl> {
     return chain;
   };
   const backButton = document.getElementById('room-back');
+  const printout = document.getElementById('printout');
+  const paper = document.getElementById('printout-paper');
   const setStation = (s: Station) => {
     root.dataset.station = s.startsWith('desk:') ? 'desk' : s;
     if (backButton) backButton.textContent = BACK[s] ?? 'Back to the desk';
     const notebookPanel = document.getElementById('notebook-panel');
     if (notebookPanel) notebookPanel.hidden = s !== 'notebook';
+    if (s !== 'reception' && printout) printout.hidden = true;
   };
   setStation('door');
 
@@ -266,6 +270,8 @@ export async function startDesk(timeline: Timeline): Promise<DeskControl> {
   });
 
   document.addEventListener('keydown', (event) => {
+    // At Reception, what is typed into the question box presses the giant keyboard's keys.
+    if (engine.station() === 'reception' && !event.metaKey && !event.ctrlKey && !event.altKey) engine.press(event.key);
     if (event.key === 'Escape' && engine.station() !== 'door') {
       event.preventDefault();
       void run(stepBack);
@@ -346,12 +352,25 @@ export async function startDesk(timeline: Timeline): Promise<DeskControl> {
   });
 
   return {
-    answer(pieces, mark) {
+    answer(pieces, mark, result) {
       engine.answering(pieces);
+      if (engine.station() !== 'reception') return;
+      // The answer prints out of the tiny printer on the counter, a refusal as a refusal; then the builder
+      // whose README answered stands, and the camera goes to their desk with the quoted line marked.
+      const printed = printout && paper && result !== undefined ? printResult(paper, result) : null;
+      if (printout && printed) {
+        printout.hidden = false;
+        delete printout.dataset.printing;
+        void printout.offsetWidth;
+        printout.dataset.printing = 'true';
+        placeSlip(printout, hall, engine.printerPoint());
+        paper?.addEventListener('animationend', () => delete printout.dataset.printing, { once: true });
+      }
       const first = pieces[0];
-      if (!first || engine.station() !== 'reception') return;
+      if (!first || printed === 'refusal') return;
+      engine.stand(first, false);
       void run(async () => {
-        if (!reduced) await new Promise((r) => setTimeout(r, 700));
+        if (!reduced) await new Promise((r) => setTimeout(r, printed ? 2400 : 700));
         if (engine.station() === 'reception') await toDesk(first, 'reception', mark);
       });
     },

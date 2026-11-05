@@ -1,6 +1,7 @@
 // The receipt stamps' browser checks, run by e2e.mjs in each browser: a real stamp verifies in the
 // browser and nothing says verified before the check resolves; the one-byte change is rejected;
-// dreaming shows a valid signature with failed checks, its reason and its supplement; earlier
+// dreaming shows a valid signature with failed checks, its reason and its supplement; the stamp's
+// ink (PASSED, FAILED, NOT VALID) lands on the card only once the check has resolved; earlier
 // captures check too; a browser without Ed25519 says it cannot verify; the flat office's folders
 // carry the same stamp.
 
@@ -11,6 +12,10 @@ const cardOpen = (page) =>
     timeout: 15000,
   });
 const stampText = (page) => page.locator('#card-stamp').textContent();
+const ink = (page) =>
+  page.evaluate(() =>
+    [...document.querySelectorAll('#card-stamp .stamp__ink')].map((el) => ({ text: el.textContent, kind: el.className })),
+  );
 const state = (page) => page.locator('#card-stamp .stamp__status').first().getAttribute('data-state');
 const settled = (page) =>
   page.waitForFunction(
@@ -53,8 +58,14 @@ export async function stampChecks({ check, expect, BASE, shot, name }) {
       const during = await stampText(page);
       expect(/Checking the signature/.test(during), `while checking: ${during}`);
       expect(!/signature valid|checks passed/i.test(during), `shows an outcome before the check resolved: ${during}`);
+      expect((await ink(page)).length === 0, 'inked before the check resolved');
       release();
       await settled(page);
+      const inked = await ink(page);
+      expect(
+        inked.length === 1 && inked[0].text === 'PASSED' && inked[0].kind.includes('stamp__ink--passed'),
+        `ink ${JSON.stringify(inked)}`,
+      );
       expect((await state(page)) === 'valid', `state ${await state(page)}`);
       const after = await stampText(page);
       expect(after.includes('Signature valid, signed by key e201c249…'), 'no signature line');
@@ -65,6 +76,7 @@ export async function stampChecks({ check, expect, BASE, shot, name }) {
       );
       await page.locator('#card-stamp .stamp__outcome').scrollIntoViewIfNeeded();
       await page.locator('#card-stamp').evaluate((el) => el.scrollIntoView({ block: 'start' }));
+      await page.waitForTimeout(450); // the ink lands
       await shot(page, 'stamp-passed');
       expect(problems.length === 0, problems.join(' | '));
     },
@@ -80,7 +92,10 @@ export async function stampChecks({ check, expect, BASE, shot, name }) {
     expect(text.includes('Signature not valid: Ed25519 signature verification failed.'), `outcome: ${text}`);
     expect(!/Signature valid|Checks passed/.test(text), 'shows facts from a rejected stamp');
     expect((await page.locator('#card-stamp .stamp__facts').count()) === 0, 'a statement shown for a rejected stamp');
+    const inked = await ink(page);
+    expect(inked.length === 1 && inked[0].text === 'NOT VALID', `ink ${JSON.stringify(inked)}`);
     await page.locator('#card-stamp').evaluate((el) => el.scrollIntoView({ block: 'start' }));
+    await page.waitForTimeout(450); // the ink lands
     await shot(page, 'stamp-tampered');
   });
 
@@ -93,6 +108,12 @@ export async function stampChecks({ check, expect, BASE, shot, name }) {
     await page.locator('#card-stamp .stamp__supplement .stamp__outcome').waitFor({ timeout: 10000 });
     const text = await stampText(page);
     expect(text.includes('Signature valid, signed by key e201c249…'), 'no valid signature');
+    // The signature is valid and the checks failed: two facts, so the ink says FAILED, not NOT VALID.
+    const inked = await ink(page);
+    expect(
+      inked.length === 1 && inked[0].text === 'FAILED' && inked[0].kind.includes('stamp__ink--failed'),
+      `ink ${JSON.stringify(inked)}`,
+    );
     expect(
       /Checks failed: unit-tests exited 1: Tests {2}1 failed \| 455 passed/.test(text),
       `no failed checks and reason: ${text.slice(0, 400)}`,
@@ -105,6 +126,7 @@ export async function stampChecks({ check, expect, BASE, shot, name }) {
       timeout: 10000,
     });
     await page.locator('#card-stamp').evaluate((el) => el.scrollIntoView({ block: 'start' }));
+    await page.waitForTimeout(450); // the ink lands
     await shot(page, 'stamp-dreaming');
   });
 

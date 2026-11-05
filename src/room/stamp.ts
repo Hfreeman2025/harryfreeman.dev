@@ -248,12 +248,32 @@ async function check(
     if (!isCurrent()) return;
     status.textContent = result.valid ? 'Checked in your browser.' : 'Checked in your browser: not valid.';
     status.dataset.state = result.valid ? 'valid' : 'invalid';
-    place.replaceChildren(outcome(result, expected, compact));
+    const shown = outcome(result, expected, compact);
+    place.replaceChildren(shown);
+    if (!compact) inkCard(place, shown.dataset.result === 'valid' ? (result.checksPassed ? 'passed' : statusOf(result)) : 'not-valid');
   } catch (error) {
     if (!isCurrent()) return;
     status.textContent = `Could not check the stamp: ${error instanceof Error ? error.message : String(error)}.`;
     status.dataset.state = 'error';
   }
+}
+
+/** What a verified statement says about its checks: failed or incomplete (only called when it did not pass). */
+function statusOf(result: VerifyResult): 'failed' | 'incomplete' {
+  const parsed = v.safeParse(StatementSchema, result.statement);
+  return parsed.success && parsed.output.predicate.status === 'incomplete' ? 'incomplete' : 'failed';
+}
+
+const INK_TEXT = { passed: 'PASSED', failed: 'FAILED', incomplete: 'INCOMPLETE', 'not-valid': 'NOT VALID' } as const;
+
+/**
+ * The stamp's ink on the card, only once the check has resolved: PASSED or FAILED for a valid signature
+ * (the checks' result), NOT VALID when the signature is not.
+ */
+function inkCard(place: HTMLElement, ink: keyof typeof INK_TEXT): void {
+  const mark = el('p', `stamp__ink stamp__ink--${ink}`, INK_TEXT[ink]);
+  mark.setAttribute('aria-hidden', 'true');
+  place.prepend(mark);
 }
 
 let generation = 0;
