@@ -210,22 +210,6 @@ export class Cabinet {
     ].map((v) => this.world(v));
   }
 
-  /** The corners of a drawer's label plate (top-left, top-right, bottom-right, bottom-left). */
-  plateCorners(id: string): Vector3[] {
-    const d = this.drawers.find((x) => x.id === id);
-    if (!d) return [];
-    const y = d.group.position.y + DRAWER_H * 0.1;
-    const z = FRONT_Z + 0.032 + d.group.position.z;
-    const w = (FRONT_W * 0.92) / 2;
-    const h = (DRAWER_H * 0.58) / 2;
-    return [
-      new Vector3(CABINET.x - w, y + h, z),
-      new Vector3(CABINET.x + w, y + h, z),
-      new Vector3(CABINET.x + w, y - h, z),
-      new Vector3(CABINET.x - w, y - h, z),
-    ].map((v) => this.world(v));
-  }
-
   isOpen(id: string): boolean {
     return this.drawers.some((d) => d.id === id && d.outTarget > 0);
   }

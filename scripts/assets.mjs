@@ -13,6 +13,7 @@ const out = join(root, 'public', 'assets', '3d');
 
 const KENNEY_FURNITURE = 'kenney_furniture-kit/Models/GLTF format';
 const KENNEY_MINI = 'kenney_mini-characters/Models/GLB format';
+const KENNEY_BLOCKY = 'kenney_blocky-characters/Models/GLB format';
 const KAYKIT = 'kaykit_furniture-bits/KayKit-Furniture-Bits-1.0-main/addons/kaykit_furniture_bits/Assets/gltf';
 const kaykit = (name) => [`${name}.gltf`, `${name}.bin`];
 
@@ -39,6 +40,11 @@ const PACKS = [
       'radio.glb',
       'trashcan.glb',
       'coatRackStanding.glb',
+      'lampSquareTable.glb',
+      'rugRound.glb',
+      'bookcaseOpen.glb',
+      'sideTable.glb',
+      'speakerSmall.glb',
     ],
   },
   {
@@ -55,6 +61,16 @@ const PACKS = [
       'aid-glasses.glb',
       'Textures/colormap.png',
     ],
+  },
+  {
+    id: 'kenney-blocky-characters',
+    name: 'Blocky Characters 2.0',
+    by: 'Kenney',
+    url: 'https://kenney.nl/assets/blocky-characters',
+    licence: 'CC0 1.0',
+    archive: 'kenney_blocky-characters.zip',
+    from: KENNEY_BLOCKY,
+    files: ['a', 'b', 'c', 'e', 'f', 'g', 'h', 'i', 'k', 'm', 'q'].flatMap((x) => [`character-${x}.glb`, `Textures/texture-${x}.png`]),
   },
   {
     id: 'kaykit-furniture-bits',

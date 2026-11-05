@@ -81,7 +81,7 @@ describe('render', () => {
   it('names only the cabinet and Reception at rest, with the grid credit always shown', () => {
     const labels = renderRoomLabels();
     const atRest = (labels.match(/<(a|button|p) [^>]*data-at="door"[^>]*>/g) ?? []).filter(
-      (t) => !t.includes('data-reveal="hover"') && !t.includes('data-place="cover"') && !t.includes('data-place="plate"'),
+      (t) => !t.includes('data-reveal="hover"') && !t.includes('data-place="cover"'),
     );
     expect(atRest.map((t) => /data-target="([^"]+)"/.exec(t)?.[1])).toEqual(['cabinet', 'reception', 'credit']);
     expect(labels).toContain('Data: Carbon Intensity API, © NESO, CC BY 4.0');

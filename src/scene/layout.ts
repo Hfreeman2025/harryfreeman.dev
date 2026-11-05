@@ -12,7 +12,7 @@ export interface Box {
   readonly max: Vec3;
   readonly material: Material;
   /** What it is part of, so a style can swap a desk or a chair for a model of one. */
-  readonly part?: 'desk' | 'chair' | 'monitor';
+  readonly part?: 'desk' | 'chair' | 'monitor' | 'sign' | 'shelf' | 'reception';
 }
 
 export const ROOM = { x0: -7, x1: 7, z0: -4.5, z1: 4.5 } as const;
@@ -183,15 +183,16 @@ export function staticBoxes(): Box[] {
   boxes.push(box([c.x - c.width / 2, 0, c.z - c.depth / 2], [c.x + c.width / 2, c.height, c.z + c.depth / 2], 'steel'));
   const rc = RECEPTION;
   boxes.push(
-    box([rc.x - rc.width / 2, 0, rc.z - rc.depth / 2], [rc.x + rc.width / 2, rc.height, rc.z + rc.depth / 2], 'wood'),
+    box([rc.x - rc.width / 2, 0, rc.z - rc.depth / 2], [rc.x + rc.width / 2, rc.height, rc.z + rc.depth / 2], 'wood', 'reception'),
     box(
       [rc.x - rc.width / 2 - 0.03, rc.height, rc.z - rc.depth / 2 - 0.03],
       [rc.x + rc.width / 2 + 0.03, rc.height + 0.04, rc.z + rc.depth / 2 + 0.03],
       'card',
+      'reception',
     ),
   );
   boxes.push(
-    box([SHELF.x - SHELF.width / 2, SHELF.y - 0.04, ROOM.z0], [SHELF.x + SHELF.width / 2, SHELF.y, ROOM.z0 + SHELF.depth], 'wood'),
+    box([SHELF.x - SHELF.width / 2, SHELF.y - 0.04, ROOM.z0], [SHELF.x + SHELF.width / 2, SHELF.y, ROOM.z0 + SHELF.depth], 'wood', 'shelf'),
     box(
       [RADIO.x - RADIO.width / 2, SHELF.y, ROOM.z0 + 0.04],
       [RADIO.x + RADIO.width / 2, SHELF.y + RADIO.height, ROOM.z0 + 0.04 + RADIO.depth],
@@ -201,6 +202,7 @@ export function staticBoxes(): Box[] {
       [SIGN.x - SIGN.width / 2, SIGN.y - SIGN.height / 2, ROOM.z0],
       [SIGN.x + SIGN.width / 2, SIGN.y + SIGN.height / 2, ROOM.z0 + 0.025],
       'card',
+      'sign',
     ),
   );
 

@@ -22,7 +22,12 @@
         "rugRectangle.glb": "a989d2d59c04e3071e0c90388b113a9a8f339ce1814ef984c51cb6dcd7c8e0eb",
         "radio.glb": "1ba93d6ba6f049750853b4652b92f286f2898e527695a0705b75cc7615897fed",
         "trashcan.glb": "e0ccc1fe50cbd05386477fdff527171d1cf7c0de2ba7ff3233f8d9561feb2561",
-        "coatRackStanding.glb": "d8231c22dab63ceb9fc8678f6c8ceafc62afa8726b51a73b4ce349043d3cdc91"
+        "coatRackStanding.glb": "d8231c22dab63ceb9fc8678f6c8ceafc62afa8726b51a73b4ce349043d3cdc91",
+        "lampSquareTable.glb": "70ec9211af336b1ef3b4da32590b8737b4facf219348c22e6533a1e898cdb13d",
+        "rugRound.glb": "c4cdc8f51ed2dbfb853b147521ed40e995307392fd3b19045b2203ea50f376db",
+        "bookcaseOpen.glb": "750702218d68c062b15dfef6ab06a4014d1cfa8bd05f02e57c53b7e13bec157c",
+        "sideTable.glb": "8227810584f7d37582e4e9ec821c56f1dc54b99c88a8dc74242ea3b7402bc472",
+        "speakerSmall.glb": "34db09984703282822f3f57fc9a31bfdfa6a8f6bf8251893d0c907e7ee6601b2"
       }
     },
     {
@@ -49,6 +54,39 @@
         "wheelchair.glb": "cb7b6cbebc7bbe238ae926b26305661eb66e17659fafa8fa0c098f5e7955fabe",
         "aid-glasses.glb": "adb8bb84ba24413068e28a800ccb8cc50060c77dc28df4cdddaee6c4d30b6289",
         "Textures/colormap.png": "0d4947d34ff32acf4a359c7f22ca784e057e7e72f622170a9a77b6fc88fdb70e"
+      }
+    },
+    {
+      "id": "kenney-blocky-characters",
+      "name": "Blocky Characters 2.0",
+      "by": "Kenney",
+      "url": "https://kenney.nl/assets/blocky-characters",
+      "licence": "CC0 1.0",
+      "archive": "kenney_blocky-characters.zip",
+      "archiveSha256": "5e123859aa0c1598342b600c6db197024a1d63eb9ec531398b310725f589887e",
+      "files": {
+        "character-a.glb": "8ee5dae167ec589863f6bba222467eb90ace8be357a4c5abfcab289290181616",
+        "Textures/texture-a.png": "257e944c582ce7cda206fbd8ceb717be648f9721756baf377a36478c11c0059a",
+        "character-b.glb": "30ed390a741a1b285f587544819aa8a02c8f7f270e552ed742eb84785034f62a",
+        "Textures/texture-b.png": "c614148428fbf63ab701ab95e2ebe0b6103ea0e2e6212c986d8931899bad7692",
+        "character-c.glb": "ad2425ba0da5d9adff791b949bd62389ddcb09963ff89265930eab0d6484398c",
+        "Textures/texture-c.png": "582a62eae6ca086f65e6bfdde16d0d1d15a95fdaf484c0def4769d5a47ba1c8e",
+        "character-e.glb": "9a12684981bc7763aebeceaffed82abfcc458d27b1ed3e169b92bebcc4870675",
+        "Textures/texture-e.png": "6bbdb4f76b8d2ba7feb1ad8e4a341ca87afd655a4f061c77a86c400ad3125049",
+        "character-f.glb": "04223c1c6cdce5da6fe9c9729a24e1aa9c765dec93af952379112f7da24a828a",
+        "Textures/texture-f.png": "54404f22588bac5a7f8df09c2aac0520e101a6f32944ce4070f550d7ad80c6f7",
+        "character-g.glb": "e3249ffc0aaa55eba973696ba4b36a204b35a10574b373e9945b56d918e8c9fd",
+        "Textures/texture-g.png": "cce3f8d545625998c27e91016672366eb84f21bbc520f8227022c23d0dd557fc",
+        "character-h.glb": "f62fcf774dc6d61d64a3616803bc3a71176e1aee252020dd3ef680ef0a95d588",
+        "Textures/texture-h.png": "7d908f3f12ac56b3debc5036dd962e2151c151f7a379cb37fe757a6ab4147536",
+        "character-i.glb": "2b566d3b6261faa3e151b352396d823a285834f039ff6476db248ec6da902fe8",
+        "Textures/texture-i.png": "2c721b0a8837836ab0bf0eb0de12ca14e5d518ccba7420b8c673ed4600dc6b63",
+        "character-k.glb": "1b0f9b218eda8444e68e988b1b87786ca058928a6c091bc3e44986363fefbc3b",
+        "Textures/texture-k.png": "4e063c40b02955bab6cb177268f56d8837346cb9661c4022ac79310bd80774fc",
+        "character-m.glb": "5289ed1e5f79a93c28d1bb0e4b8afda6fce298ab53a04fb2cc1f8f77cf661ccc",
+        "Textures/texture-m.png": "ee5652737837e662a756d66828218b2b784a6990eeee8c4e1e95a1f70d1af994",
+        "character-q.glb": "9193d03bc9ee1cfb080a1d561522f45806fe0b522b9807ef2b7c451b77547999",
+        "Textures/texture-q.png": "bf220bbc945072a4fce31118b6585207445ddac1c2836b350d10fe0d49fed5ca"
       }
     },
     {

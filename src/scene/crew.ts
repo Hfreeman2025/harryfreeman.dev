@@ -52,8 +52,10 @@ export class Crew {
   readonly answering = new Set<PieceId>();
   /** The desk the camera stands at: its builder steps out of the picture. */
   away: PieceId | null = null;
-  /** False when a style frame brings its own people. */
+  /** False when a style direction brings its own people. */
   people = true;
+  /** False when a style direction moves the work its own way. */
+  sheets = true;
   /** A piece whose sheet a style frame's builder is holding: its sheet is not drawn on its own. */
   held: PieceId | null = null;
   readonly #shadows: Mesh[] = [];
@@ -120,7 +122,7 @@ export class Crew {
       const sheet = this.#sheets.get(piece);
       if (sheet) {
         const p = sheetPose(piece, phase);
-        sheet.visible = p.visible && this.held !== piece;
+        sheet.visible = this.sheets && p.visible && this.held !== piece;
         if (p.visible) {
           sheet.position.set(p.x, p.y, p.z);
           // Flat on a desk or the table; turning upright as it reaches the board.
