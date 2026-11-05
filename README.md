@@ -514,7 +514,9 @@ the proxy and listed apart; the page never asked for it.
 **Deploy** (`npm run deploy`, `scripts/deploy.mjs`): refuses uncommitted changes; builds the hosted site
 and runs the gate; asks wrangler who it is logged in as and refuses unless the email is exactly the
 personal one in `site.config.json` with one account (it prints the account); creates the Pages project,
-production branch `main`, if it is missing; deploys `dist/` to production; prints the URLs. wrangler
+production branch `main`, if it is missing, as a classic Pages project (`--force`: wrangler 4.158
+otherwise hands a new Pages project to Cloudflare Workers when an agent runs it, and the headers and the
+hosted checks were verified on classic Pages); deploys `dist/` to production; prints the URLs. wrangler
 4.158.0 is pinned exactly in `tools/deploy/` with its own lockfile, apart from the site's dependencies,
 because it brings LGPL-3.0 and CC0 packages that `npm run licences` does not allow; none of it reaches
 `dist/`. Its telemetry is off. `npm run deploy -- --check` does everything but create and deploy.

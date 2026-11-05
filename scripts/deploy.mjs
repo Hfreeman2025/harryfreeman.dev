@@ -76,7 +76,10 @@ if (check) {
 }
 
 if (!exists) {
-  const r = wrangler(['pages', 'project', 'create', hosting.project, '--production-branch', hosting.branch], { inherit: true });
+  // --force: wrangler 4.158 hands a new Pages project to Cloudflare Workers by default when an agent runs it;
+  // the headers and the hosted checks were verified on classic Pages, so the project is created there.
+  // (`pages deploy` then needs nothing: wrangler never hands an existing Pages project to Workers.)
+  const r = wrangler(['pages', 'project', 'create', hosting.project, '--production-branch', hosting.branch, '--force'], { inherit: true });
   if (r.status !== 0) stop(`could not create ${hosting.project}`);
 }
 const subject = execFileSync('git', ['-C', site, 'log', '-1', '--format=%s'], { encoding: 'utf8' }).trim();
