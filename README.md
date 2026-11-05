@@ -365,16 +365,18 @@ fonts, `NOTICES.txt`. Nothing else: no source, no source maps, nothing from Harr
 **Headers** ([public/_headers](public/_headers), filled by the build). A Content-Security-Policy that
 allows exactly what was measured on every station (below):
 
-| Directive | Allows | Because |
-| --- | --- | --- |
-| `default-src` | `'none'` | everything not listed is refused |
-| `script-src` | `'self'`, the head script's hash, `'wasm-unsafe-eval'` | the site's modules; ONNX Runtime compiles WebAssembly |
-| `style-src-elem` | `'self'` | the stylesheets |
-| `style-src-attr` | `'unsafe-hashes'` and the hash of each style attribute in the pages | the flat cabinet's eight custom properties (`style="--i:0"` and so on), one by one; never `'unsafe-inline'` |
-| `img-src`, `font-src`, `media-src` | `'self'` | stills, textures, Plex and Caveat, the loops |
-| `connect-src` | `'self'`, `https://api.carbonintensity.org.uk`, `https://huggingface.co`, `https://us.aws.cdn.hf.co` | the record, stamps, casts and the voice; the grid; the model, and where Hugging Face redirects its weights |
-| `worker-src` | `'self'`, `blob:` | ask-the-record's model worker (a `blob:`), which imports the runtime from this site: Firefox checks that import against `worker-src` |
-| `base-uri`, `form-action`, `frame-ancestors`, `object-src` | `'none'` | |
+- `default-src 'none'`: everything not listed is refused.
+- `script-src 'self'`, the head script's hash and `'wasm-unsafe-eval'` (ONNX Runtime compiles WebAssembly).
+- `style-src-elem 'self'`; `style-src-attr 'unsafe-hashes'` with the hash of each style attribute in the
+  pages: the flat cabinet's eight custom properties (`style="--i:0"` and so on), one by one, never
+  `'unsafe-inline'`.
+- `img-src`, `font-src` and `media-src 'self'`: stills and textures, Plex and Caveat, the loops.
+- `connect-src 'self' https://api.carbonintensity.org.uk https://huggingface.co https://us.aws.cdn.hf.co`:
+  the record, stamps, casts and voice; the grid; the model, and the host Hugging Face redirects its
+  weights to.
+- `worker-src 'self' blob:`: ask-the-record's model worker is a `blob:`, and it imports the runtime from
+  this site, which Firefox checks against `worker-src`.
+- `base-uri`, `form-action`, `frame-ancestors` and `object-src 'none'`.
 
 The terminal page (`/terminal`) gets the same policy with only `style-src-elem` widened to
 `'unsafe-inline'`: xterm.js writes its theme and its measured cell sizes into `<style>` elements, which
