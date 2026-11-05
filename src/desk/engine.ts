@@ -44,6 +44,7 @@ import { fitView, fromAngles, loadGltf, type View } from '../scene/style';
 import type { Timeline } from '../timeline/schema';
 import { daylightAt, furnish } from './furnish';
 import { doorWords } from './lettering';
+import { Monitor } from './monitor';
 import {
   BusinessCard,
   coffee,
@@ -141,13 +142,15 @@ const PLACES = {
   sticky: { x: -4.6, z: 10.3, turn: 0.1 },
   notebook: { x: 15.4, z: -2.4, turn: -0.18 },
   keyboard: { x: 8.6, z: 13.4, turn: -0.1 },
-  cup: { x: 9.5, z: -11.2 },
+  cup: { x: 10.6, z: -12.4 },
   pencil: { x: 13.6, z: 6.6, turn: -0.5 },
   // The card turned square to the door camera (its azimuth, -12°), so its lines read level; the mic
   // between them.
   nameplate: { x: -19.4, z: -13.4, turn: -0.04 },
   mic: { x: -11.2, z: -11.4, turn: 0.15 },
-  card: { x: -1.0, z: -13.0, turn: -0.2 },
+  // The ultrawide at the back of the desk: seated, only its lower edge shows, along the top of the view.
+  monitor: { x: 1.5, z: -21.5 },
+  card: { x: -0.5, z: -12.6, turn: -0.2 },
 } as const;
 
 /**
@@ -454,7 +457,9 @@ export async function mountDesk({
   const mic = new Microphone();
   mic.group.position.set(PLACES.mic.x, DESK_Y, PLACES.mic.z);
   mic.group.rotation.y = PLACES.mic.turn;
-  scene.add(box.group, notebook.group, keyboard.group, stamp, cup, pen, note, plate.group, card.group, mic.group);
+  const monitor = new Monitor();
+  monitor.group.position.set(PLACES.monitor.x, DESK_Y, PLACES.monitor.z);
+  scene.add(box.group, notebook.group, keyboard.group, stamp, cup, pen, note, plate.group, card.group, mic.group, monitor.group);
 
   // ---------- Printed: the nameplate, the card, the credit slip (the door plate is the room's) ----------
   const words = (selector: string) => lettering.masthead?.querySelector(selector)?.textContent?.trim() ?? '';
@@ -509,6 +514,8 @@ export async function mountDesk({
     ...plate.corners(),
     ...card.corners(),
     ...mic.corners(),
+    // The monitor's lower edge: the dock and the session's last lines, along the top of the view.
+    ...monitor.lowerStrip(),
     ...worldOf(stamp, [
       [-7, 0, -2],
       [3, 0, 2.5],
@@ -636,7 +643,8 @@ export async function mountDesk({
     if (key === 'stamp') return stamp.localToWorld(v3(-2, DESK_Y, 2.4));
     if (key === 'credit') return note.localToWorld(v3(0.5, -2.2, 0));
     // Up at the top of the seated view, where the room is: always in the same place on the screen.
-    if (key === 'room') return v3(0, 0.9, 0.5).unproject(camera);
+    // On the monitor's stand, under the screen: up past it is the room.
+    if (key === 'room') return monitor.group.localToWorld(v3(0, 3.2, 1.4));
     if (key === 'shelf') return furniture.shelfFoot.clone();
     if (key === 'window') return v3(0, FLOOR + 2.3 * M + 12, OFFICE.z0);
     if (key === 'office-reception') return v3(RECEPTION.x, RECEPTION.height * 0.55, RECEPTION.z + RECEPTION.depth / 2 + 0.02);
@@ -816,6 +824,7 @@ export async function mountDesk({
     if (key === 'room-radio') return shelfRadio;
     if (key === 'shelf') return furniture.group;
     if (key === 'window') return room.group;
+    if (key === 'room') return monitor.group;
     if (key === 'office' || key === 'radio' || key.startsWith('office-')) return model.group;
     return null;
   }
@@ -885,13 +894,8 @@ export async function mountDesk({
       }
       const a = show ? anchorOf(key) : null;
       if (a) projected.copy(a).project(camera);
-      // 'room' is pinned to the top of the desk view, nothing in front by construction.
       const onScreen =
-        a !== null &&
-        projected.z < 1 &&
-        Math.abs(projected.x) < 1.02 &&
-        Math.abs(projected.y) < 1.02 &&
-        (key === 'room' || !hidden(a, ownOf(key)));
+        a !== null && projected.z < 1 && Math.abs(projected.x) < 1.02 && Math.abs(projected.y) < 1.02 && !hidden(a, ownOf(key));
       if (el.hidden === onScreen) el.hidden = !onScreen;
       if (!onScreen) continue;
       const x = (projected.x * 0.5 + 0.5) * w;
@@ -919,7 +923,7 @@ export async function mountDesk({
     const clear = focusNow.cut > 0.5;
     if (clear !== cleared) {
       cleared = clear;
-      for (const thing of [box.group, notebook.group, keyboard.group, stamp, cup, pen, plate.group, card.group, mic.group])
+      for (const thing of [box.group, notebook.group, keyboard.group, stamp, cup, pen, plate.group, card.group, mic.group, monitor.group])
         thing.visible = !clear;
       office.openSide(clear);
       office.solo(clear && station.startsWith('desk:') ? (station.slice(5) as PieceId) : null);
@@ -948,6 +952,8 @@ export async function mountDesk({
     last = now;
     if (!paused && !reduced) crew.s = (crew.s + dt) % crew.replay.duration;
     crew.update(dt, now / 1000);
+    // The monitor's session follows the replay, redrawn only when a new line arrives.
+    monitor.update(crew.replay, crew.s);
     office.update(dt, now / 1000);
     furniture.update(dt, now / 1000);
     if (new Date().getHours() !== hourShown) showWindow();
@@ -1449,6 +1455,36 @@ export async function mountDesk({
       doorAngle: () => room.hinge.rotation.y,
       knocks: () => knocks,
       windowState: () => furniture.state(),
+      /** The ultrawide moved on the desk (for finding its place). */
+      moveMonitor: (x: number, z: number, tilt = 0) => {
+        monitor.group.position.set(x, DESK_Y, z);
+        monitor.head.rotation.x = -tilt;
+        solids = null;
+        labelsDirty = true;
+      },
+      /** The ultrawide's session: how often it has been drawn, and its lines now. */
+      monitor: () => {
+        const r = stage.getBoundingClientRect();
+        const page = (p: Vector3) => {
+          projected.copy(p).project(camera);
+          return { x: r.left + (projected.x * 0.5 + 0.5) * r.width, y: r.top + (-projected.y * 0.5 + 0.5) * r.height, z: projected.z };
+        };
+        const { corners, row, bottomCentre } = monitor.screenCorners();
+        const at = corners.map(page);
+        const [a, b] = row.map(page);
+        return {
+          draws: monitor.draws,
+          lines: monitor.lines(),
+          // On the page: the screen's bottom edge and its top edge, and how tall one session row is.
+          bottom: page(bottomCentre).y,
+          top: Math.min(at[2]?.y ?? 0, at[3]?.y ?? 0),
+          row: a && b ? Math.abs(a.y - b.y) : 0,
+          // The whole screen in the frame and in sight: its four corners on the page, none behind a wall or the door.
+          whole:
+            at.every((c) => c.z < 1 && c.x >= r.left && c.x <= r.right && c.y >= r.top && c.y <= r.bottom) &&
+            corners.every((c) => !hidden(c, monitor.group)),
+        };
+      },
       /**
        * The printed faces on screen, in page pixels: the nameplate, the card (with its links' boxes and which
        * is ringed) and the credit slip.

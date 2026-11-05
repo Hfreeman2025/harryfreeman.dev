@@ -5,7 +5,7 @@
 // readers, search and the keyboard: focus on one of its links rings the printed link on the card, and a
 // click on the printed link is a click on the real one.
 
-import { CanvasTexture, MeshLambertMaterial, NoBlending, SRGBColorSpace, type Texture } from 'three';
+import { CanvasTexture, MeshBasicMaterial, MeshLambertMaterial, NoBlending, SRGBColorSpace, type Texture } from 'three';
 import { CREAM, INK } from './palette';
 
 const cond = (weight: number, px: number) => `${weight} ${px}px "IBM Plex Sans Condensed", "Arial Narrow", sans-serif`;
@@ -39,6 +39,11 @@ export function doorWords(plate: HTMLElement | null): { name: string; role: stri
  */
 export function printedMaterial(map: Texture, emissive?: string): MeshLambertMaterial {
   return new MeshLambertMaterial({ map, blending: NoBlending, opacity: 0, ...(emissive ? { emissive } : {}) });
+}
+
+/** The same for a screen: lit by itself, not the room. */
+export function screenMaterial(map: Texture): MeshBasicMaterial {
+  return new MeshBasicMaterial({ map, blending: NoBlending, opacity: 0, toneMapped: false });
 }
 
 /** A canvas texture that can be drawn again (a focus ring, a hover). */

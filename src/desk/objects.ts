@@ -739,7 +739,7 @@ export class Nameplate {
 }
 
 /** Harry's card, lying on the desk by the nameplate: his intro and his links printed on it. */
-export const BCARD = { width: 12.8, depth: 7.0, inset: 0.55 } as const;
+export const BCARD = { width: 14.4, depth: 7.9, inset: 0.62 } as const;
 export class BusinessCard {
   readonly group = new Group();
   readonly faceMesh: Mesh;

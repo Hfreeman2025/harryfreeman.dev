@@ -74,6 +74,15 @@ on paths to review. The things on the desk are the site's parts (`src/desk/`):
   to look round the back wall, where a spine under the pointer gives its title, authors and the tool it
   fed, the shelf's tag lists them all for keyboards and screen readers, and the radio opens the radio's
   card. Sit back down, Esc or the wheel return to the desk.
+- **The ultrawide.** A real-scale 34-inch monitor at the back of the desk (`src/desk/monitor.ts`).
+  Seated, only its lower edge shows along the top of the view; walking in, it is seen whole. Its screen
+  is drawn in the site's own style: a wallpaper in the desk's palette, a frosted dock of plain palette
+  tiles (no logos, no one's artwork), and a dark terminal window titled "ghostty" running an authored
+  session that replays the build: a prompt line, then each hand-off from the approved timeline in the
+  caption's own words, in step with it, and a status line, "auto mode on · 10 builders". Never a real
+  transcript or any real output. It is a canvas texture redrawn only when a new line arrives, sharp
+  through the tilt-shift like the other lettering, and decorative (the canvas is hidden from screen
+  readers; the caption carries the same words).
 - **The Speak to me mic.** A podcast mic by the nameplate, with a printed tag. It never listens: no
   microphone is asked for, no permission, no audio. Clicking it (or Enter) lights its ON AIR lamp and
   opens a contact card: Harry's email with a Copy button (which says Copied only once the clipboard has
@@ -258,7 +267,7 @@ the check.
   - the room's tags: only the cabinet, Reception and the credit at rest, every object a tabbable link
     or button, and each drawer followed by its folders;
   - the earlier suites: the timeline, replay, rendering, config, CV, filing, cabinet and floor plan.
-- **Browser checks (71 per browser):**
+- **Browser checks (72 per browser, all passing in Chromium, WebKit and Firefox on 5 November):**
   - lettering (`scripts/desk-checks.mjs`): the nameplate's, card's and credit's printed faces fully in
     sight from the seat (sight lines to a grid on each); a plain board stood in front of the nameplate
     hides its words completely (no dark pixels of them left in its place); no DOM text over the scene
@@ -291,6 +300,9 @@ the check.
     the click (no AudioContext made); muted (and still muted after a reload) the words show on the same
     beat with no audio at all; Skip works mid-knock; with reduced motion the knock and the words stay,
     the door neither jolts nor swings, and it cuts in;
+  - the ultrawide: seen whole and in sight (no wall or door in the way) at some point of the walk in; seated, its bottom edge in the top quarter
+    of the view and its top above it, a session row at least 9 px tall; every line authored (a mark and
+    a tool's hand-off) and the last one word for word the caption's event; held still, never redrawn;
   - the office: with the mocked grid (wind 38%, solar 4%) the turbines turn at exactly that pace and
     the panels do not glint, and the window shows the hour's time of day; without the grid it is still;
     The room stands up to the back wall with "Sit back down" as the way back; a spine under the pointer

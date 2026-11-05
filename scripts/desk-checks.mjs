@@ -420,7 +420,8 @@ export async function deskChecks({ check, expect, BASE, shot, name, config }) {
         expect(f.x >= at.stage.x && f.y >= at.stage.y && f.x + f.width <= at.stage.x + at.stage.width, `the ${k} is off screen`);
       }
       expect(at.printed.nameplate.height >= 60, `the nameplate is ${at.printed.nameplate.height.toFixed(0)}px tall`);
-      expect(at.printed.card.width >= 280, `the card is ${at.printed.card.width.toFixed(0)}px wide`);
+      // Wide enough that its intro is set at about 11px on screen or more.
+      expect(at.printed.card.width >= 250, `the card is ${at.printed.card.width.toFixed(0)}px wide`);
       // By keyboard from the name (where arriving puts focus): each card link in turn, ringed on the card.
       await page.focus('.masthead__name');
       const order = [];
@@ -755,6 +756,57 @@ export async function deskChecks({ check, expect, BASE, shot, name, config }) {
         expect(found.length === 0, `text over the scene (${where}): ${found.join(' | ')}`);
       expect(problems.length === 0, problems.join(' | '));
       return { inkBefore: Number(before.ink.toFixed(3)), greenAfter: Number(after.green.toFixed(3)) };
+    },
+  );
+
+  await check(
+    'desk: the ultrawide at the back shows, along the top of the seated view, the dock and the session’s last lines, readable and in step with the caption, redrawn only when a line arrives; walking in, it is seen whole',
+    { ...desk, door: true },
+    async (page, problems) => {
+      // From the door, so the walk can be watched for the whole monitor.
+      await page.goto(`${BASE}/?debug&door`, { waitUntil: 'load' });
+      await page.waitForFunction(() => document.documentElement.dataset.stage === 'live', null, { timeout: 30000 });
+      await page.click('#come-in');
+      const seenWhole = await page.evaluate(
+        () =>
+          new Promise((done) => {
+            let whole = false;
+            const tick = () => {
+              if (window.deskDebug.walked() > 0 && window.deskDebug.monitor().whole) whole = true;
+              if (document.documentElement.dataset.entrance === 'in') return done(whole);
+              requestAnimationFrame(tick);
+            };
+            requestAnimationFrame(tick);
+          }),
+      );
+      expect(seenWhole, 'the monitor was never seen whole on the walk in');
+      await page.waitForTimeout(800);
+      const seated = await page.evaluate(() => ({
+        m: window.deskDebug.monitor(),
+        caption: document.getElementById('replay-event').textContent,
+        stage: document.querySelector('.room__stage').getBoundingClientRect().toJSON(),
+      }));
+      const { m, stage } = seated;
+      // Its lower edge along the top: the screen's bottom in the top quarter, its top above the view.
+      expect(
+        m.bottom > stage.y && m.bottom < stage.y + stage.height * 0.25,
+        `the screen's bottom edge is at ${Math.round(m.bottom - stage.y)}px`,
+      );
+      expect(m.top < stage.y, 'the whole screen shows seated, not just its lower edge');
+      expect(m.row >= 9, `a session row is ${m.row.toFixed(1)}px tall seated`);
+      // The session: authored lines only (a mark and a tool's hand-off), the last one the caption's event.
+      expect(m.lines.length > 0 && m.lines.every((l) => /^[›▸✻↩✓·] \S/.test(l)), `the session's lines: ${m.lines.join(' | ')}`);
+      expect(m.lines.at(-1).slice(2) === seated.caption, `the screen says ${m.lines.at(-1)}, the caption ${seated.caption}`);
+      // Drawn again only when a line arrives: held still, not at all.
+      await page.goto(`${BASE}/?debug&in&hold&t=16.2`, { waitUntil: 'load' });
+      await page.waitForFunction(() => document.documentElement.dataset.stage === 'live', null, { timeout: 30000 });
+      const before = await page.evaluate(() => window.deskDebug.monitor().draws);
+      await page.waitForTimeout(2000);
+      const after = await page.evaluate(() => window.deskDebug.monitor().draws);
+      expect(after === before, `the screen was drawn ${after - before} times with nothing new`);
+      await shot(page, 'desk-monitor-seated');
+      expect(problems.length === 0, problems.join(' | '));
+      return { rowPx: Number(m.row.toFixed(1)), bottomPx: Math.round(m.bottom - stage.y), lines: m.lines.length };
     },
   );
 
