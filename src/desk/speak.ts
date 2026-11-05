@@ -26,7 +26,7 @@ const area = (a: Rect, b: Rect) =>
   Math.max(0, Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y));
 
 /** A cartoon speech bubble: a rounded box with a wedge from its nearest side to the tip. */
-function bubblePath(w: number, h: number, r: number, tip: { x: number; y: number }): string {
+export function bubblePath(w: number, h: number, r: number, tip: { x: number; y: number }): string {
   const cx = Math.min(Math.max(tip.x, r + 18), w - r - 18);
   const cy = Math.min(Math.max(tip.y, r + 18), h - r - 18);
   // The side the tip is beyond, by how far beyond it is.

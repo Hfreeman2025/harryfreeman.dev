@@ -1,5 +1,8 @@
 // The door's browser checks, run by e2e.mjs in each browser: a fresh visit lands outside the office
-// door and Come in walks through one continuous space to the seated desk, its last frame the desk's own
+// door; Knock knocks twice (two synthesised hits 180 ms apart, scheduled only after the click), the voice
+// answers after them with its words in a bubble, and the door opens onto the walk through one continuous
+// space to the seated desk; the speaker toggle silences all of it, remembered, while the captions still
+// show; its last frame the desk's own
 // (pixel-similar to the desk loaded directly), with the real desk and nothing standing in for it at any
 // point of the walk; Come in before the desk has loaded says Opening… and waits; Skip and Esc go
 // straight in; a reload starts at the door again, and Back from another page restores the desk; deep
@@ -74,19 +77,21 @@ export async function doorChecks({ check, expect, BASE, shot, name }) {
       await page.waitForFunction(() => document.getElementById('entrance-plate')?.dataset.placed !== undefined, null, { timeout: 5000 });
       const plate = await page.locator('#entrance-plate').boundingBox();
       expect(plate && plate.width > 120 && plate.y > 0, 'the plate is not on the door');
-      expect(await page.locator('#come-in').isVisible(), 'no Come in');
+      expect(await page.locator('#come-in').isVisible(), 'no Knock');
+      expect((await page.locator('#come-in').textContent()) === 'Knock', 'the way in is not a knock');
       expect(await page.locator('#skip-in').isVisible(), 'no Skip to the desk');
       await page.waitForTimeout(300);
       await shot(page, 'door');
       const started = Date.now();
       await page.click('#come-in');
-      await page.waitForTimeout(1100);
+      // Two knocks, the voice and its words (about four seconds), then the door opens and the walk begins.
+      await page.waitForTimeout(5300);
       const mid = await page.evaluate(() => ({ walked: window.deskDebug.walked(), door: window.deskDebug.doorAngle() }));
       expect(mid.walked > 0.15 && mid.walked < 0.85 && mid.door > 1, `mid-walk: ${JSON.stringify(mid)}`);
       await shot(page, 'door-walk');
       await seated(page);
       const took = Date.now() - started;
-      expect(took >= 2500 && took < 7000, `coming in took ${took} ms`);
+      expect(took >= 6000 && took < 14000, `coming in took ${took} ms`);
       expect(await page.locator('#entrance').isHidden(), 'the door is still up');
       expect((await page.evaluate(() => document.activeElement?.className)) === 'masthead__name', 'focus did not land on the name');
       await page.waitForTimeout(600);
@@ -111,9 +116,20 @@ export async function doorChecks({ check, expect, BASE, shot, name }) {
       await page.waitForTimeout(500);
       await shot(page, 'walk-0-door');
       await page.click('#come-in');
+      // The knock and the answer, shot as they happen; then the door opening.
+      await page.waitForTimeout(330);
+      await shot(page, 'knock');
+      await page.waitForTimeout(2600);
+      expect(
+        (await page.locator('#door-said').textContent())?.trim() === 'Hello, welcome! Come and explore.',
+        `the bubble says ${await page.locator('#door-said').textContent()}`,
+      );
+      await shot(page, 'knock-said');
+      await page.waitForTimeout(1300);
+      await shot(page, 'knock-open');
       const samples = [];
       for (const [i, ms] of [
-        [1, 650],
+        [1, 350],
         [2, 800],
         [3, 800],
       ]) {
@@ -162,8 +178,8 @@ export async function doorChecks({ check, expect, BASE, shot, name }) {
     await page.goto(`${BASE}/?debug`, { waitUntil: 'load' });
     expect((await page.evaluate(() => document.documentElement.dataset.stage)) !== 'live', 'the desk was up already');
     await page.click('#come-in');
-    await page.waitForTimeout(400);
-    expect((await page.locator('#come-in').textContent()) === 'Opening…', 'Come in did not say Opening…');
+    // The knock and the answer play; when the door would open, it says Opening… and waits.
+    await page.waitForFunction(() => document.getElementById('come-in')?.textContent === 'Opening…', null, { timeout: 7000 });
     expect((await page.locator('#come-in').getAttribute('aria-busy')) === 'true', 'Come in is not marked busy');
     expect((await entrance(page)) === 'door', 'it went in before the desk was there');
     release();
@@ -179,7 +195,54 @@ export async function doorChecks({ check, expect, BASE, shot, name }) {
     await page.waitForTimeout(300);
     await page.keyboard.press('Escape');
     await page.waitForFunction(() => document.documentElement.dataset.entrance === 'in', null, { timeout: 500 });
+    // Mid-knock too.
+    await page.goto(`${BASE}/?debug&door`, { waitUntil: 'load' });
+    await page.waitForFunction(() => document.documentElement.dataset.stage === 'live', null, { timeout: 30000 });
+    await page.click('#come-in');
+    await page.waitForTimeout(400);
+    await page.click('#skip-in');
+    await page.waitForFunction(() => document.documentElement.dataset.entrance === 'in', null, { timeout: 500 });
+    await page.waitForTimeout(4500);
+    expect((await page.evaluate(() => window.deskDebug.station())) === 'door', 'the knock carried on after Skip');
   });
+
+  await check(
+    'door: the knock knocks twice and the voice answers after; nothing touches audio before it; the speaker silences it all, remembered, while the words still show',
+    desk,
+    async (page, problems) => {
+      await page.goto(`${BASE}/?debug`, { waitUntil: 'load' });
+      await page.waitForFunction(() => document.documentElement.dataset.stage === 'live', null, { timeout: 30000 });
+      expect((await page.evaluate(() => window.__audio.made)) === 0, 'audio was touched before the knock');
+      await page.click('#come-in');
+      await page.waitForFunction(() => window.knockDebug.voice !== 'none', null, { timeout: 3000 });
+      const heard = await page.evaluate(() => ({ ...window.knockDebug, audio: window.__audio }));
+      expect(
+        heard.hits.length === 2 && Math.abs(heard.hits[1] - heard.hits[0] - 0.18) < 0.005,
+        `the knocks: ${JSON.stringify(heard.hits)}`,
+      );
+      expect(heard.voice === 'scheduled' && heard.voiceAt - heard.hits[1] > 0.5, `the voice: ${JSON.stringify(heard)}`);
+      expect(heard.audio.made === 1 && heard.audio.deviceFree === 1, `audio: ${JSON.stringify(heard.audio)}`);
+      // Muted: the same knock, the same words, no sound at all, and still so after a reload.
+      await page.goto(`${BASE}/?debug&door`, { waitUntil: 'load' });
+      await page.click('#door-sound');
+      expect((await page.locator('#door-sound').getAttribute('aria-pressed')) === 'false', 'the speaker did not turn off');
+      await page.reload({ waitUntil: 'load' });
+      expect((await page.locator('#door-sound').getAttribute('aria-pressed')) === 'false', 'the speaker did not stay off');
+      await page.waitForFunction(() => document.documentElement.dataset.stage === 'live', null, { timeout: 30000 });
+      await page.click('#come-in');
+      await page.waitForFunction(() => document.getElementById('door-said')?.textContent?.trim() === 'Hello, welcome!', null, {
+        timeout: 3000,
+      });
+      await page.waitForFunction(
+        () => document.getElementById('door-said')?.textContent?.trim() === 'Hello, welcome! Come and explore.',
+        null,
+        { timeout: 4000 },
+      );
+      const muted = await page.evaluate(() => ({ ...window.knockDebug, audio: window.__audio }));
+      expect(muted.voice === 'muted' && muted.hits.length === 0 && muted.audio.made === 0, `muted: ${JSON.stringify(muted)}`);
+      expect(problems.length === 0, problems.join(' | '));
+    },
+  );
 
   await check('door: a reload starts at the door again; Back from the CV restores the desk', desk, async (page) => {
     await page.goto(`${BASE}/?debug`, { waitUntil: 'load' });
@@ -205,12 +268,28 @@ export async function doorChecks({ check, expect, BASE, shot, name }) {
     expect((await page.locator('#entrance').count()) === 0, 'the CV has a door');
   });
 
-  await check('door: with reduced motion Come in is a cut', { ...desk, reducedMotion: 'reduce' }, async (page) => {
-    await page.goto(`${BASE}/?debug`, { waitUntil: 'load' });
-    await doorLive(page);
-    await page.click('#come-in');
-    await page.waitForFunction(() => document.documentElement.dataset.entrance === 'in', null, { timeout: 900 });
-  });
+  await check(
+    'door: with reduced motion the knock and the words stay, with no jolt or swing, and it cuts in',
+    { ...desk, reducedMotion: 'reduce' },
+    async (page) => {
+      await page.goto(`${BASE}/?debug`, { waitUntil: 'load' });
+      await doorLive(page);
+      await page.waitForFunction(() => document.documentElement.dataset.stage === 'live', null, { timeout: 30000 });
+      await page.click('#come-in');
+      await page.waitForFunction(() => document.getElementById('door-said')?.textContent?.trim().startsWith('Hello, welcome!'), null, {
+        timeout: 3000,
+      });
+      const during = await page.evaluate(() => ({
+        knocks: window.deskDebug.knocks(),
+        door: window.deskDebug.doorAngle(),
+        heard: window.knockDebug,
+      }));
+      expect(during.knocks === 0 && during.door === 0, `the door moved: ${JSON.stringify(during)}`);
+      expect(during.heard.hits.length === 2, 'reduced motion lost the knock');
+      await page.waitForFunction(() => document.documentElement.dataset.entrance === 'in', null, { timeout: 6000 });
+      expect((await page.evaluate(() => window.deskDebug.walked())) === 1, 'it walked rather than cut');
+    },
+  );
 
   await check(
     'door: without WebGL the door is a poster with the plate as real text and a plain Come in link',
@@ -240,7 +319,8 @@ export async function doorChecks({ check, expect, BASE, shot, name }) {
       expect((await page.locator('#come-in').getAttribute('href')) === '#directory', 'Come in does not lead to the content');
       await shot(page, 'door-poster');
       await page.click('#come-in');
-      await page.waitForTimeout(800);
+      await page.waitForFunction(() => document.documentElement.dataset.entrance === 'passed', null, { timeout: 8000 });
+      await page.waitForTimeout(900);
       expect(
         await page.locator('#directory').evaluate((el) => el.getBoundingClientRect().top < innerHeight * 0.5),
         'Come in did not go to the content',

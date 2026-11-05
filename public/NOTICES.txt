@@ -15,6 +15,22 @@ DATA
     each half-hour), and by the radio while it plays (/intensity and
     /generation). Shown as published; nothing is cached as current.
 
+AUDIO
+
+  The voice at the door ("Hello, welcome! ... Come and explore."),
+  public/audio/door-voice.webm (Opus) and door-voice.m4a (AAC), 3.23 s.
+    Generated offline with Kokoro-82M (onnx-community/Kokoro-82M-v1.0-ONNX at
+    1939ad2a8e416c0acfeecc08a694d14ef25f2231, q8, voice bm_fable, speed 1.05),
+    Apache-2.0, through kokoro-js 1.2.1 (Apache-2.0) on @huggingface/transformers
+    3.8.1 (Apache-2.0). Its phonemiser bundles espeak-ng (GPL-3.0); it was run
+    offline only, and only the generated audio is on this site, so no GPL code
+    is. Each sentence was generated separately, silence-trimmed, joined with a
+    0.35 s gap and loudness-normalised to -18 LUFS with ffmpeg. The master is
+    audio/door-voice.wav in the source. SHA-256 prefixes: m4a deb38608759ca7ac,
+    webm 6a11056ea07e5fe5.
+
+  The knock is synthesised in the page (WebAudio): no recording.
+
 CODE, VENDORED AS BUILT
 
   Listen to the Grid: the radio (public/vendor/radio/)

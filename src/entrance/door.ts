@@ -49,6 +49,10 @@ export interface DoorScene {
   reset(): void;
   /** Whether a click at this page point lands on the door. */
   hitsDoor(x: number, y: number): boolean;
+  /** A knock: the door jolts on its hinge, briefly. */
+  knock(): void;
+  /** The door on screen, in page pixels. */
+  rect(): { x: number; y: number; width: number; height: number };
   dispose(): void;
   readonly debug: Record<string, () => unknown>;
 }
@@ -256,8 +260,15 @@ export async function mountDoor({ stage, plate: plateText, lite, reduced, photo 
   let running = true;
   let phase: 'door' | 'walking' | 'seated' = 'door';
 
+  let knockedAt = -1;
   function pose(t: number): void {
     hinge.rotation.y = -1.85 * span(t, WALK.open);
+    if (knockedAt >= 0 && t === 0) {
+      const k = (performance.now() - knockedAt) / 160;
+      hinge.rotation.y = k < 1 ? -0.012 * Math.sin(k * Math.PI * 3) * (1 - k) : 0;
+      if (k >= 1) knockedAt = -1;
+      else dirty = true;
+    }
     // A step towards the open door and its light.
     const m = span(t, WALK.move);
     camera.position.lerpVectors(OUTSIDE.pos, INTO.pos, m);
@@ -349,6 +360,28 @@ export async function mountDoor({ stage, plate: plateText, lite, reduced, photo 
       dirty = true;
       done?.();
       done = null;
+    },
+    knock() {
+      if (reduced || phase !== 'door') return;
+      knockedAt = performance.now();
+      dirty = true;
+    },
+    rect() {
+      const r = stage.getBoundingClientRect();
+      const xs: number[] = [];
+      const ys: number[] = [];
+      for (const x of [-DOOR.width / 2, DOOR.width / 2])
+        for (const y of [0, DOOR.height]) {
+          const p = new Vector3(x, y, 0).project(camera);
+          xs.push(r.left + (p.x * 0.5 + 0.5) * r.width);
+          ys.push(r.top + (-p.y * 0.5 + 0.5) * r.height);
+        }
+      return {
+        x: Math.min(...xs),
+        y: Math.min(...ys),
+        width: Math.max(...xs) - Math.min(...xs),
+        height: Math.max(...ys) - Math.min(...ys),
+      };
     },
     hitsDoor(x, y) {
       const r = stage.getBoundingClientRect();

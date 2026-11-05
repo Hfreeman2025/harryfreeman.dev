@@ -38,7 +38,13 @@ on paths to review. The things on the desk are the site's parts (`src/desk/`):
 
 - **The door.** Every fresh visit and every reload starts outside Harry's office door: a corridor, the
   door with its frosted pane lit warm from inside, a brass plate reading "Harry Freeman, Head of AI"
-  (real text laid onto the plate), a handle and a doormat. The door and the room behind it are the desk's
+  (real text laid onto the plate), a handle and a doormat. The way in is a **knock** (the door, the button
+  or Enter): two knocks, synthesised in WebAudio (a filtered-noise rap over a resonant woody body, 180
+  ms apart), the door jolting and "knock" popping beside it on each; then a voice from inside, "Hello,
+  welcome! ... Come and explore." (Kokoro, generated offline; `public/NOTICES.txt`), its words in a
+  speech bubble from behind the door on the same beat; and as the second sentence ends the door swings
+  open. Nothing touches audio before the knock's click; a speaker on the door view turns the sound off
+  (remembered), and the words show either way. The door and the room behind it are the desk's
   own scene (`src/desk/room.ts`, 125 units to the metre, so the desk view's camera is a seated person's
   eyes): **Come in** (the door, the button or Enter) swings it open and walks through the room to the
   long desk under the window, lowering into the seat and ending exactly on the desk's own camera (its
@@ -236,6 +242,10 @@ the check.
     straight in; a reload starts at the door again and Back from the CV restores the desk; deep links
     skip it and the CV has none; reduced motion cuts; without WebGL it is the poster with the plate as
     text and Come in a link to the content; on a phone it is a hero above the page, no sideways scroll;
+  - the knock: two hits 180 ms apart and the voice scheduled after them, nothing touching audio before
+    the click (no AudioContext made); muted (and still muted after a reload) the words show on the same
+    beat with no audio at all; Skip works mid-knock; with reduced motion the knock and the words stay,
+    the door neither jolts nor swings, and it cuts in;
   - the mic: click or Enter opens the card and lights the lamp; its three links are the configured email,
     LinkedIn and CV, each focusable; Copy puts exactly the email on a (mocked) clipboard; Esc and a click
     away close it and the lamp goes off; `getUserMedia` is never called;

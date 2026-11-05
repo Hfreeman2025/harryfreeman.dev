@@ -24,6 +24,8 @@ export interface DeskControl {
   walkIn(): Promise<void>;
   cutIn(): void;
   hitsDoor(x: number, y: number): boolean;
+  knock(): void;
+  doorRect(): { x: number; y: number; width: number; height: number } | null;
   source(piece: PieceId): void;
   setLight(light: RoomLight): void;
   setSign(text: SignText): void;
@@ -440,6 +442,8 @@ export async function startDesk(timeline: Timeline): Promise<DeskControl> {
     walkIn: () => engine.walkIn(),
     cutIn: () => engine.cutIn(),
     hitsDoor: (x, y) => engine.hitsDoor(x, y),
+    knock: () => engine.knock(),
+    doorRect: () => engine.doorRect(),
     source(piece) {
       void run(() => toDesk(piece, engine.station()));
     },

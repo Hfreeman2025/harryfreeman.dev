@@ -82,6 +82,10 @@ export interface DeskEngine {
   cutIn(): void;
   /** Whether a click at this page point lands on the door (outside it). */
   hitsDoor(x: number, y: number): boolean;
+  /** A knock: the door jolts on its hinge, briefly. */
+  knock(): void;
+  /** The door on screen, in page pixels, outside it. */
+  doorRect(): { x: number; y: number; width: number; height: number } | null;
   /** The mic's ON AIR lamp, on while its contact card is open. */
   onAir(on: boolean): void;
   /** The top of the mic's head on screen, in page pixels, for the speech bubble's tail. */
@@ -458,6 +462,8 @@ export async function mountDesk({
   let walk: { start: number; ms: number; done: () => void; path: CatmullRomCurve3; gaze: CatmullRomCurve3; from: View; to: View } | null =
     null;
   let walked = startOutside ? 0 : 1;
+  let knockedAt = -1;
+  let knocks = 0;
   const pickRay = new Raycaster();
   const pickNdc = new Vector2();
   let labelsDirty = true;
@@ -776,6 +782,13 @@ export async function mountDesk({
     for (let i = 0; i < 3; i++) light.colour[i] = (light.colour[i] ?? 1) + ((lightTarget.colour[i] ?? 1) - (light.colour[i] ?? 1)) * k;
     light.level += (lightTarget.level - light.level) * k;
     applyLight();
+    if (knockedAt >= 0 && !walk && station === 'entrance') {
+      // A knock: a small shudder on the hinge, gone in a sixth of a second.
+      const k = (now - knockedAt) / 160;
+      room.hinge.rotation.y = k < 1 ? 0.012 * Math.sin(k * Math.PI * 3) * (1 - k) : 0;
+      if (k >= 1) knockedAt = -1;
+      labelsDirty = true;
+    }
     if (walk) {
       const t = Math.min(1, (now - walk.start) / walk.ms);
       walked = t;
@@ -1052,6 +1065,32 @@ export async function mountDesk({
         setRunning(true);
       });
     },
+    knock() {
+      if (station !== 'entrance' || reduced) return;
+      knockedAt = performance.now();
+      knocks++;
+      setRunning(true);
+    },
+    doorRect() {
+      if (station !== 'entrance') return null;
+      const r = renderer.domElement.getBoundingClientRect();
+      const b = new Box3().setFromObject(room.hinge);
+      const xs: number[] = [];
+      const ys: number[] = [];
+      for (const x of [b.min.x, b.max.x])
+        for (const y of [b.min.y, b.max.y])
+          for (const z of [b.min.z, b.max.z]) {
+            projected.set(x, y, z).project(camera);
+            xs.push(r.left + (projected.x * 0.5 + 0.5) * r.width);
+            ys.push(r.top + (-projected.y * 0.5 + 0.5) * r.height);
+          }
+      return {
+        x: Math.min(...xs),
+        y: Math.min(...ys),
+        width: Math.max(...xs) - Math.min(...xs),
+        height: Math.max(...ys) - Math.min(...ys),
+      };
+    },
     hitsDoor(x, y) {
       if (station !== 'entrance') return false;
       const r = renderer.domElement.getBoundingClientRect();
@@ -1153,6 +1192,7 @@ export async function mountDesk({
       station: () => station,
       walked: () => walked,
       doorAngle: () => room.hinge.rotation.y,
+      knocks: () => knocks,
       /** Everything in the scene graph, and anything that is a stand-in rather than the real thing. */
       sceneSummary: () => {
         let meshes = 0;
