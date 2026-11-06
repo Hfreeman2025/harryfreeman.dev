@@ -36,6 +36,7 @@ import {
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { drawerOf } from '../content/drawers';
 import { isPieceId, PIECE_IDS, PIECES, type PieceId } from '../content/pieces';
+import { wholeMedia } from '../folder';
 import { NEUTRAL_LIGHT, type RoomLight, type SignText, signFor } from '../room/grid';
 import { Crew } from '../scene/crew';
 import { BASE, CABINET, DESKS, deskFor, RECEPTION, ROOM, SCREEN, WALL } from '../scene/layout';
@@ -1104,7 +1105,7 @@ export async function mountDesk({
   setRunning(true);
 
   // One video holds all ten screens' loops.
-  const startLoops = (): void => {
+  const startLoops = async (): Promise<void> => {
     const video = document.createElement('video');
     video.muted = true;
     video.loop = true;
@@ -1112,8 +1113,14 @@ export async function mountDesk({
     video.preload = 'auto';
     video.crossOrigin = 'anonymous';
     const mp4 = video.canPlayType('video/mp4; codecs="avc1.640028"');
-    video.src = video.canPlayType('video/webm; codecs="vp9"') ? '/loops/atlas.webm' : mp4 ? '/loops/atlas.mp4' : '';
-    if (!video.src) return;
+    const path = video.canPlayType('video/webm; codecs="vp9"') ? '/loops/atlas.webm' : mp4 ? '/loops/atlas.mp4' : '';
+    if (!path) return;
+    // Fetched whole, so it plays where the host ignores byte ranges (folder.ts, wholeMedia); without it the
+    // screens keep their poster atlas.
+    video.dataset.loop = path;
+    const url = await wholeMedia(path).catch(() => null);
+    if (!url) return;
+    video.src = url;
     video.addEventListener(
       'playing',
       () => {
@@ -1126,8 +1133,8 @@ export async function mountDesk({
     );
     void video.play().catch(() => undefined);
   };
-  if ('requestIdleCallback' in window) window.requestIdleCallback(startLoops, { timeout: 2500 });
-  else setTimeout(startLoops, 1200);
+  if ('requestIdleCallback' in window) window.requestIdleCallback(() => void startLoops(), { timeout: 2500 });
+  else setTimeout(() => void startLoops(), 1200);
 
   // ---------- Picking ----------
   const raycaster = new Raycaster();

@@ -2,23 +2,32 @@
   "browser": "webkit",
   "mode": "measure",
   "origin": "https://harryfreeman.dev",
-  "at": "2026-11-05T22:01:09.506Z",
+  "at": "2026-11-06T00:02:14.547Z",
   "results": [
     {
       "station": "door: the pointer over it becomes a knuckle; knock, the voice answers, walk in to the desk",
       "ok": true,
-      "ms": 19011,
-      "violations": 1,
+      "ms": 15044,
+      "violations": 0,
       "detail": {
-        "hover": "marked by the check (the pointer did not mark it)",
-        "cursor": "auto",
+        "hover": "by the pointer",
+        "cursor": "url(\"https://harryfreeman.dev/cursors/kn",
         "voice": true
+      }
+    },
+    {
+      "station": "desk: the dive into the office and back, the notebook, the grid note, the mic",
+      "ok": true,
+      "ms": 11690,
+      "violations": 0,
+      "detail": {
+        "grid": "175 gCO₂/kWh, moderate"
       }
     },
     {
       "station": "room: looking round it, the window, three book spines, the shelf by keyboard, the radio on the shelf",
       "ok": true,
-      "ms": 4197,
+      "ms": 4029,
       "violations": 0,
       "detail": {
         "spines": [
@@ -28,45 +37,192 @@
         ],
         "listed": 18
       }
+    },
+    {
+      "station": "card: a card pulled, its loop on the screen, the recording line under it, its stamp checked",
+      "ok": true,
+      "ms": 3007,
+      "violations": 0,
+      "detail": {
+        "loop": "/loops/gpt-in-a-tab.webm",
+        "fromBlob": true,
+        "playing": true,
+        "stamp": "valid"
+      }
+    },
+    {
+      "station": "Reception: a question of your own, answered by meaning search with the model from Hugging Face",
+      "ok": true,
+      "ms": 12574,
+      "violations": 0,
+      "detail": {
+        "mode": "hybrid",
+        "kind": "refusal",
+        "model": {
+          "kind": "ready",
+          "device": "webgpu"
+        },
+        "diagnostics": {
+          "runtimeVersion": "4.3.2",
+          "device": "webgpu",
+          "checks": [
+            {
+              "device": "webgpu",
+              "ok": true,
+              "detail": "reproduces the record's vectors to cosine 0.978 (needs 0.95)"
+            }
+          ],
+          "notes": [],
+          "loadMs": 8719
+        }
+      }
+    },
+    {
+      "station": "radio: Listen to the Grid plays (device-free) and stops",
+      "ok": true,
+      "ms": 8474,
+      "violations": 0,
+      "detail": {
+        "state": "playing"
+      }
+    },
+    {
+      "station": "flat office on a phone: a folder, its recording line and stamp, Reception by keyword",
+      "ok": true,
+      "ms": 3010,
+      "violations": 0,
+      "detail": {
+        "answered": true
+      }
+    },
+    {
+      "station": "pages: the CV, what a stamp proves, both recorded terminal sessions, and a missing page",
+      "ok": true,
+      "ms": 8187,
+      "violations": 0,
+      "detail": {
+        "missing": 404
+      }
     }
   ],
   "byOrigin": {
     "https://harryfreeman.dev": {
-      "document": 2,
-      "script": 21,
-      "stylesheet": 2,
-      "image": 14,
-      "font": 18,
-      "fetch": 63,
-      "other": 2,
-      "ping": 1
+      "document": 17,
+      "script": 76,
+      "stylesheet": 13,
+      "image": 50,
+      "font": 78,
+      "fetch": 221,
+      "xhr": 3
     },
     "https://api.carbonintensity.org.uk": {
-      "fetch": 8
+      "fetch": 36
+    },
+    "blob:": {
+      "other": 40,
+      "xhr": 1
+    },
+    "https://huggingface.co": {
+      "fetch": 12
+    },
+    "https://us.aws.cdn.hf.co": {
+      "fetch": 2
     }
   },
-  "workers": [],
-  "passedThroughProxy": [],
+  "workers": [
+    "blob:"
+  ],
+  "passedThroughProxy": [
+    "huggingface.co",
+    "us.aws.cdn.hf.co"
+  ],
   "refusedBySite": [],
   "browserOwn": [],
-  "violations": {
-    "img-src ← data": 1
-  },
-  "violationDetail": {
-    "img-src ← data @ : ": {
-      "count": 1,
-      "stations": [
-        "door"
-      ]
-    }
-  },
+  "violations": {},
+  "violationDetail": {},
   "notFound": [],
   "consoleProblems": [
     {
-      "station": "door: the pointer over it becomes a knuckle; knock, the voice answers, walk in to the desk",
+      "station": "pages: the CV, what a stamp proves, both recorded terminal sessions, and a missing page",
       "type": "error",
-      "text": "[Report Only] Refused to load data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M9 22c-2-2-3-5-2-8l2-6c1-2 3-2 4 0l1 3 1-4c1-2 3-2 4 0l1 4 1-2c1-2 3-1 3 1l-1 8c0 4-3 7-7 7h-2c-2 0-4-1-5-3z' fill='%23f6f1e7' stroke='%231f2433' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E because it does not appear in the img-src directive "
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
     }
   ],
-  "failedRequests": []
+  "failedRequests": [
+    {
+      "station": "door: the pointer over it becomes a knuckle; knock, the voice answers, walk in to the desk",
+      "url": "blob:https://harryfreeman.dev/76688611-56cc-45e8-ac6a-17863a17363a",
+      "error": "cancelled"
+    },
+    {
+      "station": "desk: the dive into the office and back, the notebook, the grid note, the mic",
+      "url": "blob:https://harryfreeman.dev/4ac471d0-eed6-4d0d-9653-fcb6e5f45c47",
+      "error": "cancelled"
+    },
+    {
+      "station": "room: looking round it, the window, three book spines, the shelf by keyboard, the radio on the shelf",
+      "url": "blob:https://harryfreeman.dev/cfcfd5a8-c286-4ff9-958d-e74690082ca0",
+      "error": "cancelled"
+    },
+    {
+      "station": "card: a card pulled, its loop on the screen, the recording line under it, its stamp checked",
+      "url": "blob:https://harryfreeman.dev/b22780d0-3a24-46ab-b33b-8561512c2249",
+      "error": "cancelled"
+    },
+    {
+      "station": "card: a card pulled, its loop on the screen, the recording line under it, its stamp checked",
+      "url": "blob:https://harryfreeman.dev/418573a3-41ff-4efa-a801-b7924aee3d85",
+      "error": "cancelled"
+    },
+    {
+      "station": "Reception: a question of your own, answered by meaning search with the model from Hugging Face",
+      "url": "blob:https://harryfreeman.dev/27d2d3aa-18ff-40d9-a92f-942c1a302bca",
+      "error": "cancelled"
+    },
+    {
+      "station": "Reception: a question of your own, answered by meaning search with the model from Hugging Face",
+      "url": "blob:https://harryfreeman.dev/d511f72f-c5da-4488-8b13-9521538b6e9e",
+      "error": "cancelled"
+    },
+    {
+      "station": "radio: Listen to the Grid plays (device-free) and stops",
+      "url": "blob:https://harryfreeman.dev/b043d0d7-493d-485a-84ac-aab03aacdfd7",
+      "error": "cancelled"
+    },
+    {
+      "station": "flat office on a phone: a folder, its recording line and stamp, Reception by keyword",
+      "url": "blob:https://harryfreeman.dev/cd617355-dfcb-4c12-804e-cf89d5680c5b",
+      "error": "cancelled"
+    },
+    {
+      "station": "flat office on a phone: a folder, its recording line and stamp, Reception by keyword",
+      "url": "blob:https://harryfreeman.dev/266d3eca-e51e-4da4-a6e2-13672cf1368c",
+      "error": "cancelled"
+    },
+    {
+      "station": "pages: the CV, what a stamp proves, both recorded terminal sessions, and a missing page",
+      "url": "https://harryfreeman.dev/fonts/plex/ibm-plex-sans-latin-400-normal.woff2",
+      "error": "cancelled"
+    },
+    {
+      "station": "pages: the CV, what a stamp proves, both recorded terminal sessions, and a missing page",
+      "url": "https://harryfreeman.dev/fonts/plex/ibm-plex-sans-condensed-latin-600-normal.woff2",
+      "error": "cancelled"
+    },
+    {
+      "station": "pages: the CV, what a stamp proves, both recorded terminal sessions, and a missing page",
+      "url": "https://harryfreeman.dev/fonts/plex/ibm-plex-sans-latin-400-normal.woff2",
+      "error": "cancelled"
+    },
+    {
+      "station": "pages: the CV, what a stamp proves, both recorded terminal sessions, and a missing page",
+      "url": "https://harryfreeman.dev/fonts/plex/ibm-plex-mono-latin-400-normal.woff2",
+      "error": "cancelled"
+    },
+    {
+      "station": "pages: the CV, what a stamp proves, both recorded terminal sessions, and a missing page",
+      "url": "https://harryfreeman.dev/fonts/plex/ibm-plex-sans-condensed-latin-600-normal.woff2",
+      "error": "cancelled"
+    }
+  ]
 }

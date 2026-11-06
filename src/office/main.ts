@@ -4,7 +4,7 @@
 
 import { drawerOf } from '../content/drawers';
 import { isPieceId, type PieceId } from '../content/pieces';
-import { fillFolder, loopSource, scrollToMark, trapTab } from '../folder';
+import { clearLoop, fillFolder, scrollToMark, setLoop, trapTab } from '../folder';
 import { parseTimeline } from '../timeline/schema';
 import { startPlanReplay } from './plan-replay';
 
@@ -90,8 +90,9 @@ export function startOffice(): OfficeControl {
     folder?.classList.add('folder--lifted');
     fillFolder(piece);
     cardVideo.poster = `/loops/${piece}.webp`;
-    cardVideo.src = loopSource(cardVideo, piece);
-    if (!reduced()) void cardVideo.play().catch(() => undefined);
+    void setLoop(cardVideo, piece).then((set) => {
+      if (set && !reduced()) void cardVideo.play().catch(() => undefined);
+    });
     card.hidden = false;
     const start = onto(folder?.getBoundingClientRect() ?? null);
     cardOpen.style.transition = 'none';
@@ -113,8 +114,7 @@ export function startOffice(): OfficeControl {
     card.dataset.open = 'false';
     await wait(390);
     card.hidden = true;
-    cardVideo?.pause();
-    cardVideo?.removeAttribute('src');
+    if (cardVideo) clearLoop(cardVideo);
     folder?.classList.remove('folder--lifted');
     openPiece = null;
   }

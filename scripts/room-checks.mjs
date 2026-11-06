@@ -140,7 +140,7 @@ export async function roomChecks({ check, expect, BASE, config, shot }) {
     const card = await box(page, '#card .folder-card__open');
     expect(screen && screen.width > 200, `the screen overlay is ${JSON.stringify(screen)}`);
     expect(screen.x + screen.width <= card.x + 2, `the folder covers the screen: ${JSON.stringify({ screen, card })}`);
-    expect((await page.locator('#room-screen').getAttribute('src'))?.includes('/loops/gridtop.'), 'the screen plays another loop');
+    expect((await page.locator('#room-screen').getAttribute('data-loop'))?.includes('/loops/gridtop.'), 'the screen plays another loop');
     await page.waitForTimeout(600);
     await shot(page, 'desk');
     await page.keyboard.press('Escape');

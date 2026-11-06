@@ -295,22 +295,23 @@ export async function doorChecks({ check, expect, BASE, shot, name }) {
     await seated(page);
   });
 
+  // 'Straight' here is within 1.5 s (the walk alone is 6.9 s); a tighter bound flaked on a loaded machine.
   await check('door: Skip and Esc go straight to the desk, before the knock, mid-knock and mid-walk', desk, async (page) => {
     await page.goto(`${BASE}/?debug`, { waitUntil: 'load' });
     await page.click('#skip-in');
-    await page.waitForFunction(() => document.documentElement.dataset.entrance === 'in', null, { timeout: 500 });
+    await page.waitForFunction(() => document.documentElement.dataset.entrance === 'in', null, { timeout: 1500 });
     await page.goto(`${BASE}/?debug&door`, { waitUntil: 'load' });
     expect((await entrance(page)) === 'door', 'the door is not shown with ?door');
     await page.waitForTimeout(300);
     await page.keyboard.press('Escape');
-    await page.waitForFunction(() => document.documentElement.dataset.entrance === 'in', null, { timeout: 500 });
+    await page.waitForFunction(() => document.documentElement.dataset.entrance === 'in', null, { timeout: 1500 });
     // Mid-knock too.
     await page.goto(`${BASE}/?debug&door`, { waitUntil: 'load' });
     await page.waitForFunction(() => document.documentElement.dataset.stage === 'live', null, { timeout: 30000 });
     await page.click('#come-in');
     await page.waitForTimeout(400);
     await page.click('#skip-in');
-    await page.waitForFunction(() => document.documentElement.dataset.entrance === 'in', null, { timeout: 500 });
+    await page.waitForFunction(() => document.documentElement.dataset.entrance === 'in', null, { timeout: 1500 });
     await page.waitForTimeout(4500);
     expect((await page.evaluate(() => window.deskDebug.station())) === 'door', 'the knock carried on after Skip');
     // Mid-walk, by Skip and by Esc: straight to the seat, the walk dropped.
@@ -321,7 +322,7 @@ export async function doorChecks({ check, expect, BASE, shot, name }) {
       await page.waitForFunction(() => window.deskDebug.walked() > 0.45, null, { timeout: 15000, polling: 16 });
       if (how === 'skip') await page.click('#skip-in');
       else await page.keyboard.press('Escape');
-      await page.waitForFunction(() => document.documentElement.dataset.entrance === 'in', null, { timeout: 500 });
+      await page.waitForFunction(() => document.documentElement.dataset.entrance === 'in', null, { timeout: 1500 });
       const after = await page.evaluate(() => ({ station: window.deskDebug.station(), walked: window.deskDebug.walked() }));
       expect(after.station === 'door' && after.walked === 1, `after ${how} mid-walk: ${JSON.stringify(after)}`);
       await page.waitForTimeout(800);

@@ -456,7 +456,9 @@ allows exactly what was measured on every station (below):
   pages: the flat cabinet's eight custom properties (`style="--i:0"` and so on), one by one, never
   `'unsafe-inline'`.
 - `img-src 'self' data:`: stills and textures, and the door's knuckle cursor, an inline SVG in the
-  stylesheet; `font-src` and `media-src 'self'`: Plex and Caveat, the loops.
+  stylesheet; `font-src 'self'`: Plex and Caveat; `media-src 'self' blob:`: the loops, each fetched whole
+  and played from a blob, because Pages ignores byte ranges and Safari will not play a `<video>` whose server
+  never answers 206 (`src/folder.ts`, `wholeMedia`; checked against a server that ignores ranges).
 - `connect-src 'self' https://api.carbonintensity.org.uk https://huggingface.co https://*.hf.co`: the
   record, stamps, casts and voice; the grid; the model, and the CDN hosts Hugging Face redirects its
   weights to. Measured from London it was `us.aws.cdn.hf.co`; the host depends on the visitor's region, so

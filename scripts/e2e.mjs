@@ -12,6 +12,7 @@ import { fileURLToPath } from 'node:url';
 import { chromium, firefox, webkit } from 'playwright';
 import { deskChecks } from './desk-checks.mjs';
 import { doorChecks } from './door-checks.mjs';
+import { norangeChecks } from './norange-checks.mjs';
 import { officeChecks } from './office-checks.mjs';
 import { roomChecks } from './room-checks.mjs';
 import { silenceLiveAudio } from './silent.mjs';
@@ -167,13 +168,14 @@ async function run(name) {
     }
   };
   const shot = (page, state, size = 'desktop') => page.screenshot({ path: join(shots, `${name}-${size}-${state}.png`) });
-  const context = { check, expect, BASE, config, shots, shot, name };
+  const context = { check, expect, BASE, config, shots, shot, name, site };
 
   await deskChecks(context);
   await doorChecks(context);
   await roomChecks(context);
   await officeChecks(context);
   await stampChecks(context);
+  await norangeChecks(context);
 
   await check('the CV page holds only confirmed claims and none of the denylisted names', {}, async (page, problems) => {
     await page.goto(`${BASE}/cv.html`, { waitUntil: 'load' });

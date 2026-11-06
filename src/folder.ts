@@ -38,6 +38,59 @@ export function loopSource(video: HTMLVideoElement, piece: PieceId): string {
   return video.canPlayType('video/webm; codecs="vp9"') ? `/loops/${piece}.webm` : `/loops/${piece}.mp4`;
 }
 
+/**
+ * A recording, fetched whole and played from a blob: the host may ignore byte ranges (Cloudflare Pages
+ * does), and Safari will not play a <video> whose server never answers 206. The loops are small (75 to
+ * 345 KB); each is fetched once a page, its blob reused, and all of them released when the page goes. A
+ * failed fetch rejects, so the video keeps its poster.
+ */
+const fetched = new Map<string, Promise<string>>();
+const urls: string[] = [];
+export function wholeMedia(path: string): Promise<string> {
+  let url = fetched.get(path);
+  if (!url) {
+    url = fetch(path).then(async (response) => {
+      if (!response.ok) throw new Error(`${path}: HTTP ${response.status}`);
+      const blobUrl = URL.createObjectURL(await response.blob());
+      urls.push(blobUrl);
+      return blobUrl;
+    });
+    // A failure can be tried again next time.
+    url.catch(() => fetched.delete(path));
+    fetched.set(path, url);
+  }
+  return url;
+}
+globalThis.addEventListener?.('pagehide', (event) => {
+  if (event.persisted) return;
+  for (const url of urls.splice(0)) URL.revokeObjectURL(url);
+  fetched.clear();
+});
+
+/**
+ * Puts a tool's loop on a video, whole (wholeMedia), and says whether it did: not if the fetch failed or
+ * another loop was asked for meanwhile. The video carries the loop's address in data-loop.
+ */
+export async function setLoop(video: HTMLVideoElement, piece: PieceId): Promise<boolean> {
+  const path = loopSource(video, piece);
+  video.dataset.loop = path;
+  let url: string;
+  try {
+    url = await wholeMedia(path);
+  } catch {
+    return false;
+  }
+  if (video.dataset.loop !== path) return false;
+  video.src = url;
+  return true;
+}
+/** Takes the loop off a video (and any still on its way). */
+export function clearLoop(video: HTMLVideoElement): void {
+  delete video.dataset.loop;
+  video.pause();
+  video.removeAttribute('src');
+}
+
 /** Fills the folder card's text from the tool's entry in the full list. */
 export function fillFolder(piece: PieceId): void {
   const body = document.getElementById('card-body');

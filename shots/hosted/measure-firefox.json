@@ -2,23 +2,32 @@
   "browser": "firefox",
   "mode": "measure",
   "origin": "https://harryfreeman.dev",
-  "at": "2026-11-05T22:00:45.540Z",
+  "at": "2026-11-06T00:01:06.440Z",
   "results": [
     {
       "station": "door: the pointer over it becomes a knuckle; knock, the voice answers, walk in to the desk",
       "ok": true,
-      "ms": 18927,
-      "violations": 1,
+      "ms": 13732,
+      "violations": 0,
       "detail": {
-        "hover": "marked by the check (the pointer did not mark it)",
-        "cursor": "auto",
+        "hover": "by the pointer",
+        "cursor": "url(\"https://harryfreeman.dev/cursors/kn",
         "voice": true
+      }
+    },
+    {
+      "station": "desk: the dive into the office and back, the notebook, the grid note, the mic",
+      "ok": true,
+      "ms": 9126,
+      "violations": 0,
+      "detail": {
+        "grid": "175 gCO₂/kWh, moderate"
       }
     },
     {
       "station": "room: looking round it, the window, three book spines, the shelf by keyboard, the radio on the shelf",
       "ok": true,
-      "ms": 4256,
+      "ms": 4092,
       "violations": 0,
       "detail": {
         "spines": [
@@ -28,45 +37,124 @@
         ],
         "listed": 18
       }
+    },
+    {
+      "station": "card: a card pulled, its loop on the screen, the recording line under it, its stamp checked",
+      "ok": true,
+      "ms": 3043,
+      "violations": 0,
+      "detail": {
+        "loop": "/loops/gpt-in-a-tab.webm",
+        "fromBlob": true,
+        "playing": true,
+        "stamp": "valid"
+      }
+    },
+    {
+      "station": "Reception: a question of your own, answered by meaning search with the model from Hugging Face",
+      "ok": true,
+      "ms": 13234,
+      "violations": 0,
+      "detail": {
+        "mode": "hybrid",
+        "kind": "refusal",
+        "model": {
+          "kind": "ready",
+          "device": "wasm"
+        },
+        "diagnostics": {
+          "runtimeVersion": "4.3.2",
+          "device": "wasm",
+          "checks": [
+            {
+              "device": "wasm",
+              "ok": true,
+              "detail": "reproduces the record's vectors to cosine 0.978 (needs 0.95)"
+            }
+          ],
+          "notes": [],
+          "loadMs": 9878
+        }
+      }
+    },
+    {
+      "station": "radio: Listen to the Grid plays (device-free) and stops",
+      "ok": true,
+      "ms": 8268,
+      "violations": 0,
+      "detail": {
+        "state": "playing"
+      }
+    },
+    {
+      "station": "flat office on a phone: a folder, its recording line and stamp, Reception by keyword",
+      "ok": true,
+      "ms": 2836,
+      "violations": 0,
+      "detail": {
+        "answered": true
+      }
+    },
+    {
+      "station": "pages: the CV, what a stamp proves, both recorded terminal sessions, and a missing page",
+      "ok": true,
+      "ms": 8118,
+      "violations": 0,
+      "detail": {
+        "missing": 404
+      }
     }
   ],
   "byOrigin": {
     "https://harryfreeman.dev": {
-      "document": 2,
-      "script": 21,
-      "stylesheet": 2,
-      "image": 14,
-      "font": 18,
-      "fetch": 63,
-      "media": 2,
-      "cspreport": 1
+      "document": 17,
+      "script": 79,
+      "stylesheet": 13,
+      "image": 66,
+      "font": 78,
+      "fetch": 221
     },
     "https://api.carbonintensity.org.uk": {
-      "fetch": 8
+      "fetch": 36
+    },
+    "https://huggingface.co": {
+      "fetch": 12
+    },
+    "https://us.aws.cdn.hf.co": {
+      "fetch": 2
     }
   },
-  "workers": [],
-  "passedThroughProxy": [],
+  "workers": [
+    "blob:"
+  ],
+  "passedThroughProxy": [
+    "huggingface.co",
+    "us.aws.cdn.hf.co"
+  ],
   "refusedBySite": [],
-  "browserOwn": [],
-  "violations": {
-    "img-src ← data": 1
-  },
-  "violationDetail": {
-    "img-src ← data @ : ": {
-      "count": 1,
-      "stations": [
-        "door"
-      ]
-    }
-  },
+  "browserOwn": [
+    "aus5.mozilla.org:443"
+  ],
+  "violations": {},
+  "violationDetail": {},
   "notFound": [],
   "consoleProblems": [
     {
-      "station": "door: the pointer over it becomes a knuckle; knock, the voice answers, walk in to the desk",
+      "station": "Reception: a question of your own, answered by meaning search with the model from Hugging Face",
+      "type": "warning",
+      "text": "[JavaScript Warning: \"WebGPU is disabled by blocklist.\" {file: \"blob:https://harryfreeman.dev/39b487ae-71a2-4f63-9d6e-e20f1cde5a9f\" line: 1}]"
+    },
+    {
+      "station": "flat office on a phone: a folder, its recording line and stamp, Reception by keyword",
       "type": "error",
-      "text": "[JavaScript Error: \"Content-Security-Policy: (Report-Only policy) The page’s settings would block the loading of a resource (img-src) at data:image/svg+xml,%3Csvg xmlns='http://… because it violates the following directive: “img-src 'self'”\" {file: \"https://harryfreeman.dev/?debug\" line: 0}]"
+      "text": "[JavaScript Error: \"downloadable font: download failed (font-family: \"IBM Plex Sans\" style:normal weight:600..700 width:100 src index:0): status=2152398850 source: https://harryfreeman.dev/fonts/plex/ibm-plex-sans-latin-600-normal.woff2\"]"
     }
   ],
-  "failedRequests": []
+  "failedRequests": [
+    {
+      "station": "flat office on a phone: a folder, its recording line and stamp, Reception by keyword",
+      "url": "https://harryfreeman.dev/fonts/plex/ibm-plex-sans-latin-600-normal.woff2",
+      "error": "NS_BINDING_ABORTED"
+    }
+  ]
 }

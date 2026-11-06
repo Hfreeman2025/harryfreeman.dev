@@ -98,6 +98,10 @@ const pixels = (page, png) =>
  */
 async function onScreen(page, piece, expect) {
   await page.locator('#desk-screen').waitFor({ state: 'visible', timeout: 5000 });
+  // The loop is fetched whole before it is put on the screen: wait for it to arrive.
+  await page
+    .waitForFunction(() => (document.getElementById('desk-loop')?.getAttribute('src') ?? '').startsWith('blob:'), null, { timeout: 8000 })
+    .catch(() => undefined);
   // The desk as it is now, whichever way in: no directory board, the scene the whole window, and the
   // one way back, Back, saying where it goes.
   const layout = await page.evaluate(() => ({
@@ -123,7 +127,10 @@ async function onScreen(page, piece, expect) {
       overlay: document.getElementById('desk-screen').getBoundingClientRect().toJSON(),
       under: document.getElementById('desk-under').getBoundingClientRect().toJSON(),
       card: document.getElementById('card').getBoundingClientRect().toJSON(),
-      src: video.currentSrc || video.getAttribute('src') || '',
+      // The loop's address (data-loop), played from a blob of the whole file (folder.ts, wholeMedia).
+      src: video.dataset.loop ?? '',
+      // (currentSrc stays empty until a video that is never played loads, as with reduced motion.)
+      fromBlob: (video.currentSrc || video.getAttribute('src') || '').startsWith('blob:'),
       poster: video.poster,
       paused: video.paused,
       cardVideo: { src: document.querySelector('#card .folder-card__video')?.getAttribute('src') ?? null },
@@ -139,6 +146,7 @@ async function onScreen(page, piece, expect) {
   expect(at.overlay.width >= 360, `the screen is only ${at.overlay.width.toFixed(0)}px wide`);
   expect(at.overlay.x + at.overlay.width <= at.card.x, 'the screen is under the card');
   expect(at.src.includes(`/loops/${piece}.`) && at.poster.includes(`/loops/${piece}.webp`), `the screen plays ${at.src}`);
+  expect(at.fromBlob, 'the loop is not played from the whole file');
   expect(
     at.under.y >= at.overlay.y + at.overlay.height && at.under.y - (at.overlay.y + at.overlay.height) < 60,
     'Open is not under the bezel',

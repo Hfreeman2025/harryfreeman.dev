@@ -2,23 +2,32 @@
   "browser": "chromium",
   "mode": "measure",
   "origin": "https://harryfreeman.dev",
-  "at": "2026-11-05T22:00:21.006Z",
+  "at": "2026-11-06T00:00:01.779Z",
   "results": [
     {
       "station": "door: the pointer over it becomes a knuckle; knock, the voice answers, walk in to the desk",
       "ok": true,
-      "ms": 18416,
-      "violations": 1,
+      "ms": 13300,
+      "violations": 0,
       "detail": {
-        "hover": "marked by the check (the pointer did not mark it)",
-        "cursor": "auto",
+        "hover": "by the pointer",
+        "cursor": "url(\"https://harryfreeman.dev/cursors/kn",
         "voice": true
+      }
+    },
+    {
+      "station": "desk: the dive into the office and back, the notebook, the grid note, the mic",
+      "ok": true,
+      "ms": 8855,
+      "violations": 0,
+      "detail": {
+        "grid": "175 gCO₂/kWh, moderate"
       }
     },
     {
       "station": "room: looking round it, the window, three book spines, the shelf by keyboard, the radio on the shelf",
       "ok": true,
-      "ms": 3435,
+      "ms": 3422,
       "violations": 0,
       "detail": {
         "spines": [
@@ -28,45 +37,118 @@
         ],
         "listed": 18
       }
+    },
+    {
+      "station": "card: a card pulled, its loop on the screen, the recording line under it, its stamp checked",
+      "ok": true,
+      "ms": 2899,
+      "violations": 0,
+      "detail": {
+        "loop": "/loops/gpt-in-a-tab.webm",
+        "fromBlob": true,
+        "playing": true,
+        "stamp": "valid"
+      }
+    },
+    {
+      "station": "Reception: a question of your own, answered by meaning search with the model from Hugging Face",
+      "ok": true,
+      "ms": 10677,
+      "violations": 0,
+      "detail": {
+        "mode": "hybrid",
+        "kind": "refusal",
+        "model": {
+          "kind": "ready",
+          "device": "webgpu"
+        },
+        "diagnostics": {
+          "runtimeVersion": "4.3.2",
+          "device": "webgpu",
+          "checks": [
+            {
+              "device": "webgpu",
+              "ok": true,
+              "detail": "reproduces the record's vectors to cosine 0.978 (needs 0.95)"
+            }
+          ],
+          "notes": [],
+          "loadMs": 7517.900000095367
+        }
+      }
+    },
+    {
+      "station": "radio: Listen to the Grid plays (device-free) and stops",
+      "ok": true,
+      "ms": 6235,
+      "violations": 0,
+      "detail": {
+        "state": "playing"
+      }
+    },
+    {
+      "station": "flat office on a phone: a folder, its recording line and stamp, Reception by keyword",
+      "ok": true,
+      "ms": 3651,
+      "violations": 0,
+      "detail": {
+        "answered": true
+      }
+    },
+    {
+      "station": "pages: the CV, what a stamp proves, both recorded terminal sessions, and a missing page",
+      "ok": true,
+      "ms": 8058,
+      "violations": 0,
+      "detail": {
+        "missing": 404
+      }
     }
   ],
   "byOrigin": {
     "https://harryfreeman.dev": {
-      "document": 2,
-      "script": 21,
-      "stylesheet": 2,
-      "image": 14,
-      "fetch": 63,
-      "font": 18,
-      "other": 3,
-      "media": 2
+      "document": 17,
+      "script": 79,
+      "stylesheet": 13,
+      "image": 51,
+      "fetch": 221,
+      "font": 78,
+      "other": 13
     },
     "https://api.carbonintensity.org.uk": {
-      "fetch": 8
+      "fetch": 36
+    },
+    "https://huggingface.co": {
+      "fetch": 12
+    },
+    "https://us.aws.cdn.hf.co": {
+      "fetch": 2
     }
   },
-  "workers": [],
-  "passedThroughProxy": [],
+  "workers": [
+    "blob:"
+  ],
+  "passedThroughProxy": [
+    "huggingface.co",
+    "us.aws.cdn.hf.co"
+  ],
   "refusedBySite": [],
   "browserOwn": [
     "plain http: http://clients2.google.com/time/1/current",
-    "update.googleapis.com:443",
     "accounts.google.com:443",
+    "update.googleapis.com:443",
     "www.google.com:443",
     "android.clients.google.com:443"
   ],
-  "violations": {
-    "img-src ← data": 1
-  },
-  "violationDetail": {
-    "img-src ← data @ : ": {
-      "count": 1,
-      "stations": [
-        "door"
-      ]
-    }
-  },
+  "violations": {},
+  "violationDetail": {},
   "notFound": [],
-  "consoleProblems": [],
+  "consoleProblems": [
+    {
+      "station": "pages: the CV, what a stamp proves, both recorded terminal sessions, and a missing page",
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    }
+  ],
   "failedRequests": []
 }

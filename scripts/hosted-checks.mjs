@@ -366,7 +366,7 @@ const STATIONS = [
   {
     name: 'card: a card pulled, its loop on the screen, the recording line under it, its stamp checked',
     context: DESK,
-    async run(page, name) {
+    async run(page) {
       await page.goto(`${ORIGIN}/?debug#folder-gpt-in-a-tab`, { waitUntil: 'load' });
       await page.waitForFunction(() => document.getElementById('card')?.dataset.open === 'true', null, { timeout: 20000 });
       await page.locator('#desk-screen').waitFor({ state: 'visible', timeout: 10000 });
@@ -374,7 +374,9 @@ const STATIONS = [
       const screen = await page.evaluate(() => {
         const v = document.getElementById('desk-loop');
         return {
-          src: v.currentSrc,
+          // The loop's address; it plays from a blob of the whole file (Pages ignores byte ranges).
+          src: v.dataset.loop ?? '',
+          fromBlob: v.currentSrc.startsWith('blob:'),
           paused: v.paused,
           under: document.getElementById('desk-under')?.textContent ?? '',
           links: document.querySelectorAll('#card a[href^="http://"]').length,
@@ -383,7 +385,8 @@ const STATIONS = [
       expect(screen.under.includes(RECORDING_LINE), `under the screen: ${screen.under}`);
       expect(!/\bOpen GPT in a tab\b/.test(screen.under), 'an Open link to a local port is still offered');
       expect(screen.links === 0, 'the card links to a plain http:// address');
-      expect(!screen.paused || name === 'webkit', 'the loop is not playing');
+      // In every browser: Safari plays it too, from the whole file, though the host ignores byte ranges.
+      expect(screen.fromBlob && !screen.paused, `the loop is not playing from the whole file: ${JSON.stringify(screen)}`);
       await page.locator('#card-stamp .stamp__face').scrollIntoViewIfNeeded();
       await page.click('#card-stamp .stamp__face');
       await page.waitForFunction(
@@ -394,7 +397,7 @@ const STATIONS = [
       );
       const stamp = await page.evaluate(() => document.querySelector('#card-stamp .stamp__status')?.dataset.state);
       expect(stamp === 'valid', `the stamp checked as ${stamp}`);
-      return { loop: screen.src.replace(ORIGIN, ''), playing: !screen.paused, stamp };
+      return { loop: screen.src, fromBlob: screen.fromBlob, playing: !screen.paused, stamp };
     },
   },
   {

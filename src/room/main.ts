@@ -7,7 +7,7 @@
 
 import { DRAWERS, drawerOf } from '../content/drawers';
 import { isPieceId, PIECE_IDS, type PieceId } from '../content/pieces';
-import { fillFolder, loopSource, scrollToMark, trapTab } from '../folder';
+import { clearLoop, fillFolder, scrollToMark, setLoop, trapTab } from '../folder';
 import type { RoomEngine, Station } from '../scene/engine';
 import type { Timeline } from '../timeline/schema';
 import type { RoomLight, SignText } from './grid';
@@ -104,10 +104,11 @@ export async function startRoom(timeline: Timeline): Promise<RoomControl> {
     if (toReception) toReception.hidden = cameFrom !== 'reception';
     // The desk's screen, in full: the tool's own loop over the monitor.
     screen.poster = `/loops/${piece}.webp`;
-    screen.src = loopSource(screen, piece);
+    void setLoop(screen, piece).then((set) => {
+      if (set && !reduced) void screen.play().catch(() => undefined);
+    });
     placeScreen();
     screen.hidden = false;
-    if (!reduced) void screen.play().catch(() => undefined);
     document.getElementById('card-title')?.focus();
   }
 
@@ -115,8 +116,7 @@ export async function startRoom(timeline: Timeline): Promise<RoomControl> {
     if (!card || !screen) return;
     card.hidden = true;
     card.dataset.open = 'false';
-    screen.pause();
-    screen.removeAttribute('src');
+    clearLoop(screen);
     screen.hidden = true;
     openPiece = null;
   }

@@ -9,7 +9,7 @@
 
 import { DRAWERS, drawerOf } from '../content/drawers';
 import { isPieceId, PIECES, type PieceId, pieceById } from '../content/pieces';
-import { fillFolder, loopSource, scrollToMark } from '../folder';
+import { clearLoop, fillFolder, scrollToMark, setLoop } from '../folder';
 import type { GridMix, RoomLight, SignText } from '../room/grid';
 import { popovers } from '../room/popover';
 import type { Timeline } from '../timeline/schema';
@@ -154,8 +154,9 @@ export async function startDesk(timeline: Timeline): Promise<DeskControl> {
     if (open) under?.prepend(open);
     if (video) {
       video.poster = `/loops/${piece}.webp`;
-      video.src = loopSource(video, piece);
-      if (!reduced) void video.play().catch(() => undefined);
+      void setLoop(video, piece).then((set) => {
+        if (set && !reduced) void video.play().catch(() => undefined);
+      });
     }
     document.getElementById('card-title')?.focus();
   }
@@ -163,8 +164,7 @@ export async function startDesk(timeline: Timeline): Promise<DeskControl> {
     if (!card) return;
     card.hidden = true;
     card.dataset.open = 'false';
-    video?.pause();
-    video?.removeAttribute('src');
+    if (video) clearLoop(video);
     under?.querySelector('.work__open')?.remove();
     if (openPiece) engine.stand(null, false);
     openPiece = null;
