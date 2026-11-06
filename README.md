@@ -546,6 +546,29 @@ project (Settings → Delete project), or `npx --prefix tools/deploy wrangler pa
 harryfreeman-studio`. A single bad deployment can be rolled back instead: Deployments → an earlier one →
 Rollback.
 
+## How it was built
+
+Designed, specified and reviewed by Harry Freeman; built with AI coding agents.
+
+- **First build (3 November 2026):** a scale model of the studio where the ten tools were built, with the
+  build timeline reconstructed from file times and the builders' reports and played back, each event
+  showing its evidence, and a flat office as its first rendering.
+- **One building (4 November):** the office as the way in with the studio off its lobby, then the lit 3D
+  studio as the way in and the office as its flat rendering; checked in Chromium, WebKit and Firefox from
+  then on.
+- **Directions (5 November):** an architect's study model, receipt stamps in every folder verified in the
+  browser, and style frames and two rounds of directions for Harry to choose from; then a new one: his
+  desk at real scale with the studio as a miniature on it.
+- **The desk (5 November):** built in reviewed rounds. Harry's reviews brought the low swoop onto the
+  monitors, the card view square to the screen, his nameplate and card, the office door with a knock and
+  a voice, the furnished office, lettering printed in the scene (after he caught the nameplate showing
+  through the card box), a slower walk in, the ultrawide, and every desk object at its real size.
+- **Hosted (5 and 6 November):** a hosted build behind a gate that fails closed on private names, paths
+  and keys, a Content-Security-Policy measured from real traffic and enforced in three browsers, deployed
+  to Cloudflare Pages; then the loops fetched whole once Pages was found to ignore byte ranges, and the
+  Source printout linking every tool's code.
+- **Review:** each round was reviewed against its brief before the next began.
+
 ## Credits and licences
 
 Code: MIT, Copyright (c) 2026 Harry Freeman. Data: carbon intensity from the NESO Carbon Intensity API,
