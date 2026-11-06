@@ -90,6 +90,13 @@ on paths to review. The things on the desk are the site's parts (`src/desk/`):
   transcript or any real output. It is a canvas texture redrawn only when a new line arrives, sharp
   through the tilt-shift like the other lettering, and decorative (the canvas is hidden from screen
   readers; the caption carries the same words).
+- **The source.** A printout of the code at the desk's front right, an A5 stack under a binder clip with a
+  coral tag printed "Source"; its top sheet prints where the code is and the eleven repositories, set like
+  a listing. A click on it, or Enter on it, opens the Source list over it: the ten tools' repositories,
+  this site's (`harryfreeman.dev`) and Harry's GitHub profile, as real links (from `source` in
+  `site.config.json`). Closed, the list stays in the page, visually hidden, and focus on one of its links
+  opens it. Every tool's card has a Source link too, last in its Open line (or its recording line). No
+  logos: the word and the printout carry it.
 - **The Speak to me mic.** A podcast mic by the nameplate, with a printed tag. It never listens: no
   microphone is asked for, no permission, no audio. Clicking it (or Enter) lights its ON AIR lamp and
   opens a contact card: Harry's email with a Copy button (which says Copied only once the clipboard has
@@ -274,6 +281,10 @@ the check.
     or button, and each drawer followed by its folders;
   - the earlier suites: the timeline, replay, rendering, config, CV, filing, cabinet and floor plan.
 - **Browser checks (74 per browser, all passing in Chromium, WebKit and Firefox on 5 November):**
+  - the source: the printout's sheet fully in sight from the seat; the Source list's twelve links exact
+    (the ten tools', `harryfreeman.dev`, the profile) and visually hidden while closed; a click on the
+    printout and Enter on its cover open it in view, Esc closes it, focus on a hidden link opens it; a
+    pulled card's Source link under the screen; no layout shift; nothing fetched from GitHub;
   - real size: measured in the scene, square on, the keyboard 28.9 cm, the notebook 21.9, the card 17.8,
     the nameplate 19.5, the mug on its saucer 14.3, the sticky note 7.6, the mic 19.6 tall, the card tray
     16.2, the ultrawide 82.2, each within its real range, and the studio model 20.8 cm, a miniature;

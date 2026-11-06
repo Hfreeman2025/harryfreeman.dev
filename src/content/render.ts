@@ -4,7 +4,7 @@
 import { hostedOpenLine } from '../hosting/open';
 import type { Timeline } from '../timeline/schema';
 import { pieceRecord } from '../timeline/schema';
-import type { SiteConfig } from './config';
+import { type SiteConfig, sourceUrl } from './config';
 import { DRAWERS } from './drawers';
 import { PIECES, type Piece, pieceById } from './pieces';
 
@@ -110,10 +110,35 @@ function renderPiece(piece: Piece, config: SiteConfig, timeline: Timeline, hoste
       <div><h4>Checks, as its README reports them</h4><ul class="work__checks">${piece.checks.map((c) => `<li>${esc(c)}</li>`).join('')}</ul></div>
     </div>
     ${run}
-    ${recording ?? `<p class="work__open"><a class="open" href="${esc(url)}">Open ${esc(piece.title)}</a><span class="work__where">${esc(openLabel(piece, url))}</span></p>`}
+    ${withSource(recording ?? `<p class="work__open"><a class="open" href="${esc(url)}">Open ${esc(piece.title)}</a><span class="work__where">${esc(openLabel(piece, url))}</span></p>`, sourceUrl(config, piece.id))}
     ${crossLink(piece)}
   </div>
 </li>`;
+}
+
+/** The tool's Source link, last in its Open line (or the recording line where it cannot be opened), so it goes
+ *  wherever that line goes: under the desk's screen, in the folder, in the list. */
+function withSource(line: string, href: string): string {
+  return line.replace(/<\/p>$/, `<a class="source" href="${esc(href)}">Source</a></p>`);
+}
+
+/**
+ * The Source panel: the ten tools' repositories and the site's, and Harry's profile. On the desk it is the
+ * printout's list (printed in the scene, desk/objects.ts) and opens over it; closed, it stays in the page
+ * for screen readers and search, and focus on a link opens it. In the flat office it is a plain list.
+ */
+export function renderSource(config: SiteConfig): string {
+  const row = (href: string, name: string, repo: string) =>
+    `<li><a href="${esc(href)}">${esc(name)}</a><span class="source-card__repo">${esc(repo)}</span></li>`;
+  const tools = PIECES.map((p) => row(sourceUrl(config, p.id), p.title, p.id));
+  const site = row(sourceUrl(config, config.source.site), 'This site', config.source.site);
+  const profile = config.source.profile.replace(/^https:\/\//, '');
+  return `<nav class="source-card" id="source" aria-labelledby="source-title" tabindex="-1">
+  <h2 class="source-card__title" id="source-title">Source</h2>
+  <p class="source-card__how">The code behind each tool and this site.</p>
+  <ul class="source-card__list">${tools.join('')}${site}</ul>
+  <p class="source-card__profile"><a href="${esc(config.source.profile)}">All of it: ${esc(profile)}</a></p>
+</nav>`;
 }
 
 export function renderList(config: SiteConfig, timeline: Timeline, hosted = false): string {
@@ -144,6 +169,7 @@ export function renderDeskLabels(): string {
     `<button type="button" class="dtag dtag--place" data-desk-target="room" data-action="room" data-at="door" aria-label="The room: look up at the window and the shelf"><span class="dtag__name">The room ↑</span></button>`,
     `<button type="button" class="obj obj--cover" data-desk-target="sign" data-action="sign" data-at="door" data-place="cover" aria-expanded="false" aria-controls="grid-sign" aria-describedby="desk-credit"><span class="obj__name">The sticky note: the current carbon intensity of Great Britain’s grid</span></button>`,
     `<button type="button" class="obj obj--cover obj--mic" data-desk-target="mic" data-action="mic" data-at="door" data-place="cover" aria-expanded="false" aria-controls="speak"><span class="obj__name">Speak to me: Harry’s email, LinkedIn and CV</span></button>`,
+    `<button type="button" class="obj obj--cover" data-desk-target="source" data-action="source" data-at="door" data-place="cover" aria-expanded="false" aria-controls="source"><span class="obj__name">The printout: Source, the code behind each tool and this site</span></button>`,
   ];
   const office = [
     ...PIECES.map(

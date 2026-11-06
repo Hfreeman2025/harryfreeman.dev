@@ -6,7 +6,7 @@ import { marked } from 'marked';
 import { defineConfig, type Plugin } from 'vite';
 import { BRIEFS_HTML } from './src/content/briefs';
 import { parseConfig } from './src/content/config';
-import { renderDeskLabels, renderList, renderRoomLabels, renderTimelineJson } from './src/content/render';
+import { renderDeskLabels, renderList, renderRoomLabels, renderSource, renderTimelineJson } from './src/content/render';
 import { hosting } from './src/hosting/plugin';
 import { renderCabinet, renderDirectory, renderPlan } from './src/office/render';
 import placeholder from './src/timeline/placeholder.json' with { type: 'json' };
@@ -128,6 +128,7 @@ function studio(): Plugin {
         return html
           .replace('<!--room:labels-->', renderRoomLabels())
           .replace('<!--desk:labels-->', renderDeskLabels())
+          .replace('<!--desk:source-->', renderSource(config))
           .replace('<!--studio:briefs-->', BRIEFS_HTML)
           .replace('<!--office:directory-->', renderDirectory())
           .replace('<!--office:cabinet-->', renderCabinet())

@@ -33,6 +33,7 @@ const FLOATING = [
   '.grid-sign',
   '.radio',
   '.shelf-card',
+  '.source-card',
   '.folder-card',
   '.desk__screen',
   '.desk__notebook',
@@ -185,7 +186,7 @@ export async function deskChecks({ check, expect, BASE, shot, name, config }) {
 
   await check('desk: the HTML carries the desk’s objects, the name tags and every card before any script', {}, async () => {
     const html = await (await fetch(`${BASE}/`)).text();
-    expect((html.match(/data-desk-target=/g) ?? []).length === 39, `desk targets: ${(html.match(/data-desk-target=/g) ?? []).length}`);
+    expect((html.match(/data-desk-target=/g) ?? []).length === 40, `desk targets: ${(html.match(/data-desk-target=/g) ?? []).length}`);
     for (const action of ['office', 'cabinet', 'notebook', 'reception', 'stamp', 'sign', 'room', 'shelf'])
       expect(html.includes(`data-action="${action}"`), `no ${action}`);
     expect(html.includes('id="notebook-panel"') && html.includes('id="printout"'), 'no notebook panel or printout');
@@ -319,7 +320,17 @@ export async function deskChecks({ check, expect, BASE, shot, name, config }) {
       // The live tool opens from the screen, by keyboard too: Shift+Tab from the card reaches it.
       expect((await page.locator('#desk-under .open').textContent())?.trim() === 'Open gridtop', 'no Open under the screen');
       expect(await page.locator('#desk-under .open').isVisible(), 'Open under the screen is not visible');
+      // Under the screen, Open and then the tool's Source: Shift+Tab from the card reaches Source, then Open.
       await page.focus('#card-title');
+      await page.keyboard.press('Shift+Tab');
+      const back1 = await page.evaluate(() => ({
+        text: document.activeElement?.textContent?.trim(),
+        href: document.activeElement?.getAttribute('href'),
+      }));
+      expect(
+        back1.text === 'Source' && back1.href === 'https://github.com/Hfreeman2025/gridtop',
+        `Shift+Tab reached ${JSON.stringify(back1)}`,
+      );
       await page.keyboard.press('Shift+Tab');
       expect((await page.evaluate(() => document.activeElement?.textContent?.trim())) === 'Open gridtop', 'Shift+Tab did not reach Open');
       await page.focus('#card-title');
@@ -832,6 +843,7 @@ export async function deskChecks({ check, expect, BASE, shot, name, config }) {
       mic: [17, 26, 'tall'],
       box: [13, 19, 'across'],
       monitor: [78, 84, 'across'],
+      source: [19, 23, 'across'],
       model: [19, 23, 'across'],
     };
     for (const [thing, [lo, hi, side]] of Object.entries(want)) {
@@ -840,6 +852,100 @@ export async function deskChecks({ check, expect, BASE, shot, name, config }) {
     }
     return Object.fromEntries(Object.entries(sizes).map(([k, v]) => [k, k === 'mic' ? v.tall : v.across]));
   });
+
+  await check(
+    'desk: the source printout opens the list of repositories by click or Enter, closed it stays in the page for screen readers, every card links its source, and nothing is fetched from GitHub',
+    {
+      ...desk,
+      initScript: () => {
+        window.__shift = PerformanceObserver.supportedEntryTypes?.includes('layout-shift') ? 0 : null;
+        if (window.__shift === null) return;
+        new PerformanceObserver((list) => {
+          for (const e of list.getEntries()) if (!e.hadRecentInput) window.__shift += e.value;
+        }).observe({ type: 'layout-shift', buffered: true });
+      },
+    },
+    async (page, problems) => {
+      const github = [];
+      page.on('request', (r) => {
+        if (/(^|\.)github\.com$/.test(new URL(r.url()).hostname)) github.push(r.url());
+      });
+      await live(page, DESK());
+      const profile = 'https://github.com/Hfreeman2025';
+      const want = [
+        ...[
+          'gpt-in-a-tab',
+          'real-or-hallucinated',
+          'agent-race',
+          'receipts',
+          'dreaming',
+          'grid-weather',
+          'gridtop',
+          'listen-to-the-grid',
+          'ask-the-record',
+          'sourced',
+        ].map((r) => `${profile}/${r}`),
+        `${profile}/harryfreeman.dev`,
+        profile,
+      ];
+      // Printed on the printout, in sight from the seat; its list in the page, visually hidden, every link right.
+      const closed = await page.evaluate(() => {
+        const list = document.getElementById('source');
+        return {
+          inSight: window.deskDebug.printedInSight().source,
+          hidden: list.getBoundingClientRect().width <= 1 && getComputedStyle(list).display !== 'none',
+          hrefs: [...list.querySelectorAll('a')].map((a) => a.getAttribute('href')),
+        };
+      });
+      expect(closed.inSight === 1, `the printout's sheet is ${Math.round(closed.inSight * 100)}% in sight`);
+      expect(closed.hidden, 'the Source list is not visually hidden while closed');
+      // Every one, once, and nothing else (the list keeps the site's own order of the tools).
+      expect(JSON.stringify([...closed.hrefs].sort()) === JSON.stringify([...want].sort()), `the Source links: ${closed.hrefs.join(' ')}`);
+      // A click on the printout opens the list over it, its links shown; Esc closes it.
+      // (It sits at the desk's right edge, partly out of the frame: click its part in view.)
+      const at = await page.evaluate(() => window.deskDebug.printed().source);
+      await page.mouse.click(Math.min(at.x + at.width / 2, at.x + 120), at.y + at.height / 2);
+      await page.waitForFunction(() => document.getElementById('source').dataset.open === 'true', null, { timeout: 2000 });
+      const open = await page.evaluate(() => {
+        const r = document.getElementById('source').getBoundingClientRect();
+        return { width: r.width, inView: r.left >= 0 && r.top >= 0 && r.right <= innerWidth && r.bottom <= innerHeight };
+      });
+      expect(open.width > 200 && open.inView, `the open list: ${JSON.stringify(open)}`);
+      await shot(page, 'desk-source');
+      // Esc unpins it and gives focus back to the printout's cover (which shows it while focused, as the
+      // other cards do); moving on closes it.
+      await page.keyboard.press('Escape');
+      expect((await page.evaluate(() => document.activeElement?.dataset.action)) === 'source', 'focus did not come back to the printout');
+      await page.locator('.index a').first().focus();
+      await page.waitForFunction(() => document.getElementById('source').dataset.open !== 'true', null, { timeout: 2000 });
+      // By keyboard: the printout's cover and Enter open it, focus goes into it.
+      await page.locator('[data-action="source"][data-at="door"]').focus();
+      await page.keyboard.press('Enter');
+      await page.waitForFunction(() => document.getElementById('source').dataset.open === 'true', null, { timeout: 2000 });
+      expect(
+        await page.evaluate(() => document.getElementById('source').contains(document.activeElement)),
+        'focus did not go into the list',
+      );
+      await page.keyboard.press('Escape');
+      await page.locator('.index a').first().focus();
+      await page.waitForFunction(() => document.getElementById('source').dataset.open !== 'true', null, { timeout: 2000 });
+      // Focus on one of the hidden links (as a screen reader's would land) opens it too.
+      await page.focus('#source a[href$="/gridtop"]');
+      await page.waitForFunction(() => document.getElementById('source').dataset.open === 'true', null, { timeout: 2000 });
+      await page.locator('#room-back, .index a').first().focus();
+      // A card's source, beside its Open line under the screen.
+      await page.click('.index a[data-piece="sourced"]');
+      await cardOpen(page);
+      await waitStation(page, 'desk:sourced');
+      const cardSource = await page.evaluate(() => document.querySelector('#desk-under a.source')?.getAttribute('href'));
+      expect(cardSource === `${profile}/sourced`, `the card's Source link: ${cardSource}`);
+      const shift = await page.evaluate(() => window.__shift);
+      if (shift !== null) expect(shift === 0, `layout shift ${shift}`);
+      expect(github.length === 0, `fetched from GitHub: ${github.join(' ')}`);
+      expect(problems.length === 0, problems.join(' | '));
+      return { links: closed.hrefs.length, layoutShift: shift ?? 'not reported by this browser' };
+    },
+  );
 
   await check('desk: from the seated view the index box keeps clear of the nameplate at every window shape', desk, async (page) => {
     await live(page, DESK());

@@ -14,5 +14,9 @@
   },
   "cv": "/cv.html",
   "email": "harryfreeman2000@icloud.com",
-  "linkedin": "https://www.linkedin.com/in/harry-freeman-950295180"
+  "linkedin": "https://www.linkedin.com/in/harry-freeman-950295180",
+  "source": {
+    "profile": "https://github.com/Hfreeman2025",
+    "site": "harryfreeman.dev"
+  }
 }

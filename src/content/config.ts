@@ -14,7 +14,15 @@ const ConfigSchema = v.object({
   cv: Url,
   email: v.pipe(v.string(), v.email()),
   linkedin: v.pipe(v.string(), v.url()),
+  /** Where the code is: Harry's GitHub profile (each tool's repository is named as the tool), and this site's repository. */
+  source: v.object({
+    profile: v.pipe(v.string(), v.url(), v.startsWith('https://github.com/')),
+    site: v.pipe(v.string(), v.regex(/^[A-Za-z0-9._-]+$/)),
+  }),
 });
+
+/** A repository's address: the tool's own name, or the site's. */
+export const sourceUrl = (config: SiteConfig, repo: string) => `${config.source.profile}/${repo}`;
 
 export type SiteConfig = v.InferOutput<typeof ConfigSchema>;
 

@@ -57,8 +57,10 @@ import {
   Microphone,
   Nameplate,
   Notebook,
+  PRINTOUT,
   pencil,
   type Round,
+  SourcePrintout,
   stampAndPad,
   sticky,
 } from './objects';
@@ -127,7 +129,13 @@ interface MountOptions {
    * HTML, visually hidden; the scene prints them, rings them while they have focus, and passes clicks on
    * the printed links to the real ones.
    */
-  readonly lettering?: { readonly masthead: HTMLElement | null; readonly door: HTMLElement | null; readonly credit: HTMLElement | null };
+  readonly lettering?: {
+    readonly masthead: HTMLElement | null;
+    readonly door: HTMLElement | null;
+    readonly credit: HTMLElement | null;
+    /** The Source list (#source): the printout prints where the code is and the repositories' names. */
+    readonly source?: HTMLElement | null;
+  };
   readonly timeline: Timeline;
   readonly startAt?: number;
   readonly paused?: boolean;
@@ -147,13 +155,16 @@ const PLACES = {
   notebook: { x: 17.0, z: -1.6, turn: -0.18 },
   keyboard: { x: 10.4, z: 14.8, turn: -0.1 },
   cup: { x: 17.0, z: -14.0 },
-  pencil: { x: 21.0, z: 7.4, turn: 1.65 },
+  // Resting on the source printout.
+  pencil: { x: 29.4, z: 14.4, turn: 2.2 },
   // The card turned square to the door camera (its azimuth, -12°), so its lines read level; the mic
   // between it and the nameplate.
   nameplate: { x: -25.6, z: -17.8, turn: -0.04 },
   mic: { x: -12.6, z: -13.2, turn: 0.15 },
   // The ultrawide at the back of the desk: seated, only its lower edge shows, along the top of the view.
   monitor: { x: 7.5, z: -23.2 },
+  // The source printout, at the desk's front right, beside the keyboard.
+  source: { x: 30.2, z: 12.2, turn: 0.04 },
   card: { x: 3.8, z: -14.0, turn: -0.2 },
 } as const;
 /** How much bigger than first drawn each thing is, to be its real size (the keyboard and notebook were). */
@@ -459,7 +470,7 @@ export async function mountDesk({
   cup.position.set(PLACES.cup.x, DESK_Y, PLACES.cup.z);
   cup.scale.setScalar(REAL.cup);
   const pen = pencil();
-  pen.position.set(PLACES.pencil.x, DESK_Y + 0.2 * REAL.pencil, PLACES.pencil.z);
+  pen.position.set(PLACES.pencil.x, DESK_Y + PRINTOUT.height + 0.2 * REAL.pencil, PLACES.pencil.z);
   pen.rotation.y = PLACES.pencil.turn;
   pen.scale.setScalar(REAL.pencil);
   let note = sticky(signFor(null));
@@ -481,7 +492,29 @@ export async function mountDesk({
   const monitor = new Monitor();
   monitor.group.scale.setScalar(M / DRAWN);
   monitor.group.position.set(PLACES.monitor.x, DESK_Y, PLACES.monitor.z);
-  scene.add(box.group, notebook.group, keyboard.group, stamp, cup, pen, note, plate.group, card.group, mic.group, monitor.group);
+  const printout = new SourcePrintout(
+    lettering.source
+      ?.querySelector('.source-card__profile a')
+      ?.getAttribute('href')
+      ?.replace(/^https:\/\//, '') ?? '',
+    [...(lettering.source?.querySelectorAll('.source-card__repo') ?? [])].map((r) => r.textContent?.trim() ?? ''),
+  );
+  printout.group.position.set(PLACES.source.x, DESK_Y, PLACES.source.z);
+  printout.group.rotation.y = PLACES.source.turn;
+  scene.add(
+    box.group,
+    notebook.group,
+    keyboard.group,
+    stamp,
+    cup,
+    pen,
+    note,
+    plate.group,
+    card.group,
+    mic.group,
+    monitor.group,
+    printout.group,
+  );
 
   // ---------- Printed: the nameplate, the card, the credit slip (the door plate is the room's) ----------
   const words = (selector: string) => lettering.masthead?.querySelector(selector)?.textContent?.trim() ?? '';
@@ -541,6 +574,8 @@ export async function mountDesk({
     ...mic.corners(),
     // The monitor's lower edge: the dock and the session's last lines, along the top of the view.
     ...monitor.lowerStrip(),
+    // The printout at the desk's right edge: the seated view takes in its tag and its inner side.
+    ...printout.innerEdge(),
     ...worldOf(stamp, [
       [-7, 0, -2],
       [3, 0, 2.5],
@@ -690,6 +725,7 @@ export async function mountDesk({
     if (key.startsWith('drawer:')) return box.frontCorners(key.slice(7));
     if (key.startsWith('folder:') && isPieceId(key.slice(7))) return box.cardCorners(key.slice(7) as PieceId);
     if (key === 'mic') return mic.corners();
+    if (key === 'source') return printout.corners();
     if (key === 'sign')
       return worldOf(note, [
         [-2.2, -2.2, 0],
@@ -848,6 +884,7 @@ export async function mountDesk({
     if (key === 'stamp') return stamp;
     if (key === 'sign') return note;
     if (key === 'mic') return mic.group;
+    if (key === 'source') return printout.group;
     if (key === 'room-radio') return shelfRadio;
     if (key === 'shelf') return furniture.group;
     if (key === 'window') return room.group;
@@ -950,7 +987,19 @@ export async function mountDesk({
     const clear = focusNow.cut > 0.5;
     if (clear !== cleared) {
       cleared = clear;
-      for (const thing of [box.group, notebook.group, keyboard.group, stamp, cup, pen, plate.group, card.group, mic.group, monitor.group])
+      for (const thing of [
+        box.group,
+        notebook.group,
+        keyboard.group,
+        stamp,
+        cup,
+        pen,
+        plate.group,
+        card.group,
+        mic.group,
+        monitor.group,
+        printout.group,
+      ])
         thing.visible = !clear;
       office.openSide(clear);
       office.solo(clear && station.startsWith('desk:') ? (station.slice(5) as PieceId) : null);
@@ -1155,6 +1204,7 @@ export async function mountDesk({
     [notebook.group, 'notebook'],
     [keyboard.group, 'reception'],
     [stamp, 'stamp'],
+    [printout.group, 'source'],
   ];
   function pick(event: PointerEvent): string | null {
     if (glide) return null;
@@ -1427,6 +1477,7 @@ export async function mountDesk({
         ['nameplate', plate.group],
         ['card', card.group],
         ['mic', mic.group],
+        ['source printout', printout.group],
         ['index box', box.group],
         ['notebook', notebook.group],
         ['keyboard', keyboard.group],
@@ -1528,6 +1579,8 @@ export async function mountDesk({
           sticky: { across: Math.round((((note.geometry as PlaneGeometry).parameters.width * note.scale.x) / M) * 1000) / 10, tall: 0 },
           mic: cm(mic.group),
           box: cm(box.group),
+          // The printout, by its sheet (the clip and tag aside).
+          source: { across: Math.round(((PRINTOUT.depth * printout.group.scale.x) / M) * 1000) / 10, tall: 0 },
           monitor: cm(monitor.group),
           model: { across: Math.round(((BASE.x1 - BASE.x0) / M) * 1000) / 10, tall: 0 },
         };
@@ -1634,6 +1687,7 @@ export async function mountDesk({
             })),
           },
           credit: onPage(creditOf(note)),
+          source: onPage(printout.sheetMesh),
           door: (() => {
             const xs: number[] = [];
             const ys: number[] = [];
@@ -1664,7 +1718,12 @@ export async function mountDesk({
             }
           return seenPoints / 28;
         };
-        return { nameplate: share(plate.faceMesh), card: share(card.faceMesh), credit: share(creditOf(note)) };
+        return {
+          nameplate: share(plate.faceMesh),
+          card: share(card.faceMesh),
+          credit: share(creditOf(note)),
+          source: share(printout.sheetMesh),
+        };
       },
       /** A plain green board stood between the camera and the nameplate (true), or taken away (false). */
       blockNameplate: (on: boolean) => {

@@ -4,7 +4,7 @@ import { piecesQuoted, sourceOf } from '../src/ask';
 import { parseConfig } from '../src/content/config';
 import { DRAWERS } from '../src/content/drawers';
 import { PIECE_IDS, PIECES } from '../src/content/pieces';
-import { esc, openLabel, renderList, renderRoomLabels } from '../src/content/render';
+import { esc, openLabel, renderList, renderRoomLabels, renderSource } from '../src/content/render';
 import { parseCast } from '../src/terminal-cast';
 import placeholder from '../src/timeline/placeholder.json' with { type: 'json' };
 import { parseTimeline } from '../src/timeline/schema';
@@ -104,6 +104,27 @@ describe('render', () => {
     const list = renderList(config, { ...timeline, placeholder: false });
     expect(list).not.toContain('placeholder timeline');
     expect(list).toContain('the times are inferred');
+  });
+
+  it('links each tool to its source, in its Open line, here and hosted, and lists every repository with the profile', () => {
+    for (const hosted of [false, true]) {
+      const list = renderList(config, timeline, hosted);
+      for (const id of PIECE_IDS) {
+        const entry = list.slice(list.indexOf(`id="work-${id}"`));
+        const open = entry.slice(entry.indexOf('<p class="work__open'), entry.indexOf('</p>', entry.indexOf('<p class="work__open')) + 4);
+        expect(open).toContain(`<a class="source" href="https://github.com/Hfreeman2025/${id}">Source</a></p>`);
+      }
+    }
+    const source = renderSource(config);
+    const hrefs = [...source.matchAll(/href="([^"]+)"/g)].map((m) => m[1]);
+    expect(hrefs).toEqual([
+      ...PIECES.map((p) => `https://github.com/Hfreeman2025/${p.id}`),
+      'https://github.com/Hfreeman2025/harryfreeman.dev',
+      'https://github.com/Hfreeman2025',
+    ]);
+    expect(source).toContain('>This site</a><span class="source-card__repo">harryfreeman.dev</span>');
+    expect(() => parseConfig({ ...config, source: { profile: 'https://example.com/someone', site: 'x' } })).toThrow(/source/);
+    expect(() => parseConfig({ ...config, source: { profile: config.source.profile, site: '../site' } })).toThrow(/source/);
   });
 
   it('links each entry in the list back to its folder in the cabinet', () => {

@@ -88,6 +88,7 @@ export async function startDesk(timeline: Timeline): Promise<DeskControl> {
       masthead: document.querySelector<HTMLElement>('.masthead'),
       door: document.getElementById('entrance-plate'),
       credit: document.getElementById('desk-credit'),
+      source: document.getElementById('source'),
     },
     // Outside the office door on a fresh visit or a reload (the head script's call).
     entrance: root.dataset.entrance === 'door',
@@ -282,6 +283,8 @@ export async function startDesk(timeline: Timeline): Promise<DeskControl> {
     else if (kind === 'reception') void run(toReceptionDesk);
     else if (kind === 'radio') document.getElementById('radio-button')?.click();
     else if (kind === 'mic') speak?.toggle();
+    // The printout opens the Source list over it, as its cover does.
+    else if (kind === 'source') label('source', 'door')?.click();
     else if ((kind === 'desk' || kind === 'folder') && id && isPieceId(id)) void run(() => toDesk(id, from));
     else if (kind === 'drawer' && id) {
       void run(async () => {
@@ -301,7 +304,7 @@ export async function startDesk(timeline: Timeline): Promise<DeskControl> {
   labelsRoot.addEventListener('click', (event) => {
     const el = (event.target as Element | null)?.closest<HTMLElement>('[data-action]');
     const action = el?.dataset.action ?? '';
-    if (!el || action === 'sign' || action === 'radio' || action === 'shelf' || action === 'mic' || !action) return;
+    if (!el || action === 'sign' || action === 'radio' || action === 'shelf' || action === 'mic' || action === 'source' || !action) return;
     event.preventDefault();
     choose(action);
   });
@@ -447,7 +450,13 @@ export async function startDesk(timeline: Timeline): Promise<DeskControl> {
     [label('radio', 'office'), document.getElementById('radio')],
     [label('radio', 'room'), document.getElementById('radio')],
     [label('shelf', 'room'), shelf],
+    [label('source', 'door'), document.getElementById('source')],
   ]);
+  // Closed, the Source list is still in the page, visually hidden; focus on one of its links opens it.
+  const sourceList = document.getElementById('source');
+  sourceList?.addEventListener('focusin', () => {
+    if (sourceList.dataset.open !== 'true') label('source', 'door')?.dispatchEvent(new Event('pointerenter'));
+  });
 
   // Looking round the room, the shelf's spines say what they are and which tool they fed. A new book is new
   // lines (made afresh, so nothing in the tip moves), and the tip follows the pointer by transform.

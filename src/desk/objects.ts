@@ -28,7 +28,7 @@ import {
 import { DRAWERS } from '../content/drawers';
 import { PIECES, type PieceId, pieceById } from '../content/pieces';
 import type { SignText } from '../room/grid';
-import { canvasTexture, cond, fitFont } from '../scene/style';
+import { canvasTexture, cond, fitFont, mono } from '../scene/style';
 import { type CardLink, type FaceBox, inBox, Printed, paintCard, paintCredit, paintNameplate, printedMaterial } from './lettering';
 import { BIRCH, BLUE, CORAL, CREAM, INK, PAPER, SUN } from './palette';
 
@@ -816,6 +816,122 @@ export class BusinessCard {
       [1, 1],
       [-1, 1],
     ].map(([sx = 0, sz = 0]) => this.group.localToWorld(new Vector3((sx * BCARD.width) / 2, 0.1, (sz * BCARD.depth) / 2)));
+  }
+}
+
+/**
+ * The source: a printout of the code, an A5 stack about a hundred sheets thick, held by a binder clip, with a
+ * coral paper tag that says "Source". Its top sheet is printed (desk/lettering.ts, sharp through the
+ * tilt-shift) with where the code is and the eleven repositories, set like a listing; the page holds the
+ * same as real links (#source), which open over it.
+ */
+export const PRINTOUT = { width: 11, depth: 15.5, height: 0.8 } as const;
+export class SourcePrintout {
+  readonly group = new Group();
+  readonly sheetMesh: Mesh;
+  constructor(profile: string, repos: readonly string[]) {
+    const { width: w, depth: d, height: h } = PRINTOUT;
+    // The stack, each edge a little off true, as a hundred sheets are.
+    const paper = flat('#fbf8ef');
+    const stack = new Mesh(new BoxGeometry(w, h, d), paper);
+    stack.position.y = h / 2;
+    const under = new Mesh(new BoxGeometry(w - 0.1, h * 0.5, d - 0.1), flat('#efe9da'));
+    under.position.set(0.12, h * 0.25, 0.08);
+    under.rotation.y = 0.015;
+    // The top sheet, printed.
+    const sheet = new Mesh(
+      new PlaneGeometry(w - 0.06, d - 0.06),
+      printedMaterial(
+        canvasTexture(1100, 1550, (c) => {
+          c.fillStyle = '#fbf8ef';
+          c.fillRect(0, 0, 1100, 1550);
+          // A listing's bands, faint, every other line.
+          c.fillStyle = 'rgba(95, 160, 120, 0.09)';
+          for (let y = 300; y < 1500; y += 104) c.fillRect(60, y, 980, 52);
+          c.fillStyle = INK;
+          c.textBaseline = 'alphabetic';
+          c.font = cond(700)(96);
+          c.fillText('Source', 80, 170);
+          c.fillStyle = '#5d6577';
+          fitFont(c, profile, mono(500), 40, 940);
+          c.fillText(profile, 80, 240);
+          // The repositories, numbered like lines of a listing.
+          repos.forEach((repo, i) => {
+            const y = 340 + i * 52;
+            c.fillStyle = '#9aa1b0';
+            c.font = mono(400)(30);
+            c.fillText(String(i + 1).padStart(2, '0'), 80, y);
+            c.fillStyle = INK;
+            c.font = mono(500)(36);
+            c.fillText(`${repo}/`, 160, y);
+          });
+          // Below them, the code itself: drawn as lines, not invented text.
+          c.fillStyle = 'rgba(31, 36, 51, 0.22)';
+          for (let i = 0; i < 9; i++) {
+            const y = 340 + (repos.length + 1 + i) * 52;
+            if (y > 1490) break;
+            c.fillRect(160 + (i % 3) * 40, y - 18, 300 + ((i * 137) % 480), 14);
+          }
+        }),
+      ),
+    );
+    sheet.rotation.x = -Math.PI / 2;
+    sheet.position.y = h + 0.01;
+    sheet.userData.noEdge = true;
+    sheet.userData.lettering = 'source';
+    this.sheetMesh = sheet;
+    // The binder clip, at the head of the stack.
+    const ink = flat(INK);
+    const clip = new Mesh(new BoxGeometry(3.4, 0.5, 1.4), ink);
+    clip.position.set(0, h + 0.2, -d / 2 + 0.55);
+    const wire = new Mesh(new TorusGeometry(1.0, 0.09, 8, 24, Math.PI), flat('#b9bec4'));
+    wire.rotation.set(Math.PI / 2 - 0.5, 0, 0);
+    wire.position.set(0, h + 0.5, -d / 2 + 0.2);
+    // The tag, out from under the clip: coral, printed "Source".
+    const tag = new Mesh(
+      new PlaneGeometry(3.4, 1.3),
+      printedMaterial(
+        canvasTexture(520, 200, (c) => {
+          c.fillStyle = CORAL;
+          c.fillRect(0, 0, 520, 200);
+          c.fillStyle = PAPER;
+          c.textAlign = 'center';
+          c.textBaseline = 'middle';
+          fitFont(c, 'Source', cond(700), 120, 460);
+          c.fillText('Source', 260, 104);
+        }),
+      ),
+    );
+    // On the stack's left side, the side towards the desk's middle.
+    tag.rotation.set(-Math.PI / 2, 0, -0.18);
+    tag.position.set(-w / 2 - 0.9, h + 0.03, d / 2 - 2.6);
+    tag.userData.noEdge = true;
+    tag.userData.lettering = 'source-tag';
+    this.group.add(under, stack, sheet, clip, wire, tag);
+    this.group.position.y = DESK_Y;
+    shadows(this.group);
+  }
+  /** The top sheet's corners, and the tag's outer corner, in the room. */
+  corners(): Vector3[] {
+    const { width: w, depth: d, height: h } = PRINTOUT;
+    this.group.updateMatrixWorld(true);
+    return [
+      [-w / 2, -d / 2],
+      [w / 2, -d / 2],
+      [w / 2, d / 2],
+      [-w / 2 - 2.6, d / 2],
+    ].map(([x = 0, z = 0]) => this.group.localToWorld(new Vector3(x, h + 0.02, z)));
+  }
+  /** Its edge towards the desk's middle, with the tag: what the seated view must take in. */
+  innerEdge(): Vector3[] {
+    const { width: w, depth: d, height: h } = PRINTOUT;
+    this.group.updateMatrixWorld(true);
+    return [
+      [-w / 2, -d / 2],
+      [-w / 2 + 3, -d / 2],
+      [-w / 2 + 3, d / 2],
+      [-w / 2 - 2.6, d / 2],
+    ].map(([x = 0, z = 0]) => this.group.localToWorld(new Vector3(x, h + 0.02, z)));
   }
 }
 
