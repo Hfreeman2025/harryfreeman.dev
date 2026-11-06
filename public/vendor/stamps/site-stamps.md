@@ -54,8 +54,9 @@ to them. The current stamps were captured at the published commits.
 ## Capture
 
 Capturing and signing are operator steps on macOS, because the sandbox is
-`sandbox-exec`. They are not part of `npm test` or CI, and they expect each tool's
-repository under `~/Personal/`:
+`sandbox-exec`. They are not part of `npm test` or CI. The capture script clones each
+tool from the operator's fixed local checkout, the path every statement records as
+`capture.source`; that location is not configurable:
 
 ```sh
 npm run build

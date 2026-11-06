@@ -220,7 +220,7 @@ earlier ones predate the rewrite of each tool's history for publication, so each
 gpt-in-a-tab's folder can change one byte (the shipped tampered copy) to show the signature failing. A
 browser without Ed25519 is told it cannot verify. What a stamp proves, and what it does not, is at
 `/stamps.html`, from the receipts project's own `docs/site-stamps.md`. The packet is vendored
-unmodified by `npm run vendor stamps` from receipts commit `0253c47`, recorded with file hashes in
+unmodified by `npm run vendor stamps` from receipts commit `3926022`, recorded with file hashes in
 `public/vendor/stamps/SOURCE.json`.
 
 **Identity.** One office building; IBM Plex throughout; putty steel, manila,

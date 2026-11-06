@@ -1,7 +1,7 @@
 {
   "from": "github.com/Hfreeman2025/receipts, exports/site-stamps/",
-  "commit": "0253c47b26d09728ca91719f440a7d6edd658613",
-  "committed": "2026-11-06T01:53:37Z",
+  "commit": "392602233a96ebd35d793e12d3573f2bcff6437f",
+  "committed": "2026-11-06T02:05:40Z",
   "build": "the receipts signer (see its docs/site-stamps.md)",
   "files": {
     "captures/agent-race-3fadafb956c34ca0cf7665d1e3a61a5a397dc281-20261106014547302.json": "dcc5f0e8c42f9aca4773fc5cd72341c717d099093adcfa1d17348a3df86eb423",
@@ -54,7 +54,7 @@
     "LICENSE": "c841af0fbe85aa30a37aa14d3ee265aef97f6fbabfd472687532dbd54b4a1f48",
     "public-key.json": "484ff6bae9283dd60f602b31344745cfbcae0f41a77ef59f272571e1885308fd",
     "README.md": "e43539ee740d31aaf2ecf19083e082e97dbe612c13709da957d0127552a5f931",
-    "site-stamps.md": "da2b4d329729f23bd7e227ff78b6322721302da032f7239aca7ec87e93f0cd0b",
+    "site-stamps.md": "8c8055001c1be889422e18d08d0d85fd417f7796cd060d5cbc906191b30335f0",
     "stamps/agent-race-3fadafb956c34ca0cf7665d1e3a61a5a397dc281-20261106014547302.dsse.json": "d04061790067685ecbfd181d12f992eeaaa678be351a0f652f927b39f8eda113",
     "stamps/agent-race-647ea417af718e963b26ff2de44c707076c30780-20261104172144504.dsse.json": "0a588daa94b0bc5fea817e3a447ee6cb36465b87115a506cb52ad7538f0e5ef9",
     "stamps/agent-race-e9871e8af05838e67d02c3ae86149370a3f37d02-20261105121047937.dsse.json": "91a4dd07b6f6bda58893b774ba2226b2f4091c0a67e9d37c1a30e279df260cac",
