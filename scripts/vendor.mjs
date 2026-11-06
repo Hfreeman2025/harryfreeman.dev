@@ -9,7 +9,7 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
-import { dirname, join, relative } from 'node:path';
+import { basename, dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -64,7 +64,8 @@ const files = Object.fromEntries(
     .sort(([a], [b]) => a.localeCompare(b)),
 );
 const source = {
-  from: `${relative(homedir(), pkg.repo)}/${pkg.dir}`,
+  // Where it is published (the repository's folder name is its GitHub name).
+  from: `github.com/Hfreeman2025/${basename(pkg.repo)}, ${pkg.dir}/`,
   commit: git('rev-parse', 'HEAD'),
   committed: git('log', '-1', '--format=%cI'),
   build: pkg.build,

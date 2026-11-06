@@ -162,7 +162,7 @@ live reload. The server binds to loopback only.
 - **The radio** is Listen to the Grid's own embeddable build, vendored as built into
   `public/vendor/radio/` by `npm run vendor radio`, which copies it from
   `~/Personal/lab/listen-to-the-grid/dist-radio` only from a clean commit and writes `SOURCE.json`
-  (commit `cd66469`, file hashes). It was rebuilt at that commit and matched byte for byte.
+  (commit `4934b28`, file hashes). It was rebuilt at that commit and matched byte for byte.
 
 ## How it is made
 
@@ -438,7 +438,7 @@ fonts, `NOTICES.txt`. Nothing else: no source, no source maps, nothing from Harr
   keep Open: their recorded sessions are on this site. The colophon, the footer and the cabinet's line
   say the same (`src/hosting/html.ts`), and each of those changes must apply exactly or the build fails.
 - **Reception.** The element is vendored in `public/vendor/ask-the-record/` with its MIT licence and
-  `SOURCE.json` (commit `138597c`), by `npm run vendor:reception`: it clones that commit, installs it
+  `SOURCE.json` (commit `fe11c6a`), by `npm run vendor:reception`: it clones that commit, installs it
   from its lockfile, builds it, and refuses unless the result is byte for byte ask-the-record's own
   `dist/`. transformers.js 4.3.2 and ONNX Runtime Web's WebAssembly are copied into the build from
   ask-the-record's install only if they match their pins (version, npm integrity, SHA-256) in

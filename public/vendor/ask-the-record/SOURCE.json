@@ -1,6 +1,6 @@
 {
-  "from": "Personal/oss/ask-the-record/dist",
-  "commit": "138597c1e9543de5ac2914755ed5b9475a7b8f97",
+  "from": "github.com/Hfreeman2025/ask-the-record, dist/",
+  "commit": "fe11c6a2b8d8f18a7f49bd762eba38ffcce8bd23",
   "committed": "2026-11-03T13:59:22Z",
   "build": "npm ci && npm run build in a clean clone at the commit; byte for byte its dist/",
   "files": {

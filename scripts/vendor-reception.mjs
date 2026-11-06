@@ -84,7 +84,7 @@ try {
   for (const f of ELEMENT) cpSync(join(clone, 'dist', f), join(out, f));
   cpSync(join(clone, 'LICENSE'), join(out, 'LICENSE'));
   const source = {
-    from: 'Personal/oss/ask-the-record/dist',
+    from: 'github.com/Hfreeman2025/ask-the-record, dist/',
     commit: head,
     committed: git(repo, 'log', '-1', '--format=%cI'),
     build: 'npm ci && npm run build in a clean clone at the commit; byte for byte its dist/',
@@ -95,7 +95,7 @@ try {
   const pins = {
     $comment:
       'Reception’s runtime on the public site, from ask-the-record’s install: written by scripts/vendor-reception.mjs, checked by the hosted build before it copies each file.',
-    from: 'Personal/oss/ask-the-record/node_modules',
+    from: 'github.com/Hfreeman2025/ask-the-record, node_modules/ after npm ci',
     commit: head,
     runtime,
   };

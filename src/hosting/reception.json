@@ -1,7 +1,7 @@
 {
   "$comment": "Reception’s runtime on the public site, from ask-the-record’s install: written by scripts/vendor-reception.mjs, checked by the hosted build before it copies each file.",
-  "from": "Personal/oss/ask-the-record/node_modules",
-  "commit": "138597c1e9543de5ac2914755ed5b9475a7b8f97",
+  "from": "github.com/Hfreeman2025/ask-the-record, node_modules/ after npm ci",
+  "commit": "fe11c6a2b8d8f18a7f49bd762eba38ffcce8bd23",
   "runtime": [
     {
       "package": "@huggingface/transformers",

@@ -1,6 +1,6 @@
 {
-  "from": "Personal/lab/listen-to-the-grid/dist-radio",
-  "commit": "cd664696636a531e3dcd4799a3bf856c49efbc79",
+  "from": "github.com/Hfreeman2025/listen-to-the-grid, dist-radio/",
+  "commit": "4934b288cf5361ce3dc496c8ad71218d4c192945",
   "committed": "2026-11-04T16:38:47Z",
   "build": "npm run build:radio",
   "files": {
