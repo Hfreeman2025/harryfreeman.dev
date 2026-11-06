@@ -3,12 +3,31 @@ on: [push, pull_request]
 jobs:
   check:
     runs-on: ubuntu-latest
+    # scripts/build-record.ts type-checks against ask-the-record's own source, imported by relative path
+    # from a sibling checkout (../../oss/ask-the-record), so the runner mirrors the local layout: this
+    # repository at site/ and ask-the-record at oss/ask-the-record/, pinned to the commit the record is
+    # built with.
+    defaults:
+      run:
+        working-directory: site
     steps:
       - uses: actions/checkout@v4
+        with:
+          path: site
+      - uses: actions/checkout@v4
+        with:
+          repository: Hfreeman2025/ask-the-record
+          ref: 5d582687728a42672b09229be8de95428f67c3ec
+          path: oss/ask-the-record
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
+          cache-dependency-path: |
+            site/package-lock.json
+            oss/ask-the-record/package-lock.json
+      - run: npm ci --ignore-scripts
+        working-directory: oss/ask-the-record
       - run: npm ci --ignore-scripts
       - run: npm run typecheck
       - run: npm run lint

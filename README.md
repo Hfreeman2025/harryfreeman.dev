@@ -252,6 +252,11 @@ npm run perf        # paint, scene ready, bytes, layout shift, frame times (shot
 node scripts/moment-shots.mjs   # the busiest replay moment, before (office-3 build on :4401) and after
 ```
 
+The typecheck also checks `scripts/build-record.ts` against ask-the-record's own source, so it expects
+that repository beside this one, at `../oss/ask-the-record` with its dependencies installed. CI checks
+out both that way, with ask-the-record pinned to a commit in `.github/workflows/ci.yml`, and runs every
+step above it except the browser ones, plus `npm audit`.
+
 Automation is silent and offline from the world: every browser gets a device-free `AudioContext`
 (`scripts/silent.mjs`), the Carbon Intensity API is always mocked, and any request off the machine fails
 the check.
