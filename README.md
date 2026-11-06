@@ -220,7 +220,7 @@ the receipts project's own `docs/site-stamps.md`. The packet is vendored unmodif
 `npm run vendor stamps` from receipts commit `0f84c7e`, recorded with file hashes in
 `public/vendor/stamps/SOURCE.json`.
 
-**Identity.** [IDENTITY.md](IDENTITY.md): one office building; IBM Plex throughout; putty steel, manila,
+**Identity.** One office building; IBM Plex throughout; putty steel, manila,
 black felt and green wayfinding signs in the office; the studio is an architect's study model, in
 stone, balsa and card on pale paper.
 
@@ -233,8 +233,8 @@ Schema and rules: [docs/TIMELINE.md](docs/TIMELINE.md).
 
 ## Content
 
-- Tool lines, techniques and checks are summarised from each README and IDENTITY.md. Checks are labelled
-  _as its README reports them_: this site did not re-run them.
+- Tool lines, techniques and checks are summarised from each tool's README and IDENTITY.md. Checks are
+  labelled _as its README reports them_: this site did not re-run them.
 - The loops were recorded on 4 November 2026 from each tool's own server in a silent headless Chromium
   (`npm run record:loops`); the folders say so.
 - **The CV** (`src/content/cv.md`, at `/cv.html`) includes the items once marked _to confirm_, made

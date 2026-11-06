@@ -8,9 +8,14 @@ playwright-report/
 .tmp/
 .wrangler/
 
-# Partial browser runs (ONLY=...) report beside the full ones; only the full reports are kept.
-shots/e2e-*-only.json
-
-# Per-run browser check screenshots at the root of shots/desk (curated sets live in its subfolders).
-/shots/desk/*-desktop-*.png
-/shots/desk/*-phone-*.png
+# Browser runs write their screenshots and reports under shots/ (npm run shots, perf, moment-shots,
+# check:hosted). Only what the README cites is kept: the hosted measurements, the door view, the
+# before/after moment and the performance medians.
+/shots/*
+!/shots/hosted/
+!/shots/office-4/
+/shots/office-4/*
+!/shots/office-4/chromium-desktop-door.png
+!/shots/office-4/chromium-moment-before.png
+!/shots/office-4/chromium-moment-after.png
+!/shots/office-4/performance.json

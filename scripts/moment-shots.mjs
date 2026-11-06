@@ -1,5 +1,6 @@
 // The replay moment Harry screenshotted (desks and the review table mid-replay), before and after,
-// in each browser: the office-3 room (built from commit 066be35, served on BEFORE_URL) and this one.
+// in each browser: the office-3 room (built from the commit "One building: the lit 3D studio is the way in,
+// the office its flat rendering", 4 November, served on BEFORE_URL) and this one.
 //   node scripts/moment-shots.mjs [chromium|webkit|firefox ...]
 // Writes shots/office-4/<browser>-moment-before.png and -after.png. The grid API is mocked.
 import { join } from 'node:path';

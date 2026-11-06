@@ -28,9 +28,8 @@ AUDIO
     3.8.1 (Apache-2.0). Its phonemiser bundles espeak-ng (GPL-3.0); it was run
     offline only, and only the generated audio is on this site, so no GPL code
     is. Each sentence was generated separately, silence-trimmed, joined with a
-    0.35 s gap and loudness-normalised to -18 LUFS with ffmpeg. The master is
-    audio/door-voice.wav in the source. SHA-256 prefixes: m4a deb38608759ca7ac,
-    webm 6a11056ea07e5fe5.
+    0.35 s gap and loudness-normalised to -18 LUFS with ffmpeg. SHA-256
+    prefixes: m4a deb38608759ca7ac, webm 6a11056ea07e5fe5.
 
   The knock is synthesised in the page (WebAudio): no recording.
 

@@ -3,7 +3,7 @@
 // sign reading the grid and the neutral light, never a reading that would go stale. Needs the dev or preview server on 4400.
 //   node scripts/stills.mjs
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, rmSync } from 'node:fs';
+import { mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { gridMock, launch } from './e2e.mjs';
@@ -90,8 +90,6 @@ async function openDoor(url, width, height, scale, phone = false) {
   await page.screenshot({ path: join(site, 'public', 'og.png') });
   await done();
 }
-rmSync(join(site, 'public', 'og-studio.png'), { force: true });
-for (const old of ['studio-1600.jpg', 'studio-1600.webp', 'studio-2400.webp', 'studio-960.webp']) rmSync(join(still, old), { force: true });
 
 // The apple-touch icon: Harry's mark (public/favicon.svg, from docs/brand) drawn at 180 px. The PNG
 // favicons are the brand's own (hf-mark-16/32/64.png).

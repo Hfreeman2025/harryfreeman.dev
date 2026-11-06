@@ -7,6 +7,7 @@
       "!dist",
       "!.tmp",
       "!.cache",
+      "!.worktrees",
       "!public/assets/3d",
       "!public/casts",
       "!public/record",
