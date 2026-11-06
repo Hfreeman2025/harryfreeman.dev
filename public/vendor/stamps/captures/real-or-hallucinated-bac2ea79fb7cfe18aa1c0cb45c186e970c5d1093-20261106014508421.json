@@ -1,0 +1,171 @@
+{
+  "version": 1,
+  "tool": "real-or-hallucinated",
+  "repository": {
+    "commit": "bac2ea79fb7cfe18aa1c0cb45c186e970c5d1093",
+    "tree": "be5e01c364a144690d2b1c3cc8d25e837765affa"
+  },
+  "capturedAt": "2026-11-06T01:45:08.421Z",
+  "status": "passed",
+  "capture": {
+    "method": "fresh-local-clone-non-browser",
+    "source": "Personal/lab/real-or-hallucinated",
+    "network": "loopback-only",
+    "initialTrackedClean": true,
+    "sourceChangesDuringChecks": false,
+    "dependencies": {
+      "lockfile": "package-lock.json",
+      "sha256": "3262f02a8cad9e28079c7e12d8e8da942549eddeb3e0b5ea1f40f798bf28c2ea",
+      "registry": "https://registry.npmjs.org",
+      "policy": "npm-ci-ignore-scripts",
+      "cache": "project-local-discarded"
+    },
+    "runtime": {
+      "node": "v26.12.0",
+      "npm": "11.20.0",
+      "platform": "darwin",
+      "arch": "arm64"
+    },
+    "notes": [
+      "Capture policy v2: independent Git object inodes; reads limited to clone/cache/system SDKs; writes limited to this clone and its isolated cache. Setup is loopback-only through a registry allowlist proxy, closed before checks.",
+      "Cloned with git clone --local --no-hardlinks --dissociate; origin removed and global Git configuration disabled. Browser executables denied."
+    ]
+  },
+  "setup": [
+    {
+      "kind": "dependency-setup",
+      "argv": [
+        "npm",
+        "ci",
+        "--ignore-scripts",
+        "--strict-ssl=true",
+        "--registry=https://registry.npmjs.org",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-06T01:44:34.734Z",
+      "endedAt": "2026-11-06T01:45:03.425Z",
+      "stdout": {
+        "sha256": "6df92e089719e8f81c90b1538469f6adc0becdf62c0a64de5d1fe8dc5378d290",
+        "bytes": 26
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "dependency-setup: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    }
+  ],
+  "checks": [
+    {
+      "kind": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-06T01:45:03.475Z",
+      "endedAt": "2026-11-06T01:45:05.083Z",
+      "stdout": {
+        "sha256": "50155e0c7238960f6b84e5f9bccfe04b198fcb09b2b426e4112453c347cae0ed",
+        "bytes": 56
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "typecheck: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    },
+    {
+      "kind": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-06T01:45:05.098Z",
+      "endedAt": "2026-11-06T01:45:06.554Z",
+      "stdout": {
+        "sha256": "00416adbf5d7e45abe9204ba47505c9adec181dd15bf8f6648442932fb1823ba",
+        "bytes": 165
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "lint: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    },
+    {
+      "kind": "unit-tests",
+      "argv": [
+        "node_modules/.bin/tsx",
+        "--test",
+        "--test-concurrency=2",
+        "tests/chunk-cache.test.ts",
+        "tests/content.test.ts",
+        "tests/core.test.ts",
+        "tests/detector.test.ts",
+        "tests/display.test.ts",
+        "tests/download-progress.test.ts",
+        "tests/evidence.test.ts",
+        "tests/model-cache.test.ts",
+        "tests/model-download.test.ts",
+        "tests/nli-wire.test.ts",
+        "tests/sampling.test.ts",
+        "tests/verification.test.ts"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-06T01:45:06.570Z",
+      "endedAt": "2026-11-06T01:45:08.403Z",
+      "stdout": {
+        "sha256": "adffe0ae7279045e61cc86ef75f0a863ee86e2f80ae20367e4d571114948eebd",
+        "bytes": 8495
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "ℹ tests 65; ℹ pass 65; ℹ fail 0; ℹ cancelled 0; ℹ skipped 0",
+      "reason": null,
+      "timedOut": false
+    }
+  ],
+  "outputTails": {
+    "setup": [
+      {
+        "stdout": "\nadded 42 packages in 29s\n",
+        "stderr": ""
+      }
+    ],
+    "typecheck": {
+      "stdout": "\n> real-or-hallucinated@3.0.0 typecheck\n> tsc --noEmit\n\n",
+      "stderr": ""
+    },
+    "lint": {
+      "stdout": "\n> real-or-hallucinated@3.0.0 lint\n> biome check src scripts tests package.json tsconfig.json index.html vite.config.ts\n\nChecked 93 files in 28ms. No fixes applied.\n",
+      "stderr": ""
+    },
+    "unit-tests": {
+      "stdout": " rotation handles day boundaries, dates before launch, and repeats after fourteen (0.261041ms)\n✔ scoring compares answers with truth and rejects incomplete or oversized rounds (0.049042ms)\n✔ streak counts completed London dates once and allows yesterday before today is played (0.180167ms)\n✔ share text uses only ASCII, score, and correctness marks, never truth or claim content (0.497291ms)\n✔ quote matching normalizes entities, whitespace, curly punctuation, and dashes (0.310625ms)\n✔ HTML extraction ignores script/style and preserves text boundaries and entities (0.22175ms)\n✔ a daily score requires exactly five answers (0.060625ms)\n✔ streaks remain consecutive across DST, a leap day, and New Year (0.0835ms)\n(node:31129) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n✔ semantic entropy uses meanings, not unique wordings (0.543ms)\n✔ one-way implication cannot merge meanings; nontransitive links cannot bridge contradictions (0.496292ms)\n✔ AUROC handles ties, reversed scores, and undefined one-class evaluations (0.164167ms)\n✔ probabilities are numerically stable and neutral support does not invent truth (0.121375ms)\n✔ record parsing rejects internally inconsistent entropy and verdicts (3.510333ms)\n✔ library metadata probes at main resolve only to the selected immutable model revision (2.929333ms)\n✔ meaning uncertainty does not turn an otherwise supported claim into a false claim (0.07825ms)\n✔ sampling seeds reproduce independently mixed streams, including zero (0.230958ms)\n(node:31132) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n✔ source typography restores recognized chemical subscripts without guessing at other numbers (1.754958ms)\n✔ formatting a revealed passage leaves all stored evidence bytes and matching rules unchanged (10.684417ms)\n✔ display formatting still escapes source HTML and applies to highlighted quotes (0.738167ms)\n(node:31133) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n✔ download totals count each model artifact once across SDK event spellings (0.410667ms)\n✔ SDK aggregate progress does not double-count the generator bytes (0.110834ms)\n(node:31144) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n✔ context retains adjacent sentences and the rest of the supporting sentence (8.192958ms)\n✔ context locates a quote despite Unicode punctuation and multiple whitespace (0.247625ms)\n✔ missing and empty quotes never produce invented source context (0.161375ms)\n✔ context offsets survive astral symbols and HTML entities before the quote (0.089625ms)\n✔ all fabrications point at one exact invented phrase and all facts retain source context (2.169417ms)\n✔ proof schema rejects missing, duplicated, or incorrect annotations and invented context (0.570334ms)\n✔ missed tells are derived from actual mistakes, including facts incorrectly rejected (0.7935ms)\n✔ failed context refresh never partly changes the existing bank or its dates (1.066792ms)\n✔ context refresh rejects an invented passage without changing the input (0.945958ms)\n✔ successful context refresh updates every context date and preserves original claim-check provenance (1.343042ms)\n(node:31152) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n✔ model cache scopes keys to the app store and returns the actual stored response (15.408667ms)\n✔ blocked cache reports memory-only operation without claiming persistence (0.113167ms)\n✔ quota or read failure disables that cache and reports once; inference can retain its bytes (0.25175ms)\n(node:31171) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n✔ model downloads verify files in MODEL_DIR and reuse valid cached weights (174.98075ms)\n✔ a corrupt model response never becomes a completed weight or manifest (71.950417ms)\n✔ model metadata must describe the pinned revision (63.518958ms)\n✔ model preparation stops below the free-space floor (61.589584ms)\n(node:31188) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n✔ isolated NLI preserves exact token tensors and float32 output shape (0.852792ms)\n✔ NLI transport rejects missing, duplicate, malformed and oversized inputs before WASM (0.177084ms)\n✔ NLI output never accepts a wrong label count, mismatched batch or nonfinite score (0.061ms)\n(node:31192) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n✔ a categorical draw follows normalized probabilities and retains original model confidence (0.479041ms)\n✔ nucleus and top-k discard the tail before sampling, without relabelling model confidence (0.09175ms)\n✔ temperature and repetition change the draw distribution while the raw model probability stays honest (0.057292ms)\n✔ sampling rejects invalid settings and nonfinite logits, and breaks ties deterministically (0.103583ms)\n✔ bounded-heap sampling agrees with a full-sort oracle across changing vocabularies (6.003ms)\n(node:31196) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n✔ verification extracts visible source text and computes a response digest (9.236833ms)\n✔ verification fails explicitly on network and HTTP errors (0.587041ms)\n✔ verification rejects non-HTML responses and unsafe final redirect URLs (0.233958ms)\n✔ verification enforces both declared and streamed response size limits (1.461791ms)\nℹ tests 65\nℹ suites 0\nℹ pass 65\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 1471.406125\n",
+      "stderr": ""
+    }
+  },
+  "disclosure": "Original-byte output digests/counts; displayed tails are bounded, redacted and path-normalized. No browser/model downloads or hosted checks. npm lifecycle scripts disabled. Before/after tracked status does not detect transient reverted edits. Network/isolation mode is stated separately for every capture."
+}

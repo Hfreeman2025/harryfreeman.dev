@@ -1,0 +1,160 @@
+{
+  "version": 1,
+  "tool": "listen-to-the-grid",
+  "repository": {
+    "commit": "857d5d73e7f1d9dbb4ede63862a14a6a4c092fed",
+    "tree": "5626b4339dbe1348bde7c5f0e56de889fdcb73fa"
+  },
+  "capturedAt": "2026-11-06T01:48:46.225Z",
+  "status": "passed",
+  "capture": {
+    "method": "fresh-local-clone-non-browser",
+    "source": "Personal/lab/listen-to-the-grid",
+    "network": "loopback-only",
+    "initialTrackedClean": true,
+    "sourceChangesDuringChecks": false,
+    "dependencies": {
+      "lockfile": "package-lock.json",
+      "sha256": "af1805aa074e9f5fde7677b118609b577d64af18390592f92b10a15cc303ec16",
+      "registry": "https://registry.npmjs.org",
+      "policy": "npm-ci-ignore-scripts",
+      "cache": "project-local-discarded"
+    },
+    "runtime": {
+      "node": "v26.12.0",
+      "npm": "11.20.0",
+      "platform": "darwin",
+      "arch": "arm64"
+    },
+    "notes": [
+      "Capture policy v2: independent Git object inodes; reads limited to clone/cache/system SDKs; writes limited to this clone and its isolated cache. Setup is loopback-only through a registry allowlist proxy, closed before checks.",
+      "Cloned with git clone --local --no-hardlinks --dissociate; origin removed and global Git configuration disabled. Browser executables denied."
+    ]
+  },
+  "setup": [
+    {
+      "kind": "dependency-setup",
+      "argv": [
+        "npm",
+        "ci",
+        "--ignore-scripts",
+        "--strict-ssl=true",
+        "--registry=https://registry.npmjs.org",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-06T01:48:18.972Z",
+      "endedAt": "2026-11-06T01:48:38.399Z",
+      "stdout": {
+        "sha256": "6eb7fc6c848fe3fc2607a107f754b7bc39298a889c4458042df162249af3b19a",
+        "bytes": 27
+      },
+      "stderr": {
+        "sha256": "882076ede3a8982166553bb7d36896c689c0e4c283bba18720ac0bcfd4cf3284",
+        "bytes": 137
+      },
+      "resultLine": "dependency-setup: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    }
+  ],
+  "checks": [
+    {
+      "kind": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-06T01:48:38.446Z",
+      "endedAt": "2026-11-06T01:48:39.604Z",
+      "stdout": {
+        "sha256": "54818f2d572435b26e44c6dcc8c8b14cd5052f145a30f684060ec77dfd8d5f12",
+        "bytes": 54
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "typecheck: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    },
+    {
+      "kind": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-06T01:48:39.619Z",
+      "endedAt": "2026-11-06T01:48:42.504Z",
+      "stdout": {
+        "sha256": "ad9e5fd225f7187dd0e5950157c645fa7541c6c3a03ff5a2bb7c030070cb8f82",
+        "bytes": 45
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "lint: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    },
+    {
+      "kind": "unit-tests",
+      "argv": [
+        "npm",
+        "test",
+        "--",
+        "--maxWorkers=2"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-06T01:48:42.523Z",
+      "endedAt": "2026-11-06T01:48:46.207Z",
+      "stdout": {
+        "sha256": "7a57667bdcea66e0b00f4f9a3d0d1696b4709bafdebcb59139211acebcfed1b4",
+        "bytes": 1341
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "Tests  183 passed (183)",
+      "reason": null,
+      "timedOut": false
+    }
+  ],
+  "outputTails": {
+    "setup": [
+      {
+        "stdout": "\nadded 143 packages in 19s\n",
+        "stderr": "npm warn deprecated eslint@9.39.5: This version is no longer supported. Please see https://eslint.org/version-support for other options.\n"
+      }
+    ],
+    "typecheck": {
+      "stdout": "\n> listen-to-the-grid@1.0.0 typecheck\n> tsc --noEmit\n\n",
+      "stderr": ""
+    },
+    "lint": {
+      "stdout": "\n> listen-to-the-grid@1.0.0 lint\n> eslint .\n\n",
+      "stderr": ""
+    },
+    "unit-tests": {
+      "stdout": "\n> listen-to-the-grid@1.0.0 test\n> vitest run --maxWorkers=2\n\n\n RUN  v5.0.5 <clone>\n\n ✓ test/series.test.ts (19 tests) 4ms\n ✓ test/conductor.test.ts (12 tests) 18ms\n ✓ test/mapping.test.ts (17 tests) 3ms\n ✓ test/engrave.test.ts (5 tests) 10ms\n ✓ test/theory.test.ts (14 tests) 5ms\n ✓ test/schema.test.ts (11 tests) 5ms\n ✓ test/page.test.ts (7 tests) 9ms\n ✓ test/wav.test.ts (6 tests) 2ms\n ✓ test/format.test.ts (9 tests) 3ms\n ✓ test/context.test.ts (7 tests) 13ms\n ✓ test/pitch.test.ts (9 tests) 3ms\n ✓ test/loudness.test.ts (11 tests) 317ms\n ✓ test/regional.test.ts (6 tests) 3ms\n ✓ test/ossia.test.ts (7 tests) 17ms\n ✓ test/readout.test.ts (7 tests) 2ms\n ✓ test/rhythm.test.ts (9 tests) 2ms\n ✓ test/day.test.ts (4 tests) 6ms\n ✓ test/match.test.ts (7 tests) 211ms\n ✓ test/impulse.test.ts (7 tests) 35ms\n ✓ test/replay.test.ts (8 tests) 2ms\n ✓ test/radio-types.test.ts (1 test) 1ms\n\n Test Files  21 passed (21)\n      Tests  183 passed (183)\n   Start at  01:48:44\n   Duration  1.52s (tests 48%, import 35%, transform 15%, worker 2%)\n\n    Isolate  21 workers spawned · ~74ms startup each (spawn + environment, per file)\n             at least ~699ms faster with isolate: false — reuses workers across files instead of one per file\n\n",
+      "stderr": ""
+    }
+  },
+  "disclosure": "Original-byte output digests/counts; displayed tails are bounded, redacted and path-normalized. No browser/model downloads or hosted checks. npm lifecycle scripts disabled. Before/after tracked status does not detect transient reverted edits. Network/isolation mode is stated separately for every capture."
+}

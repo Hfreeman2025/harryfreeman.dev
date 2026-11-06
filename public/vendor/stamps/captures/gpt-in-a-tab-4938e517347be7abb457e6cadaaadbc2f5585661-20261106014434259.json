@@ -1,0 +1,160 @@
+{
+  "version": 1,
+  "tool": "gpt-in-a-tab",
+  "repository": {
+    "commit": "4938e517347be7abb457e6cadaaadbc2f5585661",
+    "tree": "8261716353358c33cbbe0deb5a459392662e953c"
+  },
+  "capturedAt": "2026-11-06T01:44:34.259Z",
+  "status": "passed",
+  "capture": {
+    "method": "fresh-local-clone-non-browser",
+    "source": "Personal/lab/gpt-in-a-tab",
+    "network": "loopback-only",
+    "initialTrackedClean": true,
+    "sourceChangesDuringChecks": false,
+    "dependencies": {
+      "lockfile": "package-lock.json",
+      "sha256": "e7fef2bd6f834658fb2858d9a188e9e9d5a5c984a314839aba1708f193f29647",
+      "registry": "https://registry.npmjs.org",
+      "policy": "npm-ci-ignore-scripts",
+      "cache": "project-local-discarded"
+    },
+    "runtime": {
+      "node": "v26.12.0",
+      "npm": "11.20.0",
+      "platform": "darwin",
+      "arch": "arm64"
+    },
+    "notes": [
+      "Capture policy v2: independent Git object inodes; reads limited to clone/cache/system SDKs; writes limited to this clone and its isolated cache. Setup is loopback-only through a registry allowlist proxy, closed before checks.",
+      "Cloned with git clone --local --no-hardlinks --dissociate; origin removed and global Git configuration disabled. Browser executables denied."
+    ]
+  },
+  "setup": [
+    {
+      "kind": "dependency-setup",
+      "argv": [
+        "npm",
+        "ci",
+        "--ignore-scripts",
+        "--strict-ssl=true",
+        "--registry=https://registry.npmjs.org",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-06T01:43:58.728Z",
+      "endedAt": "2026-11-06T01:44:24.494Z",
+      "stdout": {
+        "sha256": "36914f2b6dac06bf75bcc86b609ae105f57a9a09e9f7f9fab8d3f166d2d10adb",
+        "bytes": 26
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "dependency-setup: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    }
+  ],
+  "checks": [
+    {
+      "kind": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-06T01:44:24.560Z",
+      "endedAt": "2026-11-06T01:44:26.056Z",
+      "stdout": {
+        "sha256": "e92b21486d988f83c08c5c8ae73837c7b6e163dd34a2a27d5973a77486d4b67e",
+        "bytes": 48
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "typecheck: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    },
+    {
+      "kind": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-06T01:44:26.072Z",
+      "endedAt": "2026-11-06T01:44:29.325Z",
+      "stdout": {
+        "sha256": "415e96ea166013001df522100e5efd5726d6401b24ac7229d37b9f3949130020",
+        "bytes": 43
+      },
+      "stderr": {
+        "sha256": "33e59abb7f786039d2d37d6e69c400455f11a0b51962156e176549a4cc901128",
+        "bytes": 45
+      },
+      "resultLine": "lint: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    },
+    {
+      "kind": "unit-tests",
+      "argv": [
+        "npm",
+        "test",
+        "--",
+        "--maxWorkers=2"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-06T01:44:29.341Z",
+      "endedAt": "2026-11-06T01:44:34.243Z",
+      "stdout": {
+        "sha256": "970534ebed5a4891aaec83e78edfcf7f456ce8c77029a5ccc5ea52c0b2291570",
+        "bytes": 649
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "Tests  48 passed (48)",
+      "reason": null,
+      "timedOut": false
+    }
+  ],
+  "outputTails": {
+    "setup": [
+      {
+        "stdout": "\nadded 41 packages in 26s\n",
+        "stderr": ""
+      }
+    ],
+    "typecheck": {
+      "stdout": "\n> gpt-in-a-tab@0.1.0 typecheck\n> tsc --noEmit\n\n",
+      "stderr": ""
+    },
+    "lint": {
+      "stdout": "\n> gpt-in-a-tab@0.1.0 lint\n> biome lint .\n\n",
+      "stderr": "Checked 101 files in 27ms. No fixes applied.\n"
+    },
+    "unit-tests": {
+      "stdout": "\n> gpt-in-a-tab@0.1.0 test\n> vitest run --maxWorkers=2\n\n\n RUN  v5.0.5 <clone>\n\n ✓ tests/gradcheck.test.ts (13 tests) 7ms\n ✓ tests/model-bits.test.ts (14 tests) 758ms\n   ✓ parameter layout (3)\n     ✓ initialises deterministically 746ms\n ✓ tests/microscope.test.ts (6 tests) 16ms\n ✓ tests/scrub.test.ts (5 tests) 42ms\n ✓ tests/model.test.ts (10 tests) 3631ms\n   ✓ training (3)\n     ✓ overfits a tiny text: loss is driven near zero 3149ms\n\n Test Files  5 passed (5)\n      Tests  48 passed (48)\n   Start at  01:44:30\n   Duration  3.79s (tests 96%, transform 3%, import 1%)\n\n",
+      "stderr": ""
+    }
+  },
+  "disclosure": "Original-byte output digests/counts; displayed tails are bounded, redacted and path-normalized. No browser/model downloads or hosted checks. npm lifecycle scripts disabled. Before/after tracked status does not detect transient reverted edits. Network/isolation mode is stated separately for every capture."
+}

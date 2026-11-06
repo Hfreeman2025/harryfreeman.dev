@@ -2,8 +2,8 @@
 // browser and nothing says verified before the check resolves; the one-byte change is rejected;
 // dreaming shows a valid signature with failed checks, its reason and its supplement; the stamp's
 // ink (PASSED, FAILED, NOT VALID) lands on the card only once the check has resolved; earlier
-// captures check too; a browser without Ed25519 says it cannot verify; the flat office's folders
-// carry the same stamp.
+// captures are marked pre-publication and check too, each with its own supplement; a browser without
+// Ed25519 says it cannot verify; the flat office's folders carry the same stamp.
 
 const desk = { viewport: { width: 1440, height: 900 } };
 const phone = (name) => ({ viewport: { width: 390, height: 844 }, ...(name === 'firefox' ? {} : { isMobile: true, hasTouch: true }) });
@@ -49,7 +49,7 @@ export async function stampChecks({ check, expect, BASE, shot, name }) {
       });
       await openFolder(page, `${BASE}/#folder-gpt-in-a-tab`);
       const before = await stampText(page);
-      expect(/PASSED/.test(before) && before.includes('193619e') && before.includes('48 passed'), `the face: ${before}`);
+      expect(/PASSED/.test(before) && before.includes('4938e51') && before.includes('48 passed'), `the face: ${before}`);
       expect(!/verified|signature valid/i.test(before), `claims verification before any check: ${before}`);
       await page.click('#card-stamp .stamp__face');
       await page.waitForFunction(() => document.querySelector('#card-stamp .stamp__status')?.dataset.state === 'checking', null, {
@@ -71,7 +71,7 @@ export async function stampChecks({ check, expect, BASE, shot, name }) {
       expect(after.includes('Signature valid, signed by key e201c249…'), 'no signature line');
       expect(after.includes('Checks passed.'), 'no checks line');
       expect(
-        after.includes('193619ee720bf4a7d71da31fae9cf9c2d13a9e01') && after.includes('npm run typecheck') && after.includes('exit 0'),
+        after.includes('4938e517347be7abb457e6cadaaadbc2f5585661') && after.includes('npm run typecheck') && after.includes('exit 0'),
         'the signed statement is not shown',
       );
       await page.locator('#card-stamp .stamp__outcome').scrollIntoViewIfNeeded();
@@ -119,12 +119,29 @@ export async function stampChecks({ check, expect, BASE, shot, name }) {
       `no failed checks and reason: ${text.slice(0, 400)}`,
     );
     expect(text.includes('not network-isolated') && text.includes('Tests  7 passed (7)'), 'no supplement');
-    // Its earlier capture, signed separately, checks too.
+    // Its own supplement only: the earlier capture's supplement stays with that capture.
+    const beside = await page.locator('#card-stamp .stamp__place .stamp__supplement').count();
+    expect(beside === 1, `${beside} supplements beside the current stamp`);
+    // Its earlier captures, each signed separately, are marked as pre-publication commits and check too.
     await page.locator('#card-stamp .stamp__history summary').click();
+    const earlier = page.locator('#card-stamp .stamp__earlier');
+    const marked = await page.locator('#card-stamp .stamp__earlier .stamp__earlier-pre').allTextContents();
+    expect(
+      (await earlier.count()) === 3 && marked.length === 3 && marked.every((t) => t === 'pre-publication commit, not public'),
+      `earlier captures ${await earlier.count()}, marked ${JSON.stringify(marked)}`,
+    );
+    const why = (await page.locator('#card-stamp .stamp__pre-note').textContent()) ?? '';
+    expect(/rewritten for publication, so their commits do not exist publicly/.test(why), `the note: ${why}`);
     await page.locator('#card-stamp .stamp__earlier-check').first().click();
     await page.waitForFunction(() => document.querySelector('#card-stamp .stamp__earlier-status')?.dataset.state === 'valid', null, {
       timeout: 10000,
     });
+    // The earlier capture at 070b67d carries its own supplement, which checks too.
+    const withSupplement = earlier.filter({ hasText: '070b67d' });
+    await withSupplement.locator('.stamp__earlier-check').click();
+    await withSupplement.locator('.stamp__supplement .stamp__outcome[data-result="valid"]').waitFor({ timeout: 10000 });
+    const own = await withSupplement.locator('.stamp__supplement').count();
+    expect(own === 1, `${own} supplements with the earlier capture`);
     await page.locator('#card-stamp').evaluate((el) => el.scrollIntoView({ block: 'start' }));
     await page.waitForTimeout(450); // the ink lands
     await shot(page, 'stamp-dreaming');

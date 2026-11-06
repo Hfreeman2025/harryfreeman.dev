@@ -45,7 +45,27 @@ passed or failed. Every earlier capture, passing or failing, is signed separatel
 listed under `history` and referenced from the latest statement's
 `capture.priorCaptures` by file and SHA-256.
 
+Every tool repository's history was rewritten once before publication, on 6 November
+2026, to fix author identity and remove local paths and build scaffolding. Captures made
+before then name commit IDs that do not exist publicly. They stay signed and are listed
+with `prePublication: true` in `index.json`, and each later stamp says so where it links
+to them. The current stamps were captured at the published commits.
+
 ## Capture
+
+Capturing and signing are operator steps on macOS, because the sandbox is
+`sandbox-exec`. They are not part of `npm test` or CI, and they expect each tool's
+repository under `~/Personal/`:
+
+```sh
+npm run build
+node --disable-sigusr1 scripts/stamps-capture.mjs TOOL [--commit SHA]
+node scripts/sign-site-stamps.mjs
+```
+
+The capture script writes one immutable file under `captures/`. The signer signs every
+capture that has no stamp yet, leaves existing stamps untouched, and regenerates the
+index, the pinned verifier and the tamper example.
 
 Only authorized public repositories are cloned, using `git clone --local --no-hardlinks --dissociate SOURCE
 .cache/stamps/TOOL` at their observed HEAD. Clone-local origin is removed. No original

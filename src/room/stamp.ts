@@ -13,7 +13,10 @@ const Check = v.looseObject({ kind: v.string(), status: v.string(), resultLine: 
 const Entry = v.looseObject({
   tool: v.string(),
   commit: v.string(),
+  /** Captured before the tool's history was rewritten for publication: the commit does not exist publicly. */
+  prePublication: v.boolean(),
   status: v.string(),
+  capture: v.string(),
   envelope: v.string(),
   resultLine: v.string(),
   checks: v.array(Check),
@@ -21,6 +24,23 @@ const Entry = v.looseObject({
 const IndexSchema = v.looseObject({ entries: v.array(Entry), history: v.array(Entry), supplemental: v.array(Entry) });
 const KeySchema = v.looseObject({ algorithm: v.literal('Ed25519'), encoding: v.literal('base64'), raw: v.string(), keyId: v.string() });
 type Entry = v.InferOutput<typeof Entry>;
+
+/**
+ * The supplements to one capture. Each is signed on its own, at the same commit, and named after the
+ * capture it supplements with a label in words (captures/<capture>-eval-outside-sandbox.json), so a
+ * tool's current stamp never shows an earlier capture's supplement. Its signed statement names that
+ * capture too (tests/stamps.test.ts holds the two together).
+ */
+export function supplementsOf<E extends { tool: string; commit: string; capture: string }>(of: E, supplemental: readonly E[]): E[] {
+  const stem = of.capture.replace(/\.json$/, '-');
+  return supplemental.filter(
+    (s) =>
+      s.tool === of.tool &&
+      s.commit === of.commit &&
+      s.capture.startsWith(stem) &&
+      /^[a-z]+(?:-[a-z]+)*\.json$/.test(s.capture.slice(stem.length)),
+  );
+}
 
 /** The signed statement, as the verifier has already validated it; parsed again here for display. */
 const Run = v.looseObject({
@@ -331,7 +351,7 @@ function stampFor(piece: PieceId, entry: Entry, index: Packet['index'], isCurren
   let tampered = false;
   let button = face(entry, false);
   const run = () => {
-    const supplements = index.supplemental.filter((s) => s.tool === piece);
+    const supplements = supplementsOf(entry, index.supplemental);
     void check(tampered ? 'tampered.dsse.json' : entry.envelope, piece, status, place, false, isCurrent).then(() => {
       // A supplement is signed on its own, and shown beside the stamp, never instead of it.
       if (tampered || !isCurrent() || status.dataset.state !== 'valid') return;
@@ -372,6 +392,15 @@ function stampFor(piece: PieceId, entry: Entry, index: Packet['index'], isCurren
   if (earlier.length) {
     const history = el('details', 'stamp__history');
     history.append(el('summary', '', `Earlier captures (${earlier.length}), each signed separately`));
+    if (earlier.some((h) => h.prePublication))
+      history.append(
+        el(
+          'p',
+          'stamp__pre-note',
+          'These were captured before this tool’s history was rewritten for publication, so their commits do not ' +
+            'exist publicly. Their signatures still check.',
+        ),
+      );
     const list = el('ul');
     for (const h of earlier) {
       const item = el('li', 'stamp__earlier');
@@ -386,8 +415,17 @@ function stampFor(piece: PieceId, entry: Entry, index: Packet['index'], isCurren
       const s = el('span', 'stamp__earlier-status');
       s.setAttribute('role', 'status');
       const p = el('div');
-      b.addEventListener('click', () => void check(h.envelope, piece, s, p, true, isCurrent));
-      item.append(b, s, p);
+      b.addEventListener(
+        'click',
+        () =>
+          void check(h.envelope, piece, s, p, true, isCurrent).then(() => {
+            if (!isCurrent() || s.dataset.state !== 'valid') return;
+            for (const sup of supplementsOf(h, index.supplemental)) p.append(supplement(piece, sup, isCurrent));
+          }),
+      );
+      item.append(b);
+      if (h.prePublication) item.append(el('span', 'stamp__earlier-pre', 'pre-publication commit, not public'));
+      item.append(s, p);
       list.append(item);
     }
     history.append(list);

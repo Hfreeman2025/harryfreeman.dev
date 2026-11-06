@@ -213,11 +213,14 @@ runs the stamp says so; only when it resolves does it show the outcome, as two s
 the signature is valid, and whether the checks passed. Then come the signed statement's commands, exit
 codes, times and how they were captured, and the exact signed text. dreaming's stamp is validly signed
 and records a failed unit-test run, with the reason and its separately signed supplement (run outside
-the sandbox, not network-isolated). Earlier captures are listed and check too. gpt-in-a-tab's folder
-can change one byte (the shipped tampered copy) to show the signature failing. A browser without
-Ed25519 is told it cannot verify. What a stamp proves, and what it does not, is at `/stamps.html`, from
-the receipts project's own `docs/site-stamps.md`. The packet is vendored unmodified by
-`npm run vendor stamps` from receipts commit `0f84c7e`, recorded with file hashes in
+the sandbox, not network-isolated). Earlier captures are listed and check too, each with its own
+supplement, never the current stamp's. The current stamps were captured at the published commits; the
+earlier ones predate the rewrite of each tool's history for publication, so each is marked
+"pre-publication commit, not public", as the packet's index and the current signed statements say.
+gpt-in-a-tab's folder can change one byte (the shipped tampered copy) to show the signature failing. A
+browser without Ed25519 is told it cannot verify. What a stamp proves, and what it does not, is at
+`/stamps.html`, from the receipts project's own `docs/site-stamps.md`. The packet is vendored
+unmodified by `npm run vendor stamps` from receipts commit `0253c47`, recorded with file hashes in
 `public/vendor/stamps/SOURCE.json`.
 
 **Identity.** One office building; IBM Plex throughout; putty steel, manila,
@@ -272,7 +275,10 @@ the check.
   - the receipt stamps, with their own verifier: the pinned key matches the reported fingerprint;
     every tool's latest stamp and every earlier capture verifies and names its tool and commit;
     dreaming is validly signed with failed checks, and its supplement is validly signed and marked not
-    network-isolated; the tampered copy and a stamp under another key are rejected;
+    network-isolated; each supplement belongs to exactly the one capture its signed statement names;
+    every earlier capture is marked pre-publication, no current stamp is, and each current signed
+    statement says so where it links to them; the tampered copy and a stamp under another key are
+    rejected;
   - the screen overlay's transform landing exactly on a keystoned monitor's corners;
   - the grid: bands, measured value over forecast, refusing old, future, malformed and empty
     half-hours, HTTP errors, expiry, a sign that never shows a number when data is unavailable, and
@@ -359,8 +365,9 @@ the check.
   - the fallback without WebGL;
   - **stamps:** a real stamp verifies in the browser, with the page checked while the check is held
     open to show that nothing says verified before it resolves; the one-byte change is rejected with
-    nothing shown as fact; dreaming shows a valid signature, failed checks with the reason, its
-    supplement and an earlier capture checking; a browser without Ed25519 is told it cannot verify;
+    nothing shown as fact; dreaming shows a valid signature, failed checks with the reason and only its
+    own supplement, and its earlier captures, each marked as a pre-publication commit, check too, the
+    one with a supplement showing it; a browser without Ed25519 is told it cannot verify;
     and the flat office's folder carries the same stamp on a phone;
   - the flat office: phone, reduced motion and `?flat` with no canvas and no poster download, the
     cabinet, folders, Reception's marked line, sign and radio, tabs, plan, and zero layout shift on the

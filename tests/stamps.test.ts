@@ -4,6 +4,7 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { PIECE_IDS } from '../src/content/pieces';
+import { supplementsOf } from '../src/room/stamp';
 
 const dir = new URL('../public/vendor/stamps/', import.meta.url);
 const json = (path: string): unknown => JSON.parse(readFileSync(new URL(path, dir), 'utf8'));
@@ -17,7 +18,7 @@ interface Result {
       tool: string;
       status: string;
       repository: { commit: string };
-      capture: { network: string };
+      capture: { network: string; priorCaptures?: Array<{ file: string; sha256: string; reason: string }> };
       checks: Array<{ kind: string; status: string; reason: string | null }>;
     };
   } | null;
@@ -25,11 +26,17 @@ interface Result {
 type Verify = (envelope: unknown, key: unknown) => Promise<Result>;
 const verifier = (await import(new URL('verify-stamp.mjs', dir).href)) as { verifyStamp: Verify; PINNED_KEY_SHA256: string };
 const key = json('public-key.json') as { raw: string; keyId: string };
-const index = json('index.json') as {
-  entries: Array<{ tool: string; commit: string; status: string; envelope: string }>;
-  history: Array<{ tool: string; status: string; envelope: string }>;
-  supplemental: Array<{ tool: string; envelope: string }>;
-};
+interface Item {
+  tool: string;
+  commit: string;
+  prePublication: boolean;
+  status: string;
+  capture: string;
+  captureSha256: string;
+  envelope: string;
+}
+const index = json('index.json') as { entries: Item[]; history: Item[]; supplemental: Item[] };
+const statement = async (item: Item) => (await verifier.verifyStamp(json(item.envelope), key)).statement?.predicate;
 
 describe('receipt stamps', () => {
   it('pin the signer key the receipts session reported (e201c249…)', () => {
@@ -58,8 +65,9 @@ describe('receipt stamps', () => {
     const failed = r.statement?.predicate.checks.find((c) => c.status === 'failed');
     expect(failed?.kind).toBe('unit-tests');
     expect(failed?.reason).toMatch(/exit 1/);
-    const supplement = index.supplemental.find((s) => s.tool === 'dreaming');
+    const [supplement, ...more] = supplementsOf(entry as Item, index.supplemental);
     if (!supplement) throw new Error('no dreaming supplement');
+    expect(more).toEqual([]);
     const sr = await verifier.verifyStamp(json(supplement.envelope), key);
     expect(sr.valid).toBe(true);
     expect(sr.statement?.predicate.capture.network).toBe('not-os-isolated');
@@ -70,6 +78,37 @@ describe('receipt stamps', () => {
       const r = await verifier.verifyStamp(json(h.envelope), key);
       expect(r.valid, `${h.envelope}: ${r.reason}`).toBe(true);
       expect(r.statement?.predicate.status).toBe(h.status);
+    }
+  });
+
+  it('pair each supplement with the one capture its signed statement names, never another', async () => {
+    const captures = [...index.entries, ...index.history];
+    for (const s of index.supplemental) {
+      const owners = captures.filter((c) => supplementsOf(c, index.supplemental).includes(s));
+      expect(
+        owners.map((c) => c.capture),
+        s.capture,
+      ).toHaveLength(1);
+      const owner = owners[0] as Item;
+      const named = (await statement(s))?.capture.priorCaptures ?? [];
+      expect(named.map((n) => [n.file, n.sha256])).toContainEqual([owner.capture, owner.captureSha256]);
+      expect(s.prePublication).toBe(owner.prePublication);
+    }
+    // dreaming's current stamp gets its own supplement only; its earlier one stays with its earlier capture.
+    const dreaming = index.entries.find((e) => e.tool === 'dreaming') as Item;
+    expect(supplementsOf(dreaming, index.supplemental).map((s) => s.commit)).toEqual([dreaming.commit]);
+  });
+
+  it('mark every earlier capture pre-publication, and say so in the current stamp that links to it', async () => {
+    expect(index.entries.filter((e) => e.prePublication)).toEqual([]);
+    expect(index.history.filter((h) => !h.prePublication)).toEqual([]);
+    for (const entry of index.entries) {
+      for (const prior of (await statement(entry))?.capture.priorCaptures ?? []) {
+        const earlier = index.history.find((h) => h.capture === prior.file);
+        expect(earlier, `${entry.tool}: ${prior.file} is not listed`).toBeDefined();
+        expect(prior.sha256).toBe(earlier?.captureSha256);
+        expect(prior.reason, `${entry.tool}: ${prior.file}`).toMatch(/Pre-publication: commit [0-9a-f]{40} .*does not exist publicly/);
+      }
     }
   });
 

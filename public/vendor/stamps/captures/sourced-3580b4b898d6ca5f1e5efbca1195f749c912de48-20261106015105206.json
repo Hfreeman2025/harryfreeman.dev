@@ -1,0 +1,164 @@
+{
+  "version": 1,
+  "tool": "sourced",
+  "repository": {
+    "commit": "3580b4b898d6ca5f1e5efbca1195f749c912de48",
+    "tree": "7842534897c995b20d9e85861e79f05fe38d7766"
+  },
+  "capturedAt": "2026-11-06T01:51:05.206Z",
+  "status": "passed",
+  "capture": {
+    "method": "fresh-local-clone-non-browser",
+    "source": "Personal/lab/sourced",
+    "network": "loopback-only",
+    "initialTrackedClean": true,
+    "sourceChangesDuringChecks": false,
+    "dependencies": {
+      "lockfile": "package-lock.json",
+      "sha256": "06a1c3d74a44ff9761aeb7446950c383e1239712958aea71277d942cbd662482",
+      "registry": "https://registry.npmjs.org",
+      "policy": "npm-ci-ignore-scripts",
+      "cache": "project-local-discarded"
+    },
+    "runtime": {
+      "node": "v26.12.0",
+      "npm": "11.20.0",
+      "platform": "darwin",
+      "arch": "arm64"
+    },
+    "notes": [
+      "Capture policy v2: independent Git object inodes; reads limited to clone/cache/system SDKs; writes limited to this clone and its isolated cache. Setup is loopback-only through a registry allowlist proxy, closed before checks.",
+      "Cloned with git clone --local --no-hardlinks --dissociate; origin removed and global Git configuration disabled. Browser executables denied."
+    ]
+  },
+  "setup": [
+    {
+      "kind": "dependency-setup",
+      "argv": [
+        "npm",
+        "ci",
+        "--ignore-scripts",
+        "--strict-ssl=true",
+        "--registry=https://registry.npmjs.org",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-06T01:50:26.804Z",
+      "endedAt": "2026-11-06T01:50:59.108Z",
+      "stdout": {
+        "sha256": "cc6e81b103831fcfd648cb1a33416280f21100f6c89e67a0c2d7f9c7dd09bb82",
+        "bytes": 26
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "dependency-setup: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    }
+  ],
+  "checks": [
+    {
+      "kind": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-06T01:50:59.150Z",
+      "endedAt": "2026-11-06T01:51:00.909Z",
+      "stdout": {
+        "sha256": "d44eef2f3829293d2aedf6885fd307a10ddfe49313e76d47e4060ae3d5b249b8",
+        "bytes": 43
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "typecheck: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    },
+    {
+      "kind": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-06T01:51:00.924Z",
+      "endedAt": "2026-11-06T01:51:03.437Z",
+      "stdout": {
+        "sha256": "2341929a9d48dde524c84d917da64732c1b8f18b7812300fc91681e97456d1ab",
+        "bytes": 54
+      },
+      "stderr": {
+        "sha256": "227a8e99c4f5eb4bb0d7e6eb2e403229a2325dbe4bfd1d608caad39c7d229299",
+        "bytes": 44
+      },
+      "resultLine": "lint: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    },
+    {
+      "kind": "unit-tests",
+      "argv": [
+        "node_modules/.bin/tsx",
+        "--test",
+        "--test-concurrency=2",
+        "tests/analysis.test.ts",
+        "tests/contracts.test.ts",
+        "tests/language.test.ts",
+        "tests/stats.test.ts",
+        "tests/uncertainty.test.ts"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-06T01:51:03.453Z",
+      "endedAt": "2026-11-06T01:51:05.190Z",
+      "stdout": {
+        "sha256": "28ea86a3bd9ed9c105ba430d8655e7ac625af972d9ba1bc35fc40ff0569d5c22",
+        "bytes": 8907
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "ℹ tests 90; ℹ pass 90; ℹ fail 0; ℹ cancelled 0; ℹ skipped 0",
+      "reason": null,
+      "timedOut": false
+    }
+  ],
+  "outputTails": {
+    "setup": [
+      {
+        "stdout": "\nadded 39 packages in 32s\n",
+        "stderr": ""
+      }
+    ],
+    "typecheck": {
+      "stdout": "\n> sourced@0.1.0 typecheck\n> tsc --noEmit\n\n",
+      "stderr": ""
+    },
+    "lint": {
+      "stdout": "\n> sourced@0.1.0 lint\n> biome lint src tests scripts\n\n",
+      "stderr": "Checked 56 files in 13ms. No fixes applied.\n"
+    },
+    "unit-tests": {
+      "stdout": "()` instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n✔ a sourced calculation returns its concrete converted answer (2.241083ms)\n✔ bare numbers are refused outside an explicit assumption (0.099833ms)\n(node:41079) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n✔ lexer recognises separators, decimals, scientific notation, sources and comments (0.848792ms)\n✔ lexer reports unclosed strings and unknown characters without losing later lines (0.093666ms)\n✔ Pratt precedence, unary and parentheses (1.352875ms)\n✔ parser recovers at line boundaries, returning precise errors and valid later statements (0.116834ms)\n✔ multiline lists and calls, semicolons (0.294542ms)\n✔ all examples have concrete expected results and backends agree, including complete lineage (7.437542ms)\n✔ sourced dimensionless values need an explicit ratio unit (0.120375ms)\n✔ source must be declared; duplicate definitions and reserved builtins fail (0.087833ms)\n✔ source metadata, safe URLs, and interpolation (0.132375ms)\n✔ addition converts compatible units and rejects incompatible quantities (0.235625ms)\n✔ conversion errors, division by zero, bad roots, arity and list errors are explicit (0.394292ms)\n✔ provenance unions inputs, deduplicates dependencies, and retains repeated derivation branches (0.183083ms)\n✔ a sourced value inside assume still retains the source and the assumption (0.053833ms)\n✔ functions are unit polymorphic and capture their lexical environment (0.715375ms)\n✔ dimension algebra uses reduced rational exponents (0.283708ms)\n✔ deterministic property test: 4,000 conversion round trips over compatible units (8.396542ms)\n✔ program size guard and compiler refuse malformed programs (0.264875ms)\n✔ currency keeps two decimal places (0.037667ms)\n✔ round handles small exponential values and very large finite values (0.125084ms)\n✔ deep syntax fails with a useful diagnostic instead of a stack overflow (0.1605ms)\n✔ interpolation diagnostics point at the original source after escaped characters (0.058292ms)\n✔ checker bounds expansion of nested function calls (2.778542ms)\n✔ conversion round trips pass through the actual interpreter with provenance intact (11.633292ms)\n✔ checker reports the original mismatch without cascading unknown-name errors (0.142625ms)\n✔ unit exponent guards reject oversized exponents (0.038542ms)\n✔ compiled function calls resolve functions independently of parameter names (0.498042ms)\n✔ JavaScript generation keeps hostile-looking source strings inert and names hygienic (0.463791ms)\n✔ runtime graph limit prevents an oversized list from creating unlimited nodes (8.956625ms)\n✔ call depth guard rejects a long chain of functions (0.418667ms)\n✔ deterministic malformed-input property test never throws or hangs (5.981791ms)\n✔ rational dimensions remain exact and fail explicitly when representation is exhausted (1.09475ms)\n✔ underflowing unit scales fail explicitly (0.094958ms)\n✔ named SI derived units agree with base dimensions (0.135833ms)\n✔ square roots simplify to a named unit when possible (0.120542ms)\n(node:41080) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n✔ xoshiro128** reproduces the reference sequence for state 1, 2, 3, 4 (0.643208ms)\n✔ named streams are deterministic, distinct and uniform inside (0, 1) (4.6445ms)\n✔ inverse normal matches published quantiles to 1e-8 (0.131375ms)\n✔ every distribution reproduces its exact mean and variance from 200,000 draws (78.14525ms)\n✔ a two-piece normal keeps the stated value as its mode and 95% between the limits (6.882125ms)\n✔ triangular and lognormal quantiles have exact closed forms (0.169084ms)\n✔ type 7 quantiles, summaries and histograms are exact on small samples (0.124709ms)\n✔ Sobol indices recover an additive model exactly in expectation (46.422833ms)\n✔ Sobol total indices expose the interaction in a product of normals (68.871958ms)\n✔ Sobol estimation drops undefined rows and reports a constant output as no variance (0.383125ms)\n(node:41085) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n✔ every spread form parses with exact spans and its provenance (1.57425ms)\n✔ uncertainty errors explain the mistake at its exact span (2.190791ms)\n✔ a cited spread needs a declared source; an assumed spread on a cited value is allowed (0.522875ms)\n✔ the interpreter and compiled JavaScript agree on uncertain lineage in every example (7.83075ms)\n✔ spread literals are draggable but never perturbed as data inputs (1.995416ms)\n✔ fast column rounding equals the interpreter rounding, including ties (68.66975ms)\n✔ the column evaluator reproduces the scalar interpreter bit for bit on every example (26.750208ms)\n✔ analytic: a sum of normals in mixed units keeps its unit and its quantiles (17.569416ms)\n✔ analytic: a product of lognormals is lognormal with added log-variances (13.841666ms)\n✔ analytic: Sobol indices through the language expose a product interaction (22.971166ms)\n✔ one literal is one random variable, even when a function uses it twice (3.987625ms)\n✔ failed runs are counted and excluded, never folded into the distribution (9.950042ms)\n✔ seeds are deterministic; the scrub preview is a prefix of the refined run (31.163166ms)\n✔ dragging one quantity leaves every other quantity’s random numbers unchanged (0.998833ms)\n✔ example findings: the commute is dominated by assumed consumption, not the cited factors (123.427375ms)\n✔ the tornado probes a value without its own spread, so cited intervals never block it (3.940708ms)\n✔ review: each output excludes only the runs where its own calculation fails (17.056084ms)\n✔ review: a unit written right before .. is a unit, not part of a dotted name (0.262833ms)\n✔ review: a spread on a negative literal describes the signed quantity (0.320375ms)\n✔ review: variance shares work at any magnitude, not just near 1 (25.065792ms)\n✔ review: an overflowing sampled input is an undefined run, not an infinite mean (2.040625ms)\nℹ tests 90\nℹ suites 0\nℹ pass 90\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 1375.508917\n",
+      "stderr": ""
+    }
+  },
+  "disclosure": "Original-byte output digests/counts; displayed tails are bounded, redacted and path-normalized. No browser/model downloads or hosted checks. npm lifecycle scripts disabled. Before/after tracked status does not detect transient reverted edits. Network/isolation mode is stated separately for every capture."
+}

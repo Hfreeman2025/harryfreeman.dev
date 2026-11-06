@@ -1,0 +1,158 @@
+{
+  "version": 1,
+  "tool": "grid-weather",
+  "repository": {
+    "commit": "28fc799156165be649ab3b0629bbab4aeac13476",
+    "tree": "ba085ed877dc6ff79c663c4ec576a5eef0116dab"
+  },
+  "capturedAt": "2026-11-06T01:46:50.909Z",
+  "status": "passed",
+  "capture": {
+    "method": "fresh-local-clone-non-browser",
+    "source": "Personal/lab/grid-weather",
+    "network": "loopback-only",
+    "initialTrackedClean": true,
+    "sourceChangesDuringChecks": false,
+    "dependencies": {
+      "lockfile": "package-lock.json",
+      "sha256": "04bd30a56cdf1fa36828334f248ddb0773f4f5d88e4c4800bd9e365a9cef2b7e",
+      "registry": "https://registry.npmjs.org",
+      "policy": "npm-ci-ignore-scripts",
+      "cache": "project-local-discarded"
+    },
+    "runtime": {
+      "node": "v26.12.0",
+      "npm": "11.20.0",
+      "platform": "darwin",
+      "arch": "arm64"
+    },
+    "notes": [
+      "Capture policy v2: independent Git object inodes; reads limited to clone/cache/system SDKs; writes limited to this clone and its isolated cache. Setup is loopback-only through a registry allowlist proxy, closed before checks.",
+      "Cloned with git clone --local --no-hardlinks --dissociate; origin removed and global Git configuration disabled. Browser executables denied."
+    ]
+  },
+  "setup": [
+    {
+      "kind": "dependency-setup",
+      "argv": [
+        "npm",
+        "ci",
+        "--ignore-scripts",
+        "--strict-ssl=true",
+        "--registry=https://registry.npmjs.org",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-06T01:46:42.175Z",
+      "endedAt": "2026-11-06T01:46:46.224Z",
+      "stdout": {
+        "sha256": "3f0ad2cea5b1547929f1c84cfba194f8b5d6b6509317591219b727332a682535",
+        "bytes": 24
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "dependency-setup: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    }
+  ],
+  "checks": [
+    {
+      "kind": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-06T01:46:46.319Z",
+      "endedAt": "2026-11-06T01:46:47.045Z",
+      "stdout": {
+        "sha256": "039832d96c2941c15b0aac4ee982fddeaf650ea5b9c87a2ad61c17444941839c",
+        "bytes": 81
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "typecheck: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    },
+    {
+      "kind": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-06T01:46:47.062Z",
+      "endedAt": "2026-11-06T01:46:49.604Z",
+      "stdout": {
+        "sha256": "df24bf208a372cd3adf5e51ab342c5bae5a0a9a55f006036119ea0dc03e8322b",
+        "bytes": 140
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "lint: observed exit 0",
+      "reason": null,
+      "timedOut": false
+    },
+    {
+      "kind": "unit-tests",
+      "argv": [
+        "npm",
+        "test"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "signal": null,
+      "startedAt": "2026-11-06T01:46:49.690Z",
+      "endedAt": "2026-11-06T01:46:50.894Z",
+      "stdout": {
+        "sha256": "10fd3ae06bbfe5aad37a531db1ab8b993f55a9f8657dfccb2e1f036fab23c305",
+        "bytes": 5323
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "resultLine": "ℹ tests 53; ℹ pass 53; ℹ fail 0; ℹ cancelled 0; ℹ skipped 0",
+      "reason": null,
+      "timedOut": false
+    }
+  ],
+  "outputTails": {
+    "setup": [
+      {
+        "stdout": "\nadded 4 packages in 4s\n",
+        "stderr": ""
+      }
+    ],
+    "typecheck": {
+      "stdout": "\n> grid-weather@3.0.0 typecheck\n> node node_modules/typescript/bin/tsc --noEmit\n\n",
+      "stderr": ""
+    },
+    "lint": {
+      "stdout": "\n> grid-weather@3.0.0 lint\n> node scripts/lint.mjs\n\nAST safety lint and JavaScript syntax checks passed. Unused code checked by TypeScript.\n",
+      "stderr": ""
+    },
+    "unit-tests": {
+      "stdout": "\n> grid-weather@3.0.0 test\n> node --test --test-concurrency=2 tests/*.test.mjs\n\n✔ midpoint tracer uses metres per second over projected kilometres, with no fake carbon flow (0.562292ms)\n✔ RK2 samples the midpoint velocity rather than using an Euler endpoint (0.13975ms)\n✔ area mean uses many equal-area interior cells rather than a centroid or vector magnitude (0.884125ms)\n✔ polygon holes do not contribute and incomplete weather coverage fails visibly (0.626709ms)\n✔ schema accepts genuine API response and preserves zero intensity (2.057959ms)\n✔ schema rejects null, invalid timestamps, missing regions, non-finite values and invalid mixes (0.897708ms)\n✔ alignment sorts, deduplicates overlap in favour of newer source and rejects mismatched regions (0.310542ms)\n✔ interpolation blends half-hours, preserves endpoints and never bridges gaps or extrapolates (0.115667ms)\n✔ best two-hour window requires four contiguous full future intervals, earliest tie wins (0.13075ms)\n✔ colour scale clamps and has predictable low, middle, high anchors (0.076208ms)\n✔ genuine archive aligns all 145 half-hours and retains 14 regions (11.384667ms)\n✔ archive rejects missing half-hours, shortened forecasts and invalid calendar dates (35.853417ms)\n✔ API failure returns explicitly offline bundled data, never live success (25.750042ms)\n✔ malformed live data is rejected before explicit offline fallback (14.536667ms)\n✔ archive retains the validated GB aggregate separately from the 14 map regions (8.194ms)\n✔ browser/download disk floor includes expected operation footprint (0.403917ms)\n✔ literal DOM accessors match the actual element type in the shipped page (2.67375ms)\n✔ validated experiments remain valid across the worker structured-clone boundary (14.93825ms)\n✔ held-out truth never enters scaling, tuning or predictions; published forecasts remain separate (8.642875ms)\n✔ recursive forecast uses its own first-day predictions and never future target values (2.484791ms)\n✔ constant time series gets an undefined correlation with its true sample count (3.177ms)\n✔ UK clock and timezone labels agree in both winter and summer (1.066209ms)\n✔ repeated local times at the autumn change remain distinguishable in receipts (0.224208ms)\n✔ official geometry simplifies substantially, preserving 14 regions and all closed rings (20.762792ms)\n✔ simplification removes collinear vertices and preserves a corner (0.124917ms)\n✔ geometry parser rejects incorrect CRS, unknown region and open rings (25.035041ms)\n✔ window comparison uses current interpolated baseline, not the selected forecast frame (0.445375ms)\n✔ zero baseline cannot invent a saving; worse windows have negative reductions (0.105625ms)\n✔ sparkline uses a shared scale, aligned endpoints, and separate moves across missing intervals (0.373791ms)\n✔ an absent region or empty forecast produces no invented line (0.055875ms)\n✔ the outlook includes the full last known half-hour, so a final two-hour band is not clipped (0.047166ms)\n✔ elapsed time drives a 36-second cycle, even when frames take several seconds (0.40125ms)\n✔ speed, wraparound and zero elapsed time keep the same temporal contract (0.056167ms)\n✔ invalid playback bounds, speeds and elapsed time fail explicitly (0.105916ms)\n✔ tour opens with a temporal story and reaches the end of the available 48-hour forecast (3.168666ms)\n✔ every raw receipt matches its source; named regions are highlighted; means have four contiguous inputs (1.533792ms)\n✔ improvers and worseners compare with now, never the previous tour stop (0.542958ms)\n✔ GB crossing uses the actual aggregate, not an average of regional intensities (1.148ms)\n✔ cleanest overnight window excludes daytime minima and never bridges missing intervals (0.547167ms)\n✔ wind, solar and gas stories state observed shares with both source intervals (0.519542ms)\n✔ empty, sparse and unchanged series never invent a change, band crossing or complete window (0.406625ms)\n✔ British National Grid converts the OS published Norwich control point to WGS84 (0.444ms)\n✔ central meridian and northern grid points remain geographical and finite (0.145833ms)\n✔ recorded calculation is produced by the same real model and every series has 48 forward hours (43.509125ms)\n✔ recorded results reject tampered counts, invalid forecast values and malformed models (1.517917ms)\n✔ real weather stories cite derived area means and exact NESO shares, and never extrapolate (51.938208ms)\n✔ standardized ridge recovers the analytical regularized slope with an unpenalized intercept (0.675875ms)\n✔ training-only scaling handles constant and collinear features without NaN (0.201209ms)\n✔ invalid shapes, non-finite values and unregularized/small samples fail explicitly (0.218291ms)\n✔ meteorological wind is FROM north/west, never carbon transport (0.356792ms)\n✔ bilinear interpolation is bounded, preserves corners and rejects spatial/temporal extrapolation (0.14325ms)\n✔ Pearson correlation reports n, handles constant/short series and rejects invalid values (0.340791ms)\n✔ weather schema rejects gaps, wrong units/levels, null and oversized fields (1.023333ms)\nℹ tests 53\nℹ suites 0\nℹ pass 53\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 1018.510833\n",
+      "stderr": ""
+    }
+  },
+  "disclosure": "Original-byte output digests/counts; displayed tails are bounded, redacted and path-normalized. No browser/model downloads or hosted checks. npm lifecycle scripts disabled. Before/after tracked status does not detect transient reverted edits. Network/isolation mode is stated separately for every capture."
+}

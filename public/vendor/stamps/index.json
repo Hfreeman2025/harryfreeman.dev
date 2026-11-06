@@ -1,18 +1,24 @@
 {
   "version": 1,
-  "attestedAt": "2026-11-05T12:11:47.836Z",
+  "attestedAt": "2026-11-06T01:52:29.559Z",
   "keyId": "e201c24958d158d09f607f1951d2440aa3f0ce76061e5a67c0e6bcd7bc4ba023",
   "publicKey": "public-key.json",
   "verifier": "verify-stamp.mjs",
+  "publication": {
+    "rewrittenAt": "2026-11-06T01:38:00.000Z",
+    "note": "Repository histories were rewritten once before publication, for author identity and paths. Entries with prePublication true name commit IDs that do not exist publicly."
+  },
   "scope": "typecheck, lint, unit-tests; latest observed commands, not a full release gate",
   "entries": [
     {
       "tool": "gpt-in-a-tab",
-      "commit": "193619ee720bf4a7d71da31fae9cf9c2d13a9e01",
+      "commit": "4938e517347be7abb457e6cadaaadbc2f5585661",
+      "capturedAt": "2026-11-06T01:44:34.259Z",
+      "prePublication": false,
       "status": "passed",
-      "capture": "captures/gpt-in-a-tab-193619ee720bf4a7d71da31fae9cf9c2d13a9e01-20261104171904649.json",
-      "captureSha256": "ed0782c65a2f8188d3beebaa3b423309d4e958816a687915d801859eebbabcb3",
-      "envelope": "stamps/gpt-in-a-tab-193619ee720bf4a7d71da31fae9cf9c2d13a9e01-20261104171904649.dsse.json",
+      "capture": "captures/gpt-in-a-tab-4938e517347be7abb457e6cadaaadbc2f5585661-20261106014434259.json",
+      "captureSha256": "47063a51a809da0f5c8ccebe25fb2c736f10568237251cb85c3581db50fbac3e",
+      "envelope": "stamps/gpt-in-a-tab-4938e517347be7abb457e6cadaaadbc2f5585661-20261106014434259.dsse.json",
       "resultLine": "gpt-in-a-tab: PASSED — typecheck: passed; lint: passed; unit-tests: passed (Tests  48 passed (48))",
       "checks": [
         {
@@ -36,17 +42,20 @@
       ],
       "history": [
         "history/gpt-in-a-tab-bootstrap-abort.dsse.json",
-        "stamps/gpt-in-a-tab.dsse.json"
+        "stamps/gpt-in-a-tab.dsse.json",
+        "stamps/gpt-in-a-tab-193619ee720bf4a7d71da31fae9cf9c2d13a9e01-20261104171904649.dsse.json"
       ]
     },
     {
       "tool": "real-or-hallucinated",
-      "commit": "afe6065317edb31331fdd3e230c20c1ae86b4295",
+      "commit": "bac2ea79fb7cfe18aa1c0cb45c186e970c5d1093",
+      "capturedAt": "2026-11-06T01:45:08.421Z",
+      "prePublication": false,
       "status": "passed",
-      "capture": "captures/real-or-hallucinated-afe6065317edb31331fdd3e230c20c1ae86b4295-20261104172114497.json",
-      "captureSha256": "41e9401a846e29c1da82477fb7f714405499b98648f226ffb81cf55f8af39ad0",
-      "envelope": "stamps/real-or-hallucinated-afe6065317edb31331fdd3e230c20c1ae86b4295-20261104172114497.dsse.json",
-      "resultLine": "real-or-hallucinated: PASSED — typecheck: passed; lint: passed; unit-tests: passed (ℹ tests 61; ℹ pass 61; ℹ fail 0; ℹ cancelled 0; ℹ skipped 0)",
+      "capture": "captures/real-or-hallucinated-bac2ea79fb7cfe18aa1c0cb45c186e970c5d1093-20261106014508421.json",
+      "captureSha256": "06796107c6df67058573d93df63c91fd23dadebdd872d8cb009539e1c8b6e193",
+      "envelope": "stamps/real-or-hallucinated-bac2ea79fb7cfe18aa1c0cb45c186e970c5d1093-20261106014508421.dsse.json",
+      "resultLine": "real-or-hallucinated: PASSED — typecheck: passed; lint: passed; unit-tests: passed (ℹ tests 65; ℹ pass 65; ℹ fail 0; ℹ cancelled 0; ℹ skipped 0)",
       "checks": [
         {
           "kind": "typecheck",
@@ -64,22 +73,25 @@
           "kind": "unit-tests",
           "status": "passed",
           "exitCode": 0,
-          "resultLine": "ℹ tests 61; ℹ pass 61; ℹ fail 0; ℹ cancelled 0; ℹ skipped 0"
+          "resultLine": "ℹ tests 65; ℹ pass 65; ℹ fail 0; ℹ cancelled 0; ℹ skipped 0"
         }
       ],
       "history": [
         "history/real-or-hallucinated-first-capture.dsse.json",
-        "stamps/real-or-hallucinated.dsse.json"
+        "stamps/real-or-hallucinated.dsse.json",
+        "stamps/real-or-hallucinated-afe6065317edb31331fdd3e230c20c1ae86b4295-20261104172114497.dsse.json"
       ]
     },
     {
       "tool": "agent-race",
-      "commit": "e9871e8af05838e67d02c3ae86149370a3f37d02",
+      "commit": "3fadafb956c34ca0cf7665d1e3a61a5a397dc281",
+      "capturedAt": "2026-11-06T01:45:47.302Z",
+      "prePublication": false,
       "status": "passed",
-      "capture": "captures/agent-race-e9871e8af05838e67d02c3ae86149370a3f37d02-20261105121047937.json",
-      "captureSha256": "ae3648365923df3eb425e571d4c8682f8069e03d6ac47e186b4debc3f31aa344",
-      "envelope": "stamps/agent-race-e9871e8af05838e67d02c3ae86149370a3f37d02-20261105121047937.dsse.json",
-      "resultLine": "agent-race: PASSED — typecheck: passed; lint: passed; unit-tests: passed (Tests  76 passed (76))",
+      "capture": "captures/agent-race-3fadafb956c34ca0cf7665d1e3a61a5a397dc281-20261106014547302.json",
+      "captureSha256": "dcc5f0e8c42f9aca4773fc5cd72341c717d099093adcfa1d17348a3df86eb423",
+      "envelope": "stamps/agent-race-3fadafb956c34ca0cf7665d1e3a61a5a397dc281-20261106014547302.dsse.json",
+      "resultLine": "agent-race: PASSED — typecheck: passed; lint: passed; unit-tests: passed (Tests  77 passed (77))",
       "checks": [
         {
           "kind": "typecheck",
@@ -97,22 +109,25 @@
           "kind": "unit-tests",
           "status": "passed",
           "exitCode": 0,
-          "resultLine": "Tests  76 passed (76)"
+          "resultLine": "Tests  77 passed (77)"
         }
       ],
       "history": [
         "history/agent-race-first-capture.dsse.json",
         "stamps/agent-race.dsse.json",
-        "stamps/agent-race-647ea417af718e963b26ff2de44c707076c30780-20261104172144504.dsse.json"
+        "stamps/agent-race-647ea417af718e963b26ff2de44c707076c30780-20261104172144504.dsse.json",
+        "stamps/agent-race-e9871e8af05838e67d02c3ae86149370a3f37d02-20261105121047937.dsse.json"
       ]
     },
     {
       "tool": "receipts",
-      "commit": "5c8b8fbd876494bb55224ed7034761cb150e957d",
+      "commit": "1881b0715888f162068d8362d63e0b2f45048449",
+      "capturedAt": "2026-11-06T01:51:54.061Z",
+      "prePublication": false,
       "status": "passed",
-      "capture": "captures/receipts-5c8b8fbd876494bb55224ed7034761cb150e957d-20261105121132798.json",
-      "captureSha256": "84f4139a9974270ba8bbcdacc129b3fb91a44aef97c64a9268bb00f267099c7a",
-      "envelope": "stamps/receipts-5c8b8fbd876494bb55224ed7034761cb150e957d-20261105121132798.dsse.json",
+      "capture": "captures/receipts-1881b0715888f162068d8362d63e0b2f45048449-20261106015154061.json",
+      "captureSha256": "c3f83584e82db79e90d9f882683d55d706442c25b4cf600cbd6c50c7c5d69962",
+      "envelope": "stamps/receipts-1881b0715888f162068d8362d63e0b2f45048449-20261106015154061.dsse.json",
       "resultLine": "receipts: PASSED — typecheck: passed; lint: passed; unit-tests: passed (Tests  530 passed (530))",
       "checks": [
         {
@@ -135,16 +150,19 @@
         }
       ],
       "history": [
-        "stamps/receipts-5313dea7d30dd8ee6c3d375a80df48881027e6ea-20261105095822096.dsse.json"
+        "stamps/receipts-5313dea7d30dd8ee6c3d375a80df48881027e6ea-20261105095822096.dsse.json",
+        "stamps/receipts-5c8b8fbd876494bb55224ed7034761cb150e957d-20261105121132798.dsse.json"
       ]
     },
     {
       "tool": "dreaming",
-      "commit": "070b67d4a201561b228730625bb304b8a87613a4",
+      "commit": "00bec8c5ae2faa8cdbe2a22425a341bc28e2692e",
+      "capturedAt": "2026-11-06T01:46:38.544Z",
+      "prePublication": false,
       "status": "failed",
-      "capture": "captures/dreaming-070b67d4a201561b228730625bb304b8a87613a4-20261104172539227.json",
-      "captureSha256": "8d6c7857430f63eecb62deeb1ab4afe9d51341fb8df965bf284d447a08df79d8",
-      "envelope": "stamps/dreaming-070b67d4a201561b228730625bb304b8a87613a4-20261104172539227.dsse.json",
+      "capture": "captures/dreaming-00bec8c5ae2faa8cdbe2a22425a341bc28e2692e-20261106014638543.json",
+      "captureSha256": "13417300799ddf416cb84abd0ab0f8b382a84c84452d00f5d9adf73b6e8b8560",
+      "envelope": "stamps/dreaming-00bec8c5ae2faa8cdbe2a22425a341bc28e2692e-20261106014638543.dsse.json",
       "resultLine": "dreaming: FAILED — typecheck: passed; lint: passed; unit-tests: failed (Tests  1 failed | 455 passed | 1 skipped (457))",
       "checks": [
         {
@@ -168,17 +186,20 @@
       ],
       "history": [
         "history/dreaming-first-capture.dsse.json",
-        "stamps/dreaming.dsse.json"
+        "stamps/dreaming.dsse.json",
+        "stamps/dreaming-070b67d4a201561b228730625bb304b8a87613a4-20261104172539227.dsse.json"
       ]
     },
     {
       "tool": "grid-weather",
-      "commit": "1f3a0f73696969a9f6aa3639d393ea570b0b05ed",
+      "commit": "28fc799156165be649ab3b0629bbab4aeac13476",
+      "capturedAt": "2026-11-06T01:46:50.909Z",
+      "prePublication": false,
       "status": "passed",
-      "capture": "captures/grid-weather-1f3a0f73696969a9f6aa3639d393ea570b0b05ed-20261104172157282.json",
-      "captureSha256": "3d477b9bd9e75ae6a4fb69e7c622669790f6687fde2c37f643c4549e2b755c04",
-      "envelope": "stamps/grid-weather-1f3a0f73696969a9f6aa3639d393ea570b0b05ed-20261104172157282.dsse.json",
-      "resultLine": "grid-weather: PASSED — typecheck: passed; lint: passed; unit-tests: passed (ℹ tests 54; ℹ pass 54; ℹ fail 0; ℹ cancelled 0; ℹ skipped 0)",
+      "capture": "captures/grid-weather-28fc799156165be649ab3b0629bbab4aeac13476-20261106014650909.json",
+      "captureSha256": "c3a4c2572277d15e4bf0ed9ceec4cd2ca36e605af1aa5053cf54d9a17cbfef16",
+      "envelope": "stamps/grid-weather-28fc799156165be649ab3b0629bbab4aeac13476-20261106014650909.dsse.json",
+      "resultLine": "grid-weather: PASSED — typecheck: passed; lint: passed; unit-tests: passed (ℹ tests 53; ℹ pass 53; ℹ fail 0; ℹ cancelled 0; ℹ skipped 0)",
       "checks": [
         {
           "kind": "typecheck",
@@ -196,21 +217,24 @@
           "kind": "unit-tests",
           "status": "passed",
           "exitCode": 0,
-          "resultLine": "ℹ tests 54; ℹ pass 54; ℹ fail 0; ℹ cancelled 0; ℹ skipped 0"
+          "resultLine": "ℹ tests 53; ℹ pass 53; ℹ fail 0; ℹ cancelled 0; ℹ skipped 0"
         }
       ],
       "history": [
-        "stamps/grid-weather.dsse.json"
+        "stamps/grid-weather.dsse.json",
+        "stamps/grid-weather-1f3a0f73696969a9f6aa3639d393ea570b0b05ed-20261104172157282.dsse.json"
       ]
     },
     {
       "tool": "gridtop",
-      "commit": "b70bbf9358e1aa045fa15643f919145a08f38ed2",
+      "commit": "638c40c4ddaaf1931e2655edd808df606f06f2e6",
+      "capturedAt": "2026-11-06T01:48:17.669Z",
+      "prePublication": false,
       "status": "passed",
-      "capture": "captures/gridtop-b70bbf9358e1aa045fa15643f919145a08f38ed2-20261105120530861.json",
-      "captureSha256": "bc2f81bda92f821be7f99053d2055f0ad421434ee2a84606cd27fbc066d322de",
-      "envelope": "stamps/gridtop-b70bbf9358e1aa045fa15643f919145a08f38ed2-20261105120530861.dsse.json",
-      "resultLine": "gridtop: PASSED — typecheck: passed; lint: passed; unit-tests: passed (test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s | test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s | test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s | test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s | test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.95s | test result: ok. 5 p)",
+      "capture": "captures/gridtop-638c40c4ddaaf1931e2655edd808df606f06f2e6-20261106014817669.json",
+      "captureSha256": "8fa15015c9fe38ffc7a0a0917111a45f4e4f78cbe5209345a87e4ef0e10b4eff",
+      "envelope": "stamps/gridtop-638c40c4ddaaf1931e2655edd808df606f06f2e6-20261106014817669.dsse.json",
+      "resultLine": "gridtop: PASSED — typecheck: passed; lint: passed; unit-tests: passed (test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s | test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s | test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s | test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s | test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.17s | test result: ok. 5 p)",
       "checks": [
         {
           "kind": "typecheck",
@@ -228,22 +252,25 @@
           "kind": "unit-tests",
           "status": "passed",
           "exitCode": 0,
-          "resultLine": "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s | test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s | test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s | test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s | test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.95s | test result: ok. 5 p"
+          "resultLine": "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s | test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s | test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s | test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s | test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.17s | test result: ok. 5 p"
         }
       ],
       "history": [
         "history/gridtop-first-capture.dsse.json",
         "stamps/gridtop.dsse.json",
-        "stamps/gridtop-b70bbf9358e1aa045fa15643f919145a08f38ed2-20261104172222856.dsse.json"
+        "stamps/gridtop-b70bbf9358e1aa045fa15643f919145a08f38ed2-20261104172222856.dsse.json",
+        "stamps/gridtop-b70bbf9358e1aa045fa15643f919145a08f38ed2-20261105120530861.dsse.json"
       ]
     },
     {
       "tool": "listen-to-the-grid",
-      "commit": "cd664696636a531e3dcd4799a3bf856c49efbc79",
+      "commit": "857d5d73e7f1d9dbb4ede63862a14a6a4c092fed",
+      "capturedAt": "2026-11-06T01:48:46.225Z",
+      "prePublication": false,
       "status": "passed",
-      "capture": "captures/listen-to-the-grid-cd664696636a531e3dcd4799a3bf856c49efbc79-20261104172241923.json",
-      "captureSha256": "679227b65e05c86ec7dd025aa8d039c0f4d1f1988a216ec482765ba112e994d2",
-      "envelope": "stamps/listen-to-the-grid-cd664696636a531e3dcd4799a3bf856c49efbc79-20261104172241923.dsse.json",
+      "capture": "captures/listen-to-the-grid-857d5d73e7f1d9dbb4ede63862a14a6a4c092fed-20261106014846225.json",
+      "captureSha256": "817bbd0595d04554ea6e4535855b4913f66c20ff6b361d5b8b63dc4da9e2386c",
+      "envelope": "stamps/listen-to-the-grid-857d5d73e7f1d9dbb4ede63862a14a6a4c092fed-20261106014846225.dsse.json",
       "resultLine": "listen-to-the-grid: PASSED — typecheck: passed; lint: passed; unit-tests: passed (Tests  183 passed (183))",
       "checks": [
         {
@@ -266,16 +293,19 @@
         }
       ],
       "history": [
-        "stamps/listen-to-the-grid.dsse.json"
+        "stamps/listen-to-the-grid.dsse.json",
+        "stamps/listen-to-the-grid-cd664696636a531e3dcd4799a3bf856c49efbc79-20261104172241923.dsse.json"
       ]
     },
     {
       "tool": "ask-the-record",
-      "commit": "138597c1e9543de5ac2914755ed5b9475a7b8f97",
+      "commit": "5d582687728a42672b09229be8de95428f67c3ec",
+      "capturedAt": "2026-11-06T01:50:25.853Z",
+      "prePublication": false,
       "status": "passed",
-      "capture": "captures/ask-the-record-138597c1e9543de5ac2914755ed5b9475a7b8f97-20261104172413308.json",
-      "captureSha256": "65225163b90bad77758781c2bd64942a025b5911329aa6b4d93a320c17918893",
-      "envelope": "stamps/ask-the-record-138597c1e9543de5ac2914755ed5b9475a7b8f97-20261104172413308.dsse.json",
+      "capture": "captures/ask-the-record-5d582687728a42672b09229be8de95428f67c3ec-20261106015025853.json",
+      "captureSha256": "9313dc91060af6d89adef8ae8852f5dfe161a4ed9015ea1f004067f9e9ad8a28",
+      "envelope": "stamps/ask-the-record-5d582687728a42672b09229be8de95428f67c3ec-20261106015025853.dsse.json",
       "resultLine": "ask-the-record: PASSED — typecheck: passed; lint: passed; unit-tests: passed (Tests  389 passed (389))",
       "checks": [
         {
@@ -298,16 +328,19 @@
         }
       ],
       "history": [
-        "stamps/ask-the-record.dsse.json"
+        "stamps/ask-the-record.dsse.json",
+        "stamps/ask-the-record-138597c1e9543de5ac2914755ed5b9475a7b8f97-20261104172413308.dsse.json"
       ]
     },
     {
       "tool": "sourced",
-      "commit": "969411a7829228a1bd503c3ee0311ffaa257413d",
+      "commit": "3580b4b898d6ca5f1e5efbca1195f749c912de48",
+      "capturedAt": "2026-11-06T01:51:05.206Z",
+      "prePublication": false,
       "status": "passed",
-      "capture": "captures/sourced-969411a7829228a1bd503c3ee0311ffaa257413d-20261104172442428.json",
-      "captureSha256": "f3be1fc9070a5cf9eb6e5f33506467f850c7dd6a2b600a33bd3d6c4e6ffb01a9",
-      "envelope": "stamps/sourced-969411a7829228a1bd503c3ee0311ffaa257413d-20261104172442428.dsse.json",
+      "capture": "captures/sourced-3580b4b898d6ca5f1e5efbca1195f749c912de48-20261106015105206.json",
+      "captureSha256": "f52d68583d805404fecd2c8cd294c140d8c2f4ba786879718ad5f95a053ef120",
+      "envelope": "stamps/sourced-3580b4b898d6ca5f1e5efbca1195f749c912de48-20261106015105206.dsse.json",
       "resultLine": "sourced: PASSED — typecheck: passed; lint: passed; unit-tests: passed (ℹ tests 90; ℹ pass 90; ℹ fail 0; ℹ cancelled 0; ℹ skipped 0)",
       "checks": [
         {
@@ -331,7 +364,8 @@
       ],
       "history": [
         "history/sourced-first-capture.dsse.json",
-        "stamps/sourced.dsse.json"
+        "stamps/sourced.dsse.json",
+        "stamps/sourced-969411a7829228a1bd503c3ee0311ffaa257413d-20261104172442428.dsse.json"
       ]
     }
   ],
@@ -339,6 +373,8 @@
     {
       "tool": "agent-race",
       "commit": "647ea417af718e963b26ff2de44c707076c30780",
+      "capturedAt": "2026-11-04T16:41:28.028Z",
+      "prePublication": true,
       "status": "failed",
       "capture": "history/agent-race-first-capture.json",
       "captureSha256": "d3fd88cc6052f92df121846629869b6ef151b604a2d0cd7747fe4f012a2a3899",
@@ -369,6 +405,8 @@
     {
       "tool": "dreaming",
       "commit": "2d1f18bd11080065668e080e7c834aa2de052835",
+      "capturedAt": "2026-11-04T16:42:43.185Z",
+      "prePublication": true,
       "status": "failed",
       "capture": "history/dreaming-first-capture.json",
       "captureSha256": "a7c70912ba5cd1314ff2df0ae3a67f7f6aaa4cd833c4a5b6ad731ed51c08f02f",
@@ -399,6 +437,8 @@
     {
       "tool": "gpt-in-a-tab",
       "commit": "193619ee720bf4a7d71da31fae9cf9c2d13a9e01",
+      "capturedAt": "2026-11-04T16:37:35.507Z",
+      "prePublication": true,
       "status": "failed",
       "capture": "history/gpt-in-a-tab-bootstrap-abort.json",
       "captureSha256": "0aa70fa3ff30ca7d7d5f531a1398fbbdf90bc2af65e52a6d85dc0ab0a363dcee",
@@ -429,6 +469,8 @@
     {
       "tool": "gridtop",
       "commit": "b70bbf9358e1aa045fa15643f919145a08f38ed2",
+      "capturedAt": "2026-11-04T16:43:09.200Z",
+      "prePublication": true,
       "status": "failed",
       "capture": "history/gridtop-first-capture.json",
       "captureSha256": "f1dd4d8879671bfc3054958b231827360d1bda28ddceebca389bf12fb7734f24",
@@ -459,6 +501,8 @@
     {
       "tool": "real-or-hallucinated",
       "commit": "afe6065317edb31331fdd3e230c20c1ae86b4295",
+      "capturedAt": "2026-11-04T16:41:13.387Z",
+      "prePublication": true,
       "status": "failed",
       "capture": "history/real-or-hallucinated-first-capture.json",
       "captureSha256": "76e914b67b81f07d7086951b62e1a039e59ea3fc5c6c5c5121944034e7ab303b",
@@ -489,6 +533,8 @@
     {
       "tool": "sourced",
       "commit": "969411a7829228a1bd503c3ee0311ffaa257413d",
+      "capturedAt": "2026-11-04T16:44:29.693Z",
+      "prePublication": true,
       "status": "failed",
       "capture": "history/sourced-first-capture.json",
       "captureSha256": "730ccfcd0ddc9c3c856cb09c62138c881f54f6ed5143fe1d27b5dd473fa6f287",
@@ -519,6 +565,8 @@
     {
       "tool": "gpt-in-a-tab",
       "commit": "193619ee720bf4a7d71da31fae9cf9c2d13a9e01",
+      "capturedAt": "2026-11-04T16:40:45.456Z",
+      "prePublication": true,
       "status": "passed",
       "capture": "captures/gpt-in-a-tab.json",
       "captureSha256": "ff778abebce01f2dc7d182ef11dc2abc16b21f9277261d572e4e715e6becbfe9",
@@ -546,8 +594,41 @@
       ]
     },
     {
+      "tool": "gpt-in-a-tab",
+      "commit": "193619ee720bf4a7d71da31fae9cf9c2d13a9e01",
+      "capturedAt": "2026-11-04T17:19:04.649Z",
+      "prePublication": true,
+      "status": "passed",
+      "capture": "captures/gpt-in-a-tab-193619ee720bf4a7d71da31fae9cf9c2d13a9e01-20261104171904649.json",
+      "captureSha256": "ed0782c65a2f8188d3beebaa3b423309d4e958816a687915d801859eebbabcb3",
+      "envelope": "stamps/gpt-in-a-tab-193619ee720bf4a7d71da31fae9cf9c2d13a9e01-20261104171904649.dsse.json",
+      "resultLine": "gpt-in-a-tab: PASSED — typecheck: passed; lint: passed; unit-tests: passed (Tests  48 passed (48))",
+      "checks": [
+        {
+          "kind": "typecheck",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "typecheck: observed exit 0"
+        },
+        {
+          "kind": "lint",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "lint: observed exit 0"
+        },
+        {
+          "kind": "unit-tests",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "Tests  48 passed (48)"
+        }
+      ]
+    },
+    {
       "tool": "real-or-hallucinated",
       "commit": "afe6065317edb31331fdd3e230c20c1ae86b4295",
+      "capturedAt": "2026-11-04T16:47:58.311Z",
+      "prePublication": true,
       "status": "passed",
       "capture": "captures/real-or-hallucinated.json",
       "captureSha256": "56072829d33f58576a2f7cc146642810b696f5230ba74e85c4b66021d763478b",
@@ -575,8 +656,41 @@
       ]
     },
     {
+      "tool": "real-or-hallucinated",
+      "commit": "afe6065317edb31331fdd3e230c20c1ae86b4295",
+      "capturedAt": "2026-11-04T17:21:14.498Z",
+      "prePublication": true,
+      "status": "passed",
+      "capture": "captures/real-or-hallucinated-afe6065317edb31331fdd3e230c20c1ae86b4295-20261104172114497.json",
+      "captureSha256": "41e9401a846e29c1da82477fb7f714405499b98648f226ffb81cf55f8af39ad0",
+      "envelope": "stamps/real-or-hallucinated-afe6065317edb31331fdd3e230c20c1ae86b4295-20261104172114497.dsse.json",
+      "resultLine": "real-or-hallucinated: PASSED — typecheck: passed; lint: passed; unit-tests: passed (ℹ tests 61; ℹ pass 61; ℹ fail 0; ℹ cancelled 0; ℹ skipped 0)",
+      "checks": [
+        {
+          "kind": "typecheck",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "typecheck: observed exit 0"
+        },
+        {
+          "kind": "lint",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "lint: observed exit 0"
+        },
+        {
+          "kind": "unit-tests",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "ℹ tests 61; ℹ pass 61; ℹ fail 0; ℹ cancelled 0; ℹ skipped 0"
+        }
+      ]
+    },
+    {
       "tool": "agent-race",
       "commit": "647ea417af718e963b26ff2de44c707076c30780",
+      "capturedAt": "2026-11-04T16:48:10.250Z",
+      "prePublication": true,
       "status": "passed",
       "capture": "captures/agent-race.json",
       "captureSha256": "3f7626f2d3e61e0934e0245547e4d78ba0f35cd23ad01ed0c1c738552109f70b",
@@ -606,6 +720,8 @@
     {
       "tool": "agent-race",
       "commit": "647ea417af718e963b26ff2de44c707076c30780",
+      "capturedAt": "2026-11-04T17:21:44.504Z",
+      "prePublication": true,
       "status": "failed",
       "capture": "captures/agent-race-647ea417af718e963b26ff2de44c707076c30780-20261104172144504.json",
       "captureSha256": "01467870b3cff8c62beb39319c9eb1042cb82fc50d0ce3a457b86dba6a4ded94",
@@ -633,8 +749,41 @@
       ]
     },
     {
+      "tool": "agent-race",
+      "commit": "e9871e8af05838e67d02c3ae86149370a3f37d02",
+      "capturedAt": "2026-11-05T12:10:47.937Z",
+      "prePublication": true,
+      "status": "passed",
+      "capture": "captures/agent-race-e9871e8af05838e67d02c3ae86149370a3f37d02-20261105121047937.json",
+      "captureSha256": "ae3648365923df3eb425e571d4c8682f8069e03d6ac47e186b4debc3f31aa344",
+      "envelope": "stamps/agent-race-e9871e8af05838e67d02c3ae86149370a3f37d02-20261105121047937.dsse.json",
+      "resultLine": "agent-race: PASSED — typecheck: passed; lint: passed; unit-tests: passed (Tests  76 passed (76))",
+      "checks": [
+        {
+          "kind": "typecheck",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "typecheck: observed exit 0"
+        },
+        {
+          "kind": "lint",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "lint: observed exit 0"
+        },
+        {
+          "kind": "unit-tests",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "Tests  76 passed (76)"
+        }
+      ]
+    },
+    {
       "tool": "receipts",
       "commit": "5313dea7d30dd8ee6c3d375a80df48881027e6ea",
+      "capturedAt": "2026-11-05T09:58:22.097Z",
+      "prePublication": true,
       "status": "passed",
       "capture": "captures/receipts-5313dea7d30dd8ee6c3d375a80df48881027e6ea-20261105095822096.json",
       "captureSha256": "c8b9aa48a94b598b3f349cd535fb3e68ffe2a736160b80cd8f7e2750889b84b7",
@@ -662,8 +811,41 @@
       ]
     },
     {
+      "tool": "receipts",
+      "commit": "5c8b8fbd876494bb55224ed7034761cb150e957d",
+      "capturedAt": "2026-11-05T12:11:32.799Z",
+      "prePublication": true,
+      "status": "passed",
+      "capture": "captures/receipts-5c8b8fbd876494bb55224ed7034761cb150e957d-20261105121132798.json",
+      "captureSha256": "84f4139a9974270ba8bbcdacc129b3fb91a44aef97c64a9268bb00f267099c7a",
+      "envelope": "stamps/receipts-5c8b8fbd876494bb55224ed7034761cb150e957d-20261105121132798.dsse.json",
+      "resultLine": "receipts: PASSED — typecheck: passed; lint: passed; unit-tests: passed (Tests  530 passed (530))",
+      "checks": [
+        {
+          "kind": "typecheck",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "typecheck: observed exit 0"
+        },
+        {
+          "kind": "lint",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "lint: observed exit 0"
+        },
+        {
+          "kind": "unit-tests",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "Tests  530 passed (530)"
+        }
+      ]
+    },
+    {
       "tool": "dreaming",
       "commit": "2d1f18bd11080065668e080e7c834aa2de052835",
+      "capturedAt": "2026-11-04T16:48:34.726Z",
+      "prePublication": true,
       "status": "failed",
       "capture": "captures/dreaming.json",
       "captureSha256": "37077b8fd0dd167b6ee43d0047b0f19193c163901c35537f5d07b3e4f3ba3703",
@@ -691,8 +873,41 @@
       ]
     },
     {
+      "tool": "dreaming",
+      "commit": "070b67d4a201561b228730625bb304b8a87613a4",
+      "capturedAt": "2026-11-04T17:25:39.227Z",
+      "prePublication": true,
+      "status": "failed",
+      "capture": "captures/dreaming-070b67d4a201561b228730625bb304b8a87613a4-20261104172539227.json",
+      "captureSha256": "8d6c7857430f63eecb62deeb1ab4afe9d51341fb8df965bf284d447a08df79d8",
+      "envelope": "stamps/dreaming-070b67d4a201561b228730625bb304b8a87613a4-20261104172539227.dsse.json",
+      "resultLine": "dreaming: FAILED — typecheck: passed; lint: passed; unit-tests: failed (Tests  1 failed | 455 passed | 1 skipped (457))",
+      "checks": [
+        {
+          "kind": "typecheck",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "typecheck: observed exit 0"
+        },
+        {
+          "kind": "lint",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "lint: observed exit 0"
+        },
+        {
+          "kind": "unit-tests",
+          "status": "failed",
+          "exitCode": 1,
+          "resultLine": "Tests  1 failed | 455 passed | 1 skipped (457)"
+        }
+      ]
+    },
+    {
       "tool": "grid-weather",
       "commit": "1f3a0f73696969a9f6aa3639d393ea570b0b05ed",
+      "capturedAt": "2026-11-04T16:42:49.038Z",
+      "prePublication": true,
       "status": "passed",
       "capture": "captures/grid-weather.json",
       "captureSha256": "04a1642ed70aedd79d73b2ea7c4537e1acaea54edea06ff0e2ecfd3d86966d3f",
@@ -720,8 +935,41 @@
       ]
     },
     {
+      "tool": "grid-weather",
+      "commit": "1f3a0f73696969a9f6aa3639d393ea570b0b05ed",
+      "capturedAt": "2026-11-04T17:21:57.282Z",
+      "prePublication": true,
+      "status": "passed",
+      "capture": "captures/grid-weather-1f3a0f73696969a9f6aa3639d393ea570b0b05ed-20261104172157282.json",
+      "captureSha256": "3d477b9bd9e75ae6a4fb69e7c622669790f6687fde2c37f643c4549e2b755c04",
+      "envelope": "stamps/grid-weather-1f3a0f73696969a9f6aa3639d393ea570b0b05ed-20261104172157282.dsse.json",
+      "resultLine": "grid-weather: PASSED — typecheck: passed; lint: passed; unit-tests: passed (ℹ tests 54; ℹ pass 54; ℹ fail 0; ℹ cancelled 0; ℹ skipped 0)",
+      "checks": [
+        {
+          "kind": "typecheck",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "typecheck: observed exit 0"
+        },
+        {
+          "kind": "lint",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "lint: observed exit 0"
+        },
+        {
+          "kind": "unit-tests",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "ℹ tests 54; ℹ pass 54; ℹ fail 0; ℹ cancelled 0; ℹ skipped 0"
+        }
+      ]
+    },
+    {
       "tool": "gridtop",
       "commit": "b70bbf9358e1aa045fa15643f919145a08f38ed2",
+      "capturedAt": "2026-11-04T16:49:29.122Z",
+      "prePublication": true,
       "status": "passed",
       "capture": "captures/gridtop.json",
       "captureSha256": "9c5d28c9a4af0c17ab029704c886aefd8a4950218786655224b0ea8b7fdf9433",
@@ -751,6 +999,8 @@
     {
       "tool": "gridtop",
       "commit": "b70bbf9358e1aa045fa15643f919145a08f38ed2",
+      "capturedAt": "2026-11-04T17:22:22.856Z",
+      "prePublication": true,
       "status": "failed",
       "capture": "captures/gridtop-b70bbf9358e1aa045fa15643f919145a08f38ed2-20261104172222856.json",
       "captureSha256": "9b1d15150fba4393b5c39e3e49f6dcd8a15a8bf9a6a8ed7dc90c40987f6c23d0",
@@ -778,8 +1028,41 @@
       ]
     },
     {
+      "tool": "gridtop",
+      "commit": "b70bbf9358e1aa045fa15643f919145a08f38ed2",
+      "capturedAt": "2026-11-05T12:05:30.861Z",
+      "prePublication": true,
+      "status": "passed",
+      "capture": "captures/gridtop-b70bbf9358e1aa045fa15643f919145a08f38ed2-20261105120530861.json",
+      "captureSha256": "bc2f81bda92f821be7f99053d2055f0ad421434ee2a84606cd27fbc066d322de",
+      "envelope": "stamps/gridtop-b70bbf9358e1aa045fa15643f919145a08f38ed2-20261105120530861.dsse.json",
+      "resultLine": "gridtop: PASSED — typecheck: passed; lint: passed; unit-tests: passed (test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s | test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s | test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s | test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s | test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.95s | test result: ok. 5 p)",
+      "checks": [
+        {
+          "kind": "typecheck",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "typecheck: observed exit 0"
+        },
+        {
+          "kind": "lint",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "lint: observed exit 0"
+        },
+        {
+          "kind": "unit-tests",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s | test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s | test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s | test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s | test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.95s | test result: ok. 5 p"
+        }
+      ]
+    },
+    {
       "tool": "listen-to-the-grid",
       "commit": "b2d2d549811f702d5356c8993dca94c4bb311475",
+      "capturedAt": "2026-11-04T16:43:17.196Z",
+      "prePublication": true,
       "status": "passed",
       "capture": "captures/listen-to-the-grid.json",
       "captureSha256": "07c19f298b66570c7dc919873f9f20c1bdd03a51d18c05c0e62f39717e2ca840",
@@ -807,8 +1090,41 @@
       ]
     },
     {
+      "tool": "listen-to-the-grid",
+      "commit": "cd664696636a531e3dcd4799a3bf856c49efbc79",
+      "capturedAt": "2026-11-04T17:22:41.923Z",
+      "prePublication": true,
+      "status": "passed",
+      "capture": "captures/listen-to-the-grid-cd664696636a531e3dcd4799a3bf856c49efbc79-20261104172241923.json",
+      "captureSha256": "679227b65e05c86ec7dd025aa8d039c0f4d1f1988a216ec482765ba112e994d2",
+      "envelope": "stamps/listen-to-the-grid-cd664696636a531e3dcd4799a3bf856c49efbc79-20261104172241923.dsse.json",
+      "resultLine": "listen-to-the-grid: PASSED — typecheck: passed; lint: passed; unit-tests: passed (Tests  183 passed (183))",
+      "checks": [
+        {
+          "kind": "typecheck",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "typecheck: observed exit 0"
+        },
+        {
+          "kind": "lint",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "lint: observed exit 0"
+        },
+        {
+          "kind": "unit-tests",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "Tests  183 passed (183)"
+        }
+      ]
+    },
+    {
       "tool": "ask-the-record",
       "commit": "138597c1e9543de5ac2914755ed5b9475a7b8f97",
+      "capturedAt": "2026-11-04T16:44:25.155Z",
+      "prePublication": true,
       "status": "passed",
       "capture": "captures/ask-the-record.json",
       "captureSha256": "4085ae67d2a53bc4180f279d356f174fc108a9a6a6c034a526c45514d1b70244",
@@ -836,12 +1152,76 @@
       ]
     },
     {
+      "tool": "ask-the-record",
+      "commit": "138597c1e9543de5ac2914755ed5b9475a7b8f97",
+      "capturedAt": "2026-11-04T17:24:13.308Z",
+      "prePublication": true,
+      "status": "passed",
+      "capture": "captures/ask-the-record-138597c1e9543de5ac2914755ed5b9475a7b8f97-20261104172413308.json",
+      "captureSha256": "65225163b90bad77758781c2bd64942a025b5911329aa6b4d93a320c17918893",
+      "envelope": "stamps/ask-the-record-138597c1e9543de5ac2914755ed5b9475a7b8f97-20261104172413308.dsse.json",
+      "resultLine": "ask-the-record: PASSED — typecheck: passed; lint: passed; unit-tests: passed (Tests  389 passed (389))",
+      "checks": [
+        {
+          "kind": "typecheck",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "typecheck: observed exit 0"
+        },
+        {
+          "kind": "lint",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "lint: observed exit 0"
+        },
+        {
+          "kind": "unit-tests",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "Tests  389 passed (389)"
+        }
+      ]
+    },
+    {
       "tool": "sourced",
       "commit": "969411a7829228a1bd503c3ee0311ffaa257413d",
+      "capturedAt": "2026-11-04T16:49:36.249Z",
+      "prePublication": true,
       "status": "passed",
       "capture": "captures/sourced.json",
       "captureSha256": "3823fb246931fce4f92845015d9f0e3bf30cd6e9df9197c196e25887336c9843",
       "envelope": "stamps/sourced.dsse.json",
+      "resultLine": "sourced: PASSED — typecheck: passed; lint: passed; unit-tests: passed (ℹ tests 90; ℹ pass 90; ℹ fail 0; ℹ cancelled 0; ℹ skipped 0)",
+      "checks": [
+        {
+          "kind": "typecheck",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "typecheck: observed exit 0"
+        },
+        {
+          "kind": "lint",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "lint: observed exit 0"
+        },
+        {
+          "kind": "unit-tests",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "ℹ tests 90; ℹ pass 90; ℹ fail 0; ℹ cancelled 0; ℹ skipped 0"
+        }
+      ]
+    },
+    {
+      "tool": "sourced",
+      "commit": "969411a7829228a1bd503c3ee0311ffaa257413d",
+      "capturedAt": "2026-11-04T17:24:42.428Z",
+      "prePublication": true,
+      "status": "passed",
+      "capture": "captures/sourced-969411a7829228a1bd503c3ee0311ffaa257413d-20261104172442428.json",
+      "captureSha256": "f3be1fc9070a5cf9eb6e5f33506467f850c7dd6a2b600a33bd3d6c4e6ffb01a9",
+      "envelope": "stamps/sourced-969411a7829228a1bd503c3ee0311ffaa257413d-20261104172442428.dsse.json",
       "resultLine": "sourced: PASSED — typecheck: passed; lint: passed; unit-tests: passed (ℹ tests 90; ℹ pass 90; ℹ fail 0; ℹ cancelled 0; ℹ skipped 0)",
       "checks": [
         {
@@ -868,7 +1248,40 @@
   "supplemental": [
     {
       "tool": "dreaming",
+      "commit": "00bec8c5ae2faa8cdbe2a22425a341bc28e2692e",
+      "capturedAt": "2026-11-06T01:46:41.012Z",
+      "prePublication": false,
+      "status": "incomplete",
+      "capture": "captures/dreaming-00bec8c5ae2faa8cdbe2a22425a341bc28e2692e-20261106014638543-eval-outside-sandbox.json",
+      "captureSha256": "c432a0513244c08adc7fdcb8e5c162381c62b874b68f11d0532c54e3864e9b71",
+      "envelope": "stamps/dreaming-00bec8c5ae2faa8cdbe2a22425a341bc28e2692e-20261106014638543-eval-outside-sandbox.dsse.json",
+      "resultLine": "dreaming: INCOMPLETE — typecheck: not-run; lint: not-run; unit-tests: passed (Tests  7 passed (7))",
+      "checks": [
+        {
+          "kind": "typecheck",
+          "status": "not-run",
+          "exitCode": null,
+          "resultLine": "Not run: Supplement only: full typecheck is in the linked sandbox capture"
+        },
+        {
+          "kind": "lint",
+          "status": "not-run",
+          "exitCode": null,
+          "resultLine": "Not run: Supplement only: full lint is in the linked sandbox capture"
+        },
+        {
+          "kind": "unit-tests",
+          "status": "passed",
+          "exitCode": 0,
+          "resultLine": "Tests  7 passed (7)"
+        }
+      ]
+    },
+    {
+      "tool": "dreaming",
       "commit": "070b67d4a201561b228730625bb304b8a87613a4",
+      "capturedAt": "2026-11-04T17:25:42.375Z",
+      "prePublication": true,
       "status": "incomplete",
       "capture": "captures/dreaming-070b67d4a201561b228730625bb304b8a87613a4-20261104172539227-eval-outside-sandbox.json",
       "captureSha256": "6a2200a781a503339071c8c1436ecfede4605180176b54fdf5fe4842cb170fcd",
